@@ -57,7 +57,7 @@ export default function Index() {
           <CardHeader>
             <CardTitle>Daily Coding Challenge</CardTitle>
             <CardDescription>
-              A new programming challenge is generated every day at midnight UTC to help you practice and improve your coding skills.
+              A new programming challenge is automatically generated every day at 12 AM EST. You can also manually generate a new challenge using the button below.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -65,7 +65,7 @@ export default function Index() {
               onClick={generateChallenge}
               className="mb-4"
             >
-              Generate New Challenge
+              Generate New Challenge Manually
             </Button>
             <div className="space-y-4">
               <ChallengeDisplay 
