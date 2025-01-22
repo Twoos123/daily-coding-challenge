@@ -46,12 +46,14 @@ const Index = () => {
     },
     enabled: !!apiKey,
     retry: false,
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to generate challenge. Please check your API key.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to generate challenge. Please check your API key.",
+          variant: "destructive",
+        });
+      }
     }
   });
 
