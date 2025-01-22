@@ -82,9 +82,7 @@ serve(async (req) => {
 
     // Update README.md in GitHub
     console.log('Updating README.md in GitHub...')
-    const readmeContent = `# Daily Coding Challenge Project
-
-## About
+    const readmeContent = `## About
 
 This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository.
 
@@ -93,41 +91,49 @@ This repository contains daily coding challenges generated using the Perplexity 
 ${challenge}`
 
     try {
-      console.log('Fetching current README from GitHub...')
-      const repoResponse = await fetch('https://api.github.com/repos/Twoos123/daily-coding-challenge/contents/README.md', {
+      console.log('Attempting to update README in GitHub...')
+      const repoOwner = 'Twoos123'
+      const repoName = 'daily-coding-challenge'
+      const filePath = 'README.md'
+      const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`
+
+      // Try to get the current file first
+      console.log('Fetching current README if it exists...')
+      const getFileResponse = await fetch(apiUrl, {
         headers: {
           'Authorization': `token ${githubToken}`,
           'Accept': 'application/vnd.github.v3+json'
         }
       })
 
-      if (!repoResponse.ok) {
-        const errorText = await repoResponse.text()
-        console.error('GitHub API error when fetching README:', errorText)
-        throw new Error(`Failed to get README from GitHub: ${errorText}`)
-      }
-
-      const repoData = await repoResponse.json()
-      const currentSha = repoData.sha
-
       // Encode content to base64
       const encoder = new TextEncoder()
       const data = encoder.encode(readmeContent)
       const base64Content = btoa(String.fromCharCode(...data))
 
-      console.log('Updating README in GitHub...')
-      const updateResponse = await fetch('https://api.github.com/repos/Twoos123/daily-coding-challenge/contents/README.md', {
+      let updatePayload: any = {
+        message: 'Update daily challenge',
+        content: base64Content,
+      }
+
+      // If file exists, include its SHA
+      if (getFileResponse.ok) {
+        const fileData = await getFileResponse.json()
+        updatePayload.sha = fileData.sha
+        console.log('Existing README found, updating with SHA:', fileData.sha)
+      } else {
+        console.log('README does not exist, creating new file')
+      }
+
+      console.log('Sending update request to GitHub...')
+      const updateResponse = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
           'Authorization': `token ${githubToken}`,
           'Accept': 'application/vnd.github.v3+json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: 'Update daily challenge',
-          content: base64Content,
-          sha: currentSha
-        })
+        body: JSON.stringify(updatePayload)
       })
 
       if (!updateResponse.ok) {
