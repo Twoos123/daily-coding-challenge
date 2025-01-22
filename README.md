@@ -1,69 +1,82 @@
 ## About
 
-This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository.
+This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository at 12 AM EST everyday.
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: "Efficient Calendar Scheduling"
+### Coding Challenge: "Efficiently Merging Sorted Files"
 
-**Problem Description:**
-Given a list of events with start and end times, determine the minimum number of conference rooms required to accommodate all events efficiently. The goal is to minimize the total number of rooms used while ensuring that no two events in the same room overlap.
+#### Problem Description:
+Given two sorted text files, merge them into a single sorted file efficiently. The output file should contain all lines from both input files in ascending order.
 
-**Example Input/Output:**
+#### Example Input/Output:
 
-**Input:**
+**Input Files:**
+- `file1.txt`: 
+  ```
+  Alice,30
+  Bob,25
+  Charlie,35
+  ```
+
+- `file2.txt`: 
+  ```
+  David,28
+  Emily,32
+  Frank,42
+  ```
+
+**Output File (merged.txt):**
 ```
-[[0, 30], [5, 10], [15, 20]]
+Alice,30
+Bob,25
+Charlie,35
+David,28
+Emily,32
+Frank,42
 ```
 
-**Output:**
-```
-2
-```
+#### Constraints:
+- Both input files are sorted in ascending order by a key (e.g., name or age).
+- The output file should also be sorted in ascending order.
+- The solution should be efficient in terms of time complexity.
+- The solution should handle cases where the input files are empty or contain different keys.
 
-**Constraints:**
-1. **Event Times:** Each event is represented by a tuple `(start, end)` where `start` and `end` are integers representing the start and end times in minutes.
-2. **Non-Overlapping Events:** No two events in the same room can overlap in time.
-3. **Efficiency:** The goal is to minimize the total number of rooms used.
-
-**Solution in Python:**
+#### Solution in Python:
 
 ```python
-import heapq
-
-def min_rooms(rooms):
-    # Sort events by start time
-    events = sorted((start, end, 1) for start, end in rooms) + \
-             sorted((end, start, -1) for start, end in rooms)
-    
-    # Initialize priority queue to keep track of end times and number of rooms
-    end_times = []
-    
-    # Initialize minimum number of rooms required
-    min_rooms = 0
-    
-    for _, time, delta in events:
-        # If it's an end time, decrease count by delta (1 if it's an end time of an event, -1 if it's a start time)
-        if end_times and end_times[0][0] == time:
-            heapq.heappop(end_times)
+def merge_sorted_files(file1, file2, output_file):
+    with open(file1, 'r') as f1, open(file2, 'r') as f2, open(output_file, 'w') as fo:
+        line1 = next(f1)
+        line2 = next(f2)
         
-        # Increase count by delta and push new end time into priority queue
-        heapq.heappush(end_times, (time + delta, delta))
+        while line1 and line2:
+            if line1.split(',')[1] <= line2.split(',')[1]:
+                fo.write(line1)
+                line1 = next(f1, '')
+            else:
+                fo.write(line2)
+                line2 = next(f2, '')
         
-        # Update minimum number of rooms required if current count is higher
-        min_rooms = max(min_rooms, len(end_times))
-    
-    return min_rooms
+        # Write any remaining lines from either file
+        while line1:
+            fo.write(line1)
+            line1 = next(f1, '')
+        
+        while line2:
+            fo.write(line2)
+            line2 = next(f2, '')
 
 # Example usage:
-rooms = [[0, 30], [5, 10], [15, 20]]
-print(min_rooms(rooms)) # Output: 2
-
+merge_sorted_files('file1.txt', 'file2.txt', 'merged.txt')
 ```
 
-**Difficulty Rating:**
-Difficulty Level: 3/5
+#### Difficulty Rating: 4/5
 
-This challenge requires understanding of event scheduling and using a priority queue to efficiently manage the end times of events. The solution needs to handle both start and end times correctly to avoid overcounting or undercounting the number of rooms needed.
+This challenge requires understanding of file I/O operations in Python and efficient sorting techniques. The solution needs to handle edge cases where one file might be empty or contain different keys, ensuring that the output remains sorted.
+
+---
+
+This challenge is designed to test your ability to handle file operations and sorting algorithms efficiently while ensuring that the output remains sorted.
