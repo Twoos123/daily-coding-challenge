@@ -8,7 +8,6 @@ An automated platform that generates unique, LeetCode-style coding challenges ev
 - 🕒 **Daily Updates**: New challenges are automatically generated and committed at 12 AM EST
 - ⭐ **Difficulty Ratings**: Each challenge includes a difficulty rating from 1-5
 - 💡 **Complete Solutions**: Every challenge comes with a detailed Python solution
-- 🔄 **Manual Generation**: Option to generate new challenges on demand
 
 ## Today's Challenge
 
