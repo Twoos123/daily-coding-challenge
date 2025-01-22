@@ -59,9 +59,8 @@ const Index = () => {
       if (githubUsername && githubToken) {
         try {
           const today = new Date().toISOString().split('T')[0];
-          const readmeContent = `# Daily Coding Challenge\n\n## ${today}\n\n${content}\n\n[Generated with ❤️ by Lovable](https://lovable.dev)`;
+          const readmeContent = `# Daily Coding Challenge\n\nDaily coding challenges to improve programming skills.\n\n## Latest Challenge (${today})\n\n${content}\n\n---\n\n[Generated with ❤️ by Lovable](https://lovable.dev)`;
           
-          // Use the specific repository information
           const readmeResponse = await fetch(`https://api.github.com/repos/Twoos123/daily-coding-challenge/contents/README.md`, {
             headers: {
               'Authorization': `token ${githubToken}`,
