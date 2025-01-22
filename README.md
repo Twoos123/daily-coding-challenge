@@ -1,89 +1,96 @@
-# Daily Coding Challenge Generator 🚀
+## About
 
-An automated platform that generates unique, LeetCode-style coding challenges every day at 12 AM EST using AI. Each challenge is carefully crafted to help developers practice and improve their problem-solving skills.
-
-## Features
-
-- 🤖 **AI-Powered Challenges**: Leverages the Perplexity API to generate unique coding problems
-- 🕒 **Daily Updates**: New challenges are automatically generated and committed at 12 AM EST
-- ⭐ **Difficulty Ratings**: Each challenge includes a difficulty rating from 1-5
-- 💡 **Complete Solutions**: Every challenge comes with a detailed Python solution
+This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository at 12 AM EST everyday.
 
 ## Today's Challenge
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: "Efficiently Merging Sorted Files"
+### Coding Challenge: "Dynamic Taxi Dispatch System"
 
-#### Problem Description:
-Given two sorted text files, merge them into a single sorted file efficiently. The output file should contain all lines from both input files in ascending order.
+#### Problem Description
 
-#### Example Input/Output:
+You are tasked with creating a dynamic taxi dispatch system that efficiently assigns taxis to passengers. The system should handle multiple pickups and drop-offs, ensuring that each taxi is maximized in terms of distance traveled and time spent. The system will be given a list of passenger locations (x, y coordinates) along with their desired drop-off locations. Your task is to develop an algorithm that assigns the closest available taxi to each passenger and minimizes the overall distance traveled by all taxis.
 
-**Input Files:**
-- `file1.txt`: 
-  ```
-  Alice,30
-  Bob,25
-  Charlie,35
-  ```
+#### Example Input/Output
 
-- `file2.txt`: 
-  ```
-  David,28
-  Emily,32
-  Frank,42
-  ```
+**Input:**
+- List of passenger pickup locations: `[(1, 2), (3, 4), (5, 6)]`
+- List of passenger drop-off locations: `[(7, 8), (9, 10), (11, 12)]`
+- Initial taxi location: `(0, 0)`
+- Number of taxis: `2`
 
-**Output File (merged.txt):**
-```
-Alice,30
-Bob,25
-Charlie,35
-David,28
-Emily,32
-Frank,42
-```
+**Output:**
+- Assignment of taxis to passengers:
+    - Taxi 1: `[Passenger 1 -> Drop-off 1, Passenger 2 -> Drop-off 2]`
+    - Taxi 2: `[Passenger 3 -> Drop-off 3]`
+- Total distance traveled by all taxis
 
-#### Constraints:
-- Both input files are sorted in ascending order by a key (e.g., name or age).
-- The output file should also be sorted in ascending order.
-- The solution should be efficient in terms of time complexity.
-- The solution should handle cases where the input files are empty or contain different keys.
+#### Constraints
 
-#### Solution in Python:
+- The system should handle any number of passengers and taxis.
+- The initial location of each taxi is at `(0, 0)`.
+- The distance between two points `(x1, y1)` and `(x2, y2)` is calculated using the Euclidean distance formula: `√((x2 - x1)^2 + (y2 - y1)^2)`.
+- Taxis cannot travel through each other.
+
+#### Solution in Python
 
 ```python
-def merge_sorted_files(file1, file2, output_file):
-    with open(file1, 'r') as f1, open(file2, 'r') as f2, open(output_file, 'w') as fo:
-        line1 = next(f1)
-        line2 = next(f2)
-        
-        while line1 and line2:
-            if line1.split(',')[1] <= line2.split(',')[1]:
-                fo.write(line1)
-                line1 = next(f1, '')
-            else:
-                fo.write(line2)
-                line2 = next(f2, '')
-        
-        # Write any remaining lines from either file
-        while line1:
-            fo.write(line1)
-            line1 = next(f1, '')
-        
-        while line2:
-            fo.write(line2)
-            line2 = next(f2, '')
+import math
 
-# Example usage:
-merge_sorted_files('file1.txt', 'file2.txt', 'merged.txt')
+def calculate_distance(point1, point2):
+    return math.sqrt((point2[0] - point1[0])**2 + (point2[1] - point1[1])**2)
+
+def assign_taxis(pickup_locations, drop_off_locations, num_taxis):
+    # Initialize taxis at origin
+    taxis = [(0, 0) for _ in range(num_taxis)]
+    
+    # Assign closest taxi to each passenger
+    assignments = [[] for _ in range(num_taxis)]
+    
+    for i, pickup in enumerate(pickup_locations):
+        min_distance = float('inf')
+        closest_taxi_index = None
+        
+        for j, taxi in enumerate(taxis):
+            distance = calculate_distance(pickup, taxi)
+            if distance < min_distance:
+                min_distance = distance
+                closest_taxi_index = j
+        
+        assignments[closest_taxi_index].append(f'Passenger {i + 1} -> Drop-off {i + 1}')
+        
+        # Update taxi position after each pickup
+        taxis[closest_taxi_index] = drop_off_locations[i]
+    
+    return assignments
+
+# Example usage
+pickup_locations = [(1, 2), (3, 4), (5, 6)]
+drop_off_locations = [(7, 8), (9, 10), (11, 12)]
+num_taxis = 2
+
+assignments = assign_taxis(pickup_locations, drop_off_locations, num_taxis)
+total_distance_traveled = 0
+
+for i, taxi_path in enumerate(assignments):
+    for j in range(len(taxi_path)):
+        if j == 0:
+            # First point is pickup location
+            current_point = pickup_locations[j]
+        else:
+            current_point = drop_off_locations[j - 1]
+        
+        next_point = drop_off_locations[j] if j < len(drop_off_locations) - 1 else (11, 12)
+        
+        distance_traveled = calculate_distance(current_point, next_point)
+        total_distance_traveled += distance_traveled
+    
+    print(f'Taxi {i + 1}: {", ".join(taxi_path)}')
+
+print(f'Total distance traveled by all taxis: {total_distance_traveled}')
 ```
 
 #### Difficulty Rating: 4/5
 
-This challenge requires understanding of file I/O operations in Python and efficient sorting techniques. The solution needs to handle edge cases where one file might be empty or contain different keys, ensuring that the output remains sorted.
-
----
-
-This challenge is designed to test your ability to handle file operations and sorting algorithms efficiently while ensuring that the output remains sorted.
+This challenge requires the implementation of a dynamic assignment algorithm that optimizes taxi routes based on passenger pickups and drop-offs. The solution involves calculating distances using Euclidean distance and managing the state of each taxi to ensure efficient assignment. The difficulty level is high due to the need for efficient data structures and algorithms to handle multiple pickups and drop-offs while minimizing overall distance traveled.
