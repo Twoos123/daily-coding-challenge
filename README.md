@@ -1,6 +1,14 @@
-## About
+# Daily Coding Challenge Generator 🚀
 
-This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository at 12 AM EST everyday.
+An automated platform that generates unique, LeetCode-style coding challenges every day at 12 AM EST using AI. Each challenge is carefully crafted to help developers practice and improve their problem-solving skills.
+
+## Features
+
+- 🤖 **AI-Powered Challenges**: Leverages the Perplexity API to generate unique coding problems
+- 🕒 **Daily Updates**: New challenges are automatically generated and committed at 12 AM EST
+- ⭐ **Difficulty Ratings**: Each challenge includes a difficulty rating from 1-5
+- 💡 **Complete Solutions**: Every challenge comes with a detailed Python solution
+- 🔄 **Manual Generation**: Option to generate new challenges on demand
 
 ## Today's Challenge
 
