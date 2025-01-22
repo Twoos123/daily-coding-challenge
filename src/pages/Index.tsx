@@ -61,11 +61,8 @@ const Index = () => {
           const today = new Date().toISOString().split('T')[0];
           const readmeContent = `# Daily Coding Challenge\n\n## ${today}\n\n${content}\n\n[Generated with ❤️ by Lovable](https://lovable.dev)`;
           
-          // First, get the repository name from the current URL
-          const repoName = window.location.pathname.split('/projects/')[1];
-          
-          // Get the current README content
-          const readmeResponse = await fetch(`https://api.github.com/repos/lovable-dev/${repoName}/contents/README.md`, {
+          // Use the specific repository information
+          const readmeResponse = await fetch(`https://api.github.com/repos/Twoos123/daily-coding-challenge/contents/README.md`, {
             headers: {
               'Authorization': `token ${githubToken}`,
               'Accept': 'application/vnd.github.v3+json'
@@ -75,7 +72,7 @@ const Index = () => {
           if (readmeResponse.ok) {
             const readmeData = await readmeResponse.json();
             
-            const updateResponse = await fetch(`https://api.github.com/repos/lovable-dev/${repoName}/contents/README.md`, {
+            const updateResponse = await fetch(`https://api.github.com/repos/Twoos123/daily-coding-challenge/contents/README.md`, {
               method: 'PUT',
               headers: {
                 'Authorization': `token ${githubToken}`,
@@ -134,7 +131,7 @@ const Index = () => {
             <CardTitle>Daily Coding Challenge</CardTitle>
             <CardDescription>
               A new programming challenge is generated every day to help you practice and improve your coding skills.
-              To enable auto-commits to this repository's README, please provide your GitHub username and personal access token.
+              To enable auto-commits to the daily-coding-challenge repository, please provide your GitHub username and personal access token.
             </CardDescription>
           </CardHeader>
           <CardContent>
