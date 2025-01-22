@@ -12,12 +12,15 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting challenge generation...')
+    
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
     if (!perplexityApiKey) {
       throw new Error('Missing Perplexity API key')
     }
 
     // Generate the challenge using Perplexity API
+    console.log('Calling Perplexity API...')
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -42,29 +45,35 @@ serve(async (req) => {
     })
 
     if (!response.ok) {
+      console.error('Perplexity API error:', await response.text())
       throw new Error('Failed to generate challenge')
     }
 
     const data = await response.json()
     const content = data.choices[0].message.content
+    console.log('Challenge generated successfully')
 
     // Store the challenge in Supabase
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    console.log('Storing challenge in database...')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase credentials')
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseKey)
 
     const { error: insertError } = await supabaseClient
       .from('daily_challenges')
       .insert([{ challenge: content }])
 
     if (insertError) {
+      console.error('Database insertion error:', insertError)
       throw new Error(`Failed to store challenge: ${insertError.message}`)
     }
 
-    // Update README in GitHub
-    const today = new Date().toISOString().split('T')[0]
-    const readmeContent = `# Daily Coding Challenge\n\nDaily coding challenges to improve programming skills.\n\n## Latest Challenge (${today})\n\n${content}\n\n---\n\n[Generated with ❤️ by Lovable](https://lovable.dev)`
+    console.log('Challenge stored successfully')
 
     return new Response(
       JSON.stringify({ success: true, challenge: content }),
