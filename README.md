@@ -1,70 +1,99 @@
 ## About
 
-This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository at 12 am EST everyday.
+This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository.
 
 ## Today's Challenge
 
-### Coding Challenge: "Efficient Scheduling of Tasks"
+### Coding Challenge: "Restaurant Seating Arrangement"
 
-**Problem Description:**
+#### Problem Description
+You are a manager at a busy restaurant, and you need to optimize the seating arrangement for your customers. Given a list of customer preferences and table capacities, determine the most efficient seating arrangement that maximizes customer satisfaction.
 
-You are given a list of tasks with their respective durations and deadlines. The goal is to determine the most efficient schedule that allows all tasks to be completed on or before their deadlines, while minimizing the total duration of the schedule.
-
-**Example Input/Output:**
+#### Example Input/Output
 
 **Input:**
-- Tasks: `[[1, 3], [2, 4], [3, 2], [4, 1]]`
-  - Each task is represented as a list `[duration, deadline]`.
-- The tasks need to be scheduled such that each task is completed on or before its deadline.
+- `customers`: A list of customer preferences in the format `[customer_id, preference (high/medium/low)]`.
+- `tables`: A dictionary of tables with their capacities.
 
 **Output:**
-- The most efficient schedule: `[[1, 3], [2, 4], [4, 1], [3, 2]]`
-  - This schedule implies that the tasks should be completed in the order `[1, 3]`, `[2, 4]`, `[4, 1]`, and `[3, 2]`.
+- A dictionary where keys are customer IDs and values are the table numbers assigned to them.
 
-**Constraints:**
+#### Constraints:
+- The preferences are sorted in descending order (high > medium > low).
+- The tables are available on a first-come, first-served basis.
+- Each customer can only be seated at one table.
 
-- The tasks are non-overlapping.
-- The durations and deadlines are integers.
-- The number of tasks is limited (e.g., up to 10 tasks).
+#### Example:
+```plaintext
+customers = [
+    (1, 'high'),
+    (2, 'medium'),
+    (3, 'high'),
+    (4, 'low'),
+    (5, 'medium')
+]
 
-**Solution in Python:**
-
-```python
-from collections import defaultdict
-
-def schedule_tasks(tasks):
-    # Start with an empty schedule
-    schedule = []
-    
-    # Sort tasks by deadline
-    tasks.sort(key=lambda x: x[1])
-    
-    # Create a dictionary to store available time slots
-    time_slots = defaultdict(int)
-    
-    # Iterate over each task
-    for duration, deadline in tasks:
-        # Find the earliest available time slot that meets the deadline
-        for i in range(deadline):
-            if time_slots[i] + duration <= deadline:
-                schedule.append([duration, i])
-                time_slots[i] += duration
-                break
-    
-    return schedule
-
-# Example usage:
-tasks = [[1, 3], [2, 4], [3, 2], [4, 1]]
-print(schedule_tasks(tasks))
+tables = {
+    10: 5,
+    11: 3,
+    12: 4,
+    13: 2,
+    14: 6
+}
 ```
 
-### Explanation:
+**Expected Output:**
+```plaintext
+seating_arrangement = {
+    1: 10,
+    2: 11,
+    3: 10,
+    4: 12,
+    5: 13
+}
+```
 
-1. **Sort Tasks by Deadline**: The tasks are sorted by their deadlines to ensure that we consider tasks with earlier deadlines first.
-2. **Create Time Slots**: A dictionary `time_slots` is used to keep track of available time slots. Each key represents a time point (from 0 to the latest deadline), and its value represents the total duration of tasks already scheduled up to that point.
-3. **Schedule Tasks**:
-   - Iterate over each task.
-   - For each task, find the earliest available time slot that meets its deadline by checking all time points up to its deadline.
-   - If an available slot is found, add the task to the schedule and update `time_slots` accordingly.
+#### Solution in Python
 
-This solution ensures that all tasks are scheduled efficiently while minimizing the total duration of the schedule.
+```python
+def restaurant_seating(customers, tables):
+    # Sort customers by preference and then by ID
+    customers.sort(key=lambda x: (-[preference for preference in ['high', 'medium', 'low'] if preference == x[1]], x[0]))
+
+    # Initialize the seating arrangement dictionary
+    seating_arrangement = {}
+    
+    # Iterate over available tables in ascending order of capacity
+    sorted_tables_by_capacity = sorted(tables.items(), key=lambda item: item[1])
+    
+    for i, customer in enumerate(customers):
+        # Assign the next available table to the current customer
+        for table_number, capacity in sorted_tables_by_capacity:
+            if capacity > 0:
+                seating_arrangement[customer[0]] = table_number
+                tables[table_number] -= 1 # Decrement capacity after assignment
+                break
+    
+    return seating_arrangement
+
+# Example usage:
+customers = [
+    (1, 'high'),
+    (2, 'medium'),
+    (3, 'high'),
+    (4, 'low'),
+    (5, 'medium')
+]
+
+tables = {
+    10: 5,
+    11: 3,
+    12: 4,
+    13: 2,
+    14: 6
+}
+
+print(restaurant_seating(customers, tables))
+```
+
+This solution sorts the customers based on their preferences and then by their IDs. It then iterates through the available tables in ascending order of capacity, assigning each customer to the next available table based on their preference. The output will be the most efficient seating arrangement that maximizes customer satisfaction.
