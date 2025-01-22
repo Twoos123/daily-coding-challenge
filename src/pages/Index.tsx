@@ -191,7 +191,7 @@ const Index = () => {
                     {isLoading ? (
                       <p>Generating challenge...</p>
                     ) : challenge ? (
-                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                      <div className="prose prose-sm max-w-none dark:prose-invert prose-pre:bg-muted prose-pre:text-muted-foreground prose-code:text-muted-foreground">
                         <div dangerouslySetInnerHTML={{ __html: challenge }} />
                       </div>
                     ) : (
