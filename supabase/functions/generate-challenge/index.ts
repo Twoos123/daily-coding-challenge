@@ -48,11 +48,9 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
   const data = await response.json() as PerplexityResponse;
   const content = data.choices[0].message.content;
   
-  // Extract difficulty from the start of the content
   const difficultyMatch = content.match(/DIFFICULTY:(\d)/i);
   const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 3; // Default to 3 if not found
   
-  // Remove the DIFFICULTY line from the content
   const challenge = content.replace(/DIFFICULTY:\d\n*/i, '').trim();
 
   return {
@@ -90,7 +88,6 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 ## Built With
 
 - 🔥 **React + Vite**: For a fast and modern development experience
-- 🎨 **Tailwind CSS**: For beautiful, responsive styling
 - 🔷 **TypeScript**: For type-safe code
 - 🛠️ **Shadcn/UI**: For pre-built, customizable components
 - 🔌 **Supabase**: For backend functionality and database
@@ -164,21 +161,17 @@ serve(async (req) => {
   try {
     console.log('Starting challenge generation...')
     
-    // Get environment variables
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
     const githubToken = Deno.env.get('GITHUB_ACCESS_TOKEN')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
-    // Validate environment variables
     if (!perplexityApiKey || !githubToken || !supabaseUrl || !supabaseServiceKey) {
       throw new Error('Missing required environment variables')
     }
 
-    // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Generate, store, and update challenge
     const { challenge, difficulty } = await generateChallengeWithAI(perplexityApiKey)
     await storeChallenge(supabase, challenge, difficulty)
     await updateGitHubReadme(githubToken, challenge, difficulty)
