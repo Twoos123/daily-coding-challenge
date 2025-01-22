@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
 const corsHeaders = {
@@ -16,8 +15,14 @@ serve(async (req) => {
     console.log('Starting challenge generation...')
     
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
+    const githubToken = Deno.env.get('GITHUB_ACCESS_TOKEN')
+
     if (!perplexityApiKey) {
       throw new Error('Missing Perplexity API key')
+    }
+
+    if (!githubToken) {
+      throw new Error('Missing GitHub access token')
     }
 
     // Generate the challenge using Perplexity API
@@ -51,33 +56,64 @@ serve(async (req) => {
     }
 
     const data = await response.json()
-    const content = data.choices[0].message.content
-    console.log('Challenge generated successfully:', content.substring(0, 100) + '...')
+    const challenge = data.choices[0].message.content
+    console.log('Challenge generated successfully')
 
-    // Store the challenge in Supabase
-    console.log('Storing challenge in database...')
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase credentials')
+    // Get the current README content
+    console.log('Fetching current README...')
+    const readmeResponse = await fetch(
+      'https://api.github.com/repos/lovable-dev/daily-coding-challenge/contents/README.md',
+      {
+        headers: {
+          'Authorization': `Bearer ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      }
+    )
+
+    if (!readmeResponse.ok) {
+      console.error('GitHub API error:', await readmeResponse.text())
+      throw new Error('Failed to fetch README')
     }
 
-    const supabaseClient = createClient(supabaseUrl, supabaseKey)
+    const readmeData = await readmeResponse.json()
+    const currentContent = atob(readmeData.content)
 
-    const { error: insertError } = await supabaseClient
-      .from('daily_challenges')
-      .insert([{ challenge: content }])
+    // Update the README content with the new challenge
+    const todayDate = new Date().toISOString().split('T')[0]
+    const newContent = currentContent.replace(
+      "## Today's Challenge\n\nNo challenge has been generated yet. The first challenge will be committed soon.",
+      `## Today's Challenge\n\n**Date**: ${todayDate}\n\n${challenge}`
+    )
 
-    if (insertError) {
-      console.error('Database insertion error:', insertError)
-      throw new Error(`Failed to store challenge: ${insertError.message}`)
+    // Commit the updated README
+    console.log('Committing updated README...')
+    const updateResponse = await fetch(
+      'https://api.github.com/repos/lovable-dev/daily-coding-challenge/contents/README.md',
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${githubToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+        body: JSON.stringify({
+          message: `Add coding challenge for ${todayDate}`,
+          content: btoa(newContent),
+          sha: readmeData.sha,
+        }),
+      }
+    )
+
+    if (!updateResponse.ok) {
+      console.error('GitHub commit error:', await updateResponse.text())
+      throw new Error('Failed to commit README update')
     }
 
-    console.log('Challenge stored successfully')
+    console.log('Challenge committed successfully')
 
     return new Response(
-      JSON.stringify({ success: true, challenge: content }),
+      JSON.stringify({ success: true, challenge }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
