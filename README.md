@@ -12,6 +12,7 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 ## Built With
 
 - 🔥 **React + Vite**: For a fast and modern development experience
+- 🎨 **Tailwind CSS**: For beautiful, responsive styling
 - 🔷 **TypeScript**: For type-safe code
 - 🛠️ **Shadcn/UI**: For pre-built, customizable components
 - 🔌 **Supabase**: For backend functionality and database
@@ -21,99 +22,76 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Restaurant Menu Balancer"
+### Coding Challenge: **Fractional Remainder Queue**
 
-#### Problem Description:
-You are given a list of menu items from a restaurant, each item with its price and the number of items available in stock. The goal is to balance the menu by ensuring that the total cost of the items in each category (e.g., appetizers, main courses, desserts) is as close to equal as possible. You must distribute the items across categories while minimizing the total cost difference between categories.
+**Problem Description:**
+Implement a queue data structure that supports efficient insertion and extraction of elements, with an additional constraint: each element in the queue is a fraction with a numerator and a denominator. The twist is that when an element is extracted, it must leave a fractional remainder in the queue. For example, if the fraction 3/4 is extracted, the remainder 1/4 should remain in the queue.
 
-#### Example Input/Output:
+**Example Input/Output:**
 
-**Input:**
-```
-menu_items = [
-    {"name": "Appetizer1", "price": 10.99, "stock": 5},
-    {"name": "Appetizer2", "price": 7.99, "stock": 3},
-    {"name": "Main Course1", "price": 19.99, "stock": 4},
-    {"name": "Main Course2", "price": 14.99, "stock": 6},
-    {"name": "Dessert1", "price": 8.99, "stock": 2},
-    {"name": "Dessert2", "price": 12.99, "stock": 5}
-]
-```
+- **Input:** [Insertion of 1/2, 2/3, Extraction of 1/2]
+  - Queue: [2/3, 1/2]
+  - Remainders: [0, 1/2]
+  
+- **Input:** [Insertion of 3/4, Extraction of 2/3]
+  - Queue: [3/4, 1/2]
+  - Remainders: [1/3, 1/2]
 
-**Output:**
-```
-{
-    "appetizers": [
-        {"name": "Appetizer1", "price": 10.99, "stock": 3},
-        {"name": "Appetizer2", "price": 7.99, "stock": 3}
-    ],
-    "main_courses": [
-        {"name": "Main Course1", "price": 19.99, "stock": 2},
-        {"name": "Main Course2", "price": 14.99, "stock": 4}
-    ],
-    "desserts": [
-        {"name": "Dessert1", "price": 8.99, "stock": 2},
-        {"name": "Dessert2", "price": 12.99, "stock": 3}
-    ]
-}
-```
+**Constraints:**
+1. The queue should support insertion and extraction of fractions.
+2. When an element is extracted, it must leave a fractional remainder in the queue.
+3. The remainder should be calculated as `numerator / denominator` modulo `numerator` and `denominator`.
 
-#### Constraints:
-- The total number of items in each category must be distributed as evenly as possible.
-- The total cost of each category must be as close to equal as possible.
-- If an item's stock is less than the required number to distribute evenly, it should be placed in the category with the smallest total cost so far.
-
-#### Solution in Python:
+**Solution in Python:**
 
 ```python
-def balance_menu(menu_items):
-    # Group items by category (assuming categories are 'appetizers', 'main_courses', 'desserts')
-    categories = {'appetizers': [], 'main_courses': [], 'desserts': []}
-    
-    # Initialize dictionaries to store items and their costs
-    cost_dict = {'appetizers': 0, 'main_courses': 0, 'desserts': 0}
-    
-    # Distribute items into categories
-    for item in menu_items:
-        category = item['name'].split()[0]
-        categories[category].append(item)
-        cost_dict[category] += item['price'] * item['stock']
-    
-    # Distribute items as evenly as possible while minimizing cost difference
-    result = []
-    
-    for category, items in categories.items():
-        total_stock = sum(item['stock'] for item in items)
-        total_cost = cost_dict[category]
-        ideal_stock_per_item = total_stock // len(items)
-        
-        allocated_items = []
-        
-        remaining_items = items[:]
-        
-        while remaining_items:
-            best_category_for_item = min(cost_dict, key=lambda k: cost_dict[k] / len(categories[k]))
-            best_item = min(remaining_items, key=lambda i: abs(i['stock'] - ideal_stock_per_item))
-            
-            if best_item['stock'] <= ideal_stock_per_item:
-                allocated_items.append(best_item)
-                cost_dict[best_category_for_item] -= best_item['price']
-                remaining_items.remove(best_item)
-            else:
-                allocated_items.append(best_item)
-                cost_dict[best_category_for_item] -= best_item['price']
-                remaining_items.remove(best_item)
-                break
-        
-        result.append({'name': category, 'items': allocated_items})
-    
-    return result
+from fractions import Fraction
 
-# Example usage:
-menu_items = [
-    {"name": "Appetizer1", "price": 10.99, "stock": 5},
-    {"name": "Appetizer2", "price": 7.99, "stock": 3},
-    {"name": "Main Course1", "price": 19.99, "stock": 4},
-    {"name": "Main Course2", "price": 14.99, "stock": 6},
-    {"name": "Dessert1", "price": 8.99, "stock": 2},
-   
+class FractionalRemainderQueue:
+    def __init__(self):
+        self.queue = []
+        self.remainders = []
+
+    def insert(self, fraction):
+        self.queue.append(fraction)
+        # Calculate the remainder by finding the fractional part
+        remainder = fraction.numerator % fraction.denominator
+        self.remainders.append(Fraction(remainder, fraction.denominator))
+
+    def extract(self):
+        if not self.queue:
+            return None
+        
+        element = self.queue.pop(0)
+        remainder_index = self.remainders.index(Fraction(element.numerator % element.denominator, element.denominator))
+        
+        # Remove the corresponding remainder
+        del self.remainders[remainder_index]
+        
+        return element
+    
+    def print_status(self):
+        print("Queue:", [f"{fraction.numerator}/{fraction.denominator}" for fraction in self.queue])
+        print("Remainders:", [f"{remainder.numerator}/{remainder.denominator}" for remainder in self.remainders])
+
+# Usage:
+queue = FractionalRemainderQueue()
+queue.insert(Fraction(1, 2))
+queue.insert(Fraction(2, 3))
+extracted = queue.extract()
+print("Extracted:", f"{extracted.numerator}/{extracted.denominator}")
+queue.print_status()
+
+queue.insert(Fraction(3, 4))
+extracted = queue.extract()
+print("Extracted:", f"{extracted.numerator}/{extracted.denominator}")
+queue.print_status()
+```
+
+**Explanation:**
+1. **Initialization:** The `FractionalRemainderQueue` class initializes two lists: `queue` and `remainders`.
+2. **Insert:** The `insert` method adds a fraction to the `queue` and calculates its remainder by finding the fractional part using `numerator % denominator`. The remainder is then appended to the `remainders` list.
+3. **Extract:** The `extract` method removes the first element from the `queue`, calculates its corresponding remainder index in the `remainders` list, and removes that element from the list.
+4. **Print Status:** The `print_status` method prints both the current state of the queue and the remainders.
+
+This implementation ensures that when an element is extracted, it leaves a fractional remainder in the queue as specified by the problem constraints.
