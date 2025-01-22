@@ -4,96 +4,66 @@ This repository contains daily coding challenges generated using the Perplexity 
 
 ## Today's Challenge
 
-### Coding Challenge: "Restaurant Seating Arrangement"
+Difficulty: ⭐⭐⭐ (3/5)
 
-#### Problem Description
-You are a manager at a busy restaurant, and you need to optimize the seating arrangement for your customers. Given a list of customer preferences and table capacities, determine the most efficient seating arrangement that maximizes customer satisfaction.
+### Coding Challenge: "Efficient Calendar Scheduling"
 
-#### Example Input/Output
+**Problem Description:**
+Given a list of events with start and end times, determine the minimum number of conference rooms required to accommodate all events efficiently. The goal is to minimize the total number of rooms used while ensuring that no two events in the same room overlap.
+
+**Example Input/Output:**
 
 **Input:**
-- `customers`: A list of customer preferences in the format `[customer_id, preference (high/medium/low)]`.
-- `tables`: A dictionary of tables with their capacities.
+```
+[[0, 30], [5, 10], [15, 20]]
+```
 
 **Output:**
-- A dictionary where keys are customer IDs and values are the table numbers assigned to them.
-
-#### Constraints:
-- The preferences are sorted in descending order (high > medium > low).
-- The tables are available on a first-come, first-served basis.
-- Each customer can only be seated at one table.
-
-#### Example:
-```plaintext
-customers = [
-    (1, 'high'),
-    (2, 'medium'),
-    (3, 'high'),
-    (4, 'low'),
-    (5, 'medium')
-]
-
-tables = {
-    10: 5,
-    11: 3,
-    12: 4,
-    13: 2,
-    14: 6
-}
+```
+2
 ```
 
-**Expected Output:**
-```plaintext
-seating_arrangement = {
-    1: 10,
-    2: 11,
-    3: 10,
-    4: 12,
-    5: 13
-}
-```
+**Constraints:**
+1. **Event Times:** Each event is represented by a tuple `(start, end)` where `start` and `end` are integers representing the start and end times in minutes.
+2. **Non-Overlapping Events:** No two events in the same room can overlap in time.
+3. **Efficiency:** The goal is to minimize the total number of rooms used.
 
-#### Solution in Python
+**Solution in Python:**
 
 ```python
-def restaurant_seating(customers, tables):
-    # Sort customers by preference and then by ID
-    customers.sort(key=lambda x: (-[preference for preference in ['high', 'medium', 'low'] if preference == x[1]], x[0]))
+import heapq
 
-    # Initialize the seating arrangement dictionary
-    seating_arrangement = {}
+def min_rooms(rooms):
+    # Sort events by start time
+    events = sorted((start, end, 1) for start, end in rooms) + \
+             sorted((end, start, -1) for start, end in rooms)
     
-    # Iterate over available tables in ascending order of capacity
-    sorted_tables_by_capacity = sorted(tables.items(), key=lambda item: item[1])
+    # Initialize priority queue to keep track of end times and number of rooms
+    end_times = []
     
-    for i, customer in enumerate(customers):
-        # Assign the next available table to the current customer
-        for table_number, capacity in sorted_tables_by_capacity:
-            if capacity > 0:
-                seating_arrangement[customer[0]] = table_number
-                tables[table_number] -= 1 # Decrement capacity after assignment
-                break
+    # Initialize minimum number of rooms required
+    min_rooms = 0
     
-    return seating_arrangement
+    for _, time, delta in events:
+        # If it's an end time, decrease count by delta (1 if it's an end time of an event, -1 if it's a start time)
+        if end_times and end_times[0][0] == time:
+            heapq.heappop(end_times)
+        
+        # Increase count by delta and push new end time into priority queue
+        heapq.heappush(end_times, (time + delta, delta))
+        
+        # Update minimum number of rooms required if current count is higher
+        min_rooms = max(min_rooms, len(end_times))
+    
+    return min_rooms
 
 # Example usage:
-customers = [
-    (1, 'high'),
-    (2, 'medium'),
-    (3, 'high'),
-    (4, 'low'),
-    (5, 'medium')
-]
+rooms = [[0, 30], [5, 10], [15, 20]]
+print(min_rooms(rooms)) # Output: 2
 
-tables = {
-    10: 5,
-    11: 3,
-    12: 4,
-    13: 2,
-    14: 6
-}
-
-print(restaurant_seating(customers, tables))
 ```
 
-This solution sorts the customers based on their preferences and then by their IDs. It then iterates through the available tables in ascending order of capacity, assigning each customer to the next available table based on their preference. The output will be the most efficient seating arrangement that maximizes customer satisfaction.
+**Difficulty Rating:**
+Difficulty Level: 3/5
+
+This challenge requires understanding of event scheduling and using a priority queue to efficiently manage the end times of events. The solution needs to handle both start and end times correctly to avoid overcounting or undercounting the number of rooms needed.
