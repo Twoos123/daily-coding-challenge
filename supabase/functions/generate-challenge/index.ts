@@ -48,9 +48,8 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
   const data = await response.json() as PerplexityResponse;
   const content = data.choices[0].message.content;
   
-  // Extract difficulty rating from the content (assuming it's mentioned in the text)
   const difficultyMatch = content.match(/difficulty.*?(\d)/i);
-  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 3; // Default to 3 if not found
+  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 3;
 
   return {
     challenge: content,
@@ -73,9 +72,25 @@ async function storeChallenge(supabase: any, challenge: string, difficulty: numb
 async function updateGitHubReadme(githubToken: string, challenge: string, difficulty: number): Promise<void> {
   console.log('Updating README.md in GitHub...')
   const stars = '⭐'.repeat(difficulty);
-  const readmeContent = `## About
+  const readmeContent = `# Daily Coding Challenge Generator 🚀
 
-This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository at 12 AM EST everyday.
+An AI-powered platform that generates unique coding challenges daily, helping developers enhance their problem-solving skills through consistent practice.
+
+## Features
+
+- 🤖 **AI-Powered**: Challenges are generated using advanced AI to ensure uniqueness and relevance
+- 🕒 **Daily Updates**: New challenges are automatically generated and committed at 12 AM EST
+- ⭐ **Difficulty Ratings**: Each challenge includes a difficulty rating from 1-5
+- 💡 **Complete Solutions**: Every challenge comes with a detailed Python solution
+
+## Built With
+
+- 🔥 **React + Vite**: For a fast and modern development experience
+- 🎨 **Tailwind CSS**: For beautiful, responsive styling
+- 🔷 **TypeScript**: For type-safe code
+- 🛠️ **Shadcn/UI**: For pre-built, customizable components
+- 🔌 **Supabase**: For backend functionality and database
+- 🤖 **Perplexity API**: For AI-powered challenge generation
 
 ## Today's Challenge
 
