@@ -20,93 +20,101 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Dynamic Taxi Dispatch System"
+### Coding Challenge: "Restaurant Menu Balancer"
 
-#### Problem Description
+#### Problem Description:
+You are given a list of menu items from a restaurant, each item with its price and the number of items available in stock. The goal is to balance the menu by ensuring that the total cost of the items in each category (e.g., appetizers, main courses, desserts) is as close to equal as possible. You must distribute the items across categories while minimizing the total cost difference between categories.
 
-You are tasked with creating a dynamic taxi dispatch system that efficiently assigns taxis to passengers. The system should handle multiple pickups and drop-offs, ensuring that each taxi is maximized in terms of distance traveled and time spent. The system will be given a list of passenger locations (x, y coordinates) along with their desired drop-off locations. Your task is to develop an algorithm that assigns the closest available taxi to each passenger and minimizes the overall distance traveled by all taxis.
-
-#### Example Input/Output
+#### Example Input/Output:
 
 **Input:**
-- List of passenger pickup locations: `[(1, 2), (3, 4), (5, 6)]`
-- List of passenger drop-off locations: `[(7, 8), (9, 10), (11, 12)]`
-- Initial taxi location: `(0, 0)`
-- Number of taxis: `2`
-
-**Output:**
-- Assignment of taxis to passengers:
-    - Taxi 1: `[Passenger 1 -> Drop-off 1, Passenger 2 -> Drop-off 2]`
-    - Taxi 2: `[Passenger 3 -> Drop-off 3]`
-- Total distance traveled by all taxis
-
-#### Constraints
-
-- The system should handle any number of passengers and taxis.
-- The initial location of each taxi is at `(0, 0)`.
-- The distance between two points `(x1, y1)` and `(x2, y2)` is calculated using the Euclidean distance formula: `√((x2 - x1)^2 + (y2 - y1)^2)`.
-- Taxis cannot travel through each other.
-
-#### Solution in Python
-
-```python
-import math
-
-def calculate_distance(point1, point2):
-    return math.sqrt((point2[0] - point1[0])**2 + (point2[1] - point1[1])**2)
-
-def assign_taxis(pickup_locations, drop_off_locations, num_taxis):
-    # Initialize taxis at origin
-    taxis = [(0, 0) for _ in range(num_taxis)]
-    
-    # Assign closest taxi to each passenger
-    assignments = [[] for _ in range(num_taxis)]
-    
-    for i, pickup in enumerate(pickup_locations):
-        min_distance = float('inf')
-        closest_taxi_index = None
-        
-        for j, taxi in enumerate(taxis):
-            distance = calculate_distance(pickup, taxi)
-            if distance < min_distance:
-                min_distance = distance
-                closest_taxi_index = j
-        
-        assignments[closest_taxi_index].append(f'Passenger {i + 1} -> Drop-off {i + 1}')
-        
-        # Update taxi position after each pickup
-        taxis[closest_taxi_index] = drop_off_locations[i]
-    
-    return assignments
-
-# Example usage
-pickup_locations = [(1, 2), (3, 4), (5, 6)]
-drop_off_locations = [(7, 8), (9, 10), (11, 12)]
-num_taxis = 2
-
-assignments = assign_taxis(pickup_locations, drop_off_locations, num_taxis)
-total_distance_traveled = 0
-
-for i, taxi_path in enumerate(assignments):
-    for j in range(len(taxi_path)):
-        if j == 0:
-            # First point is pickup location
-            current_point = pickup_locations[j]
-        else:
-            current_point = drop_off_locations[j - 1]
-        
-        next_point = drop_off_locations[j] if j < len(drop_off_locations) - 1 else (11, 12)
-        
-        distance_traveled = calculate_distance(current_point, next_point)
-        total_distance_traveled += distance_traveled
-    
-    print(f'Taxi {i + 1}: {", ".join(taxi_path)}')
-
-print(f'Total distance traveled by all taxis: {total_distance_traveled}')
+```
+menu_items = [
+    {"name": "Appetizer1", "price": 10.99, "stock": 5},
+    {"name": "Appetizer2", "price": 7.99, "stock": 3},
+    {"name": "Main Course1", "price": 19.99, "stock": 4},
+    {"name": "Main Course2", "price": 14.99, "stock": 6},
+    {"name": "Dessert1", "price": 8.99, "stock": 2},
+    {"name": "Dessert2", "price": 12.99, "stock": 5}
+]
 ```
 
-#### Difficulty Rating: 4/5
+**Output:**
+```
+{
+    "appetizers": [
+        {"name": "Appetizer1", "price": 10.99, "stock": 3},
+        {"name": "Appetizer2", "price": 7.99, "stock": 3}
+    ],
+    "main_courses": [
+        {"name": "Main Course1", "price": 19.99, "stock": 2},
+        {"name": "Main Course2", "price": 14.99, "stock": 4}
+    ],
+    "desserts": [
+        {"name": "Dessert1", "price": 8.99, "stock": 2},
+        {"name": "Dessert2", "price": 12.99, "stock": 3}
+    ]
+}
+```
 
-This challenge requires the implementation of a dynamic assignment algorithm that optimizes taxi routes based on passenger pickups and drop-offs. The solution involves calculating distances using Euclidean distance and managing the state of each taxi to ensure efficient assignment. The difficulty level is high due to the need for efficient data structures and algorithms to handle multiple pickups and drop-offs while minimizing overall distance traveled.
+#### Constraints:
+- The total number of items in each category must be distributed as evenly as possible.
+- The total cost of each category must be as close to equal as possible.
+- If an item's stock is less than the required number to distribute evenly, it should be placed in the category with the smallest total cost so far.
+
+#### Solution in Python:
+
+```python
+def balance_menu(menu_items):
+    # Group items by category (assuming categories are 'appetizers', 'main_courses', 'desserts')
+    categories = {'appetizers': [], 'main_courses': [], 'desserts': []}
+    
+    # Initialize dictionaries to store items and their costs
+    cost_dict = {'appetizers': 0, 'main_courses': 0, 'desserts': 0}
+    
+    # Distribute items into categories
+    for item in menu_items:
+        category = item['name'].split()[0]
+        categories[category].append(item)
+        cost_dict[category] += item['price'] * item['stock']
+    
+    # Distribute items as evenly as possible while minimizing cost difference
+    result = []
+    
+    for category, items in categories.items():
+        total_stock = sum(item['stock'] for item in items)
+        total_cost = cost_dict[category]
+        ideal_stock_per_item = total_stock // len(items)
+        
+        allocated_items = []
+        
+        remaining_items = items[:]
+        
+        while remaining_items:
+            best_category_for_item = min(cost_dict, key=lambda k: cost_dict[k] / len(categories[k]))
+            best_item = min(remaining_items, key=lambda i: abs(i['stock'] - ideal_stock_per_item))
+            
+            if best_item['stock'] <= ideal_stock_per_item:
+                allocated_items.append(best_item)
+                cost_dict[best_category_for_item] -= best_item['price']
+                remaining_items.remove(best_item)
+            else:
+                allocated_items.append(best_item)
+                cost_dict[best_category_for_item] -= best_item['price']
+                remaining_items.remove(best_item)
+                break
+        
+        result.append({'name': category, 'items': allocated_items})
+    
+    return result
+
+# Example usage:
+menu_items = [
+    {"name": "Appetizer1", "price": 10.99, "stock": 5},
+    {"name": "Appetizer2", "price": 7.99, "stock": 3},
+    {"name": "Main Course1", "price": 19.99, "stock": 4},
+    {"name": "Main Course2", "price": 14.99, "stock": 6},
+    {"name": "Dessert1", "price": 8.99, "stock": 2},
+   
