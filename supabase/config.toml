@@ -2,5 +2,3 @@
 verify_jwt = false
 [functions.generate-challenge.import_map]
 imports = {}
-[functions.generate-challenge.triggers]
-cron = "0 0 * * *"  # Runs at midnight every day
