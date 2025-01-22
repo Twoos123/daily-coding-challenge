@@ -49,7 +49,7 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
   const content = data.choices[0].message.content;
   
   const difficultyMatch = content.match(/DIFFICULTY:(\d)/i);
-  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 3; // Default to 3 if not found
+  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 3;
   
   const challenge = content.replace(/DIFFICULTY:\d\n*/i, '').trim();
 
