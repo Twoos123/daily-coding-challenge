@@ -138,21 +138,30 @@ Simply open [Lovable](https://lovable.dev/projects/32867549-de20-4d11-a45f-71a96
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)`
 
-    // Update README.md file
-    const { error: readmeError } = await supabase
-      .storage
-      .from('project-files')
-      .upload('README.md', readmeContent, {
-        contentType: 'text/markdown',
-        upsert: true
-      })
+    try {
+      // Convert string to Uint8Array
+      const encoder = new TextEncoder()
+      const fileContent = encoder.encode(readmeContent)
 
-    if (readmeError) {
-      console.error('Failed to update README:', readmeError)
+      // Upload README.md to storage
+      const { error: uploadError } = await supabase
+        .storage
+        .from('project-files')
+        .upload('README.md', fileContent, {
+          contentType: 'text/markdown',
+          upsert: true
+        })
+
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError)
+        throw new Error('Failed to update README')
+      }
+
+      console.log('README.md updated successfully')
+    } catch (error) {
+      console.error('Error updating README:', error)
       throw new Error('Failed to update README')
     }
-
-    console.log('Challenge stored and README updated successfully')
 
     return new Response(
       JSON.stringify({ success: true, challenge }),
