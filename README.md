@@ -9,6 +9,15 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 - ⭐ **Difficulty Ratings**: Each challenge includes a difficulty rating from 1-5
 - 💡 **Complete Solutions**: Every challenge comes with a detailed Python solution
 
+## Built With
+
+- 🔥 **React + Vite**: For a fast and modern development experience
+- 🎨 **Tailwind CSS**: For beautiful, responsive styling
+- 🔷 **TypeScript**: For type-safe code
+- 🛠️ **Shadcn/UI**: For pre-built, customizable components
+- 🔌 **Supabase**: For backend functionality and database
+- 🤖 **Perplexity API**: For AI-powered challenge generation
+
 ## Today's Challenge
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
