@@ -150,23 +150,30 @@ Simply open [Lovable](https://lovable.dev/projects/32867549-de20-4d11-a45f-71a96
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)`
 
     try {
-      // Get the current README content and SHA
+      // First try to get the current README content and SHA
+      console.log('Fetching current README from GitHub...')
       const repoResponse = await fetch('https://api.github.com/repos/lovable-dev/32867549-de20-4d11-a45f-71a962e14dbd/contents/README.md', {
         headers: {
           'Authorization': `token ${githubToken}`,
           'Accept': 'application/vnd.github.v3+json'
         }
-      });
+      })
 
       if (!repoResponse.ok) {
-        console.error('GitHub API error:', await repoResponse.text());
-        throw new Error('Failed to get README from GitHub');
+        const errorText = await repoResponse.text()
+        console.error('GitHub API error when fetching README:', errorText)
+        throw new Error(`Failed to get README from GitHub: ${errorText}`)
       }
 
-      const repoData = await repoResponse.json();
-      const currentSha = repoData.sha;
+      const repoData = await repoResponse.json()
+      const currentSha = repoData.sha
 
-      // Update README in GitHub
+      // Encode content to base64
+      const encoder = new TextEncoder()
+      const data = encoder.encode(readmeContent)
+      const base64Content = btoa(String.fromCharCode(...data))
+
+      console.log('Updating README in GitHub...')
       const updateResponse = await fetch('https://api.github.com/repos/lovable-dev/32867549-de20-4d11-a45f-71a962e14dbd/contents/README.md', {
         method: 'PUT',
         headers: {
@@ -176,20 +183,21 @@ We don't support custom domains (yet). If you want to deploy your project under 
         },
         body: JSON.stringify({
           message: 'Update daily challenge',
-          content: btoa(readmeContent),
+          content: base64Content,
           sha: currentSha
         })
-      });
+      })
 
       if (!updateResponse.ok) {
-        console.error('GitHub update error:', await updateResponse.text());
-        throw new Error('Failed to update README in GitHub');
+        const errorText = await updateResponse.text()
+        console.error('GitHub update error:', errorText)
+        throw new Error(`Failed to update README in GitHub: ${errorText}`)
       }
 
-      console.log('README.md updated successfully in GitHub');
+      console.log('README.md updated successfully in GitHub')
     } catch (error) {
-      console.error('Error updating README in GitHub:', error);
-      throw new Error('Failed to update README in GitHub');
+      console.error('Error updating README in GitHub:', error)
+      throw new Error(`Failed to update README in GitHub: ${error.message}`)
     }
 
     return new Response(
@@ -197,7 +205,7 @@ We don't support custom domains (yet). If you want to deploy your project under 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
