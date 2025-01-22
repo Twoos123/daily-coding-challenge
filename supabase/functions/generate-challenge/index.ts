@@ -48,7 +48,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A solution in TypeScript. Format the response in markdown with proper headings and code blocks.'
+            content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A solution in Python. Format the response in markdown with proper headings and code blocks.'
           },
           {
             role: 'user',
@@ -58,7 +58,7 @@ serve(async (req) => {
         temperature: 0.7,
         max_tokens: 1000,
       }),
-    })
+    });
 
     if (!response.ok) {
       console.error('Perplexity API error:', await response.text())
