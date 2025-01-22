@@ -1,6 +1,6 @@
 ## About
 
-This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository.
+This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository at 12 am EST everyday.
 
 ## Today's Challenge
 
