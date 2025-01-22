@@ -9,7 +9,7 @@ export const ChallengeDisplay = ({ isLoading, challenge }: ChallengeDisplayProps
   }
 
   if (!challenge) {
-    return <p>No challenge generated yet.</p>;
+    return <p>No challenge has been generated yet. Please check back later.</p>;
   }
 
   return (
