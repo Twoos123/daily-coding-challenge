@@ -82,7 +82,7 @@ serve(async (req) => {
     // Update the README content with the new challenge
     const todayDate = new Date().toISOString().split('T')[0]
     const newContent = currentContent.replace(
-      "## Today's Challenge\n\nNo challenge has been generated yet. The first challenge will be committed soon.",
+      /## Today's Challenge\n\n(?:No challenge has been generated yet. The first challenge will be committed soon.|(?:\*\*Date\*\*:[^\n]*\n\n[\s\S]*?(?=##|$)))/,
       `## Today's Challenge\n\n**Date**: ${todayDate}\n\n${challenge}`
     )
 
