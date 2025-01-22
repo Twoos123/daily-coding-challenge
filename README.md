@@ -12,7 +12,6 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 ## Built With
 
 - 🔥 **React + Vite**: For a fast and modern development experience
-- 🎨 **Tailwind CSS**: For beautiful, responsive styling
 - 🔷 **TypeScript**: For type-safe code
 - 🛠️ **Shadcn/UI**: For pre-built, customizable components
 - 🔌 **Supabase**: For backend functionality and database
