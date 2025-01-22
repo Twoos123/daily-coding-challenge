@@ -28,7 +28,7 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
       messages: [
         {
           role: 'system',
-          content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A solution in Python. Rate the difficulty from 1-5 where 1 is easiest and 5 is hardest, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:3". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.'
+          content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A complete solution in Python with explanation. Rate the difficulty as 2 out of 5, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:2". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.'
         },
         {
           role: 'user',
@@ -50,7 +50,7 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
   
   // Extract difficulty from the start of the content
   const difficultyMatch = content.match(/DIFFICULTY:(\d)/i);
-  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 3;
+  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 2; // Default to 2 if not found
   
   // Remove the DIFFICULTY line from the content
   const challenge = content.replace(/DIFFICULTY:\d\n*/i, '').trim();
