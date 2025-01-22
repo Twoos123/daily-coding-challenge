@@ -7,13 +7,17 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [apiKey, setApiKey] = useState("");
+  const [githubUsername, setGithubUsername] = useState("");
+  const [githubToken, setGithubToken] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     const savedKey = localStorage.getItem('perplexity_api_key');
-    if (savedKey) {
-      setApiKey(savedKey);
-    }
+    const savedUsername = localStorage.getItem('github_username');
+    const savedToken = localStorage.getItem('github_token');
+    if (savedKey) setApiKey(savedKey);
+    if (savedUsername) setGithubUsername(savedUsername);
+    if (savedToken) setGithubToken(savedToken);
   }, []);
 
   const { data: challenge, isLoading } = useQuery({
@@ -52,48 +56,57 @@ const Index = () => {
       const content = data.choices[0].message.content;
 
       // Update README.md via GitHub API
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        const readmeContent = `# Daily Coding Challenge\n\n## ${today}\n\n${content}\n\n[Generated with ❤️ by Lovable](https://lovable.dev)`;
-        
-        // Get the current README content and SHA
-        const readmeResponse = await fetch('https://api.github.com/repos/YOUR_USERNAME/YOUR_USERNAME/contents/README.md', {
-          headers: {
-            'Authorization': `token ${localStorage.getItem('github_token')}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        });
-        
-        if (readmeResponse.ok) {
-          const readmeData = await readmeResponse.json();
+      if (githubUsername && githubToken) {
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          const readmeContent = `# Daily Coding Challenge\n\n## ${today}\n\n${content}\n\n[Generated with ❤️ by Lovable](https://lovable.dev)`;
           
-          // Update README
-          await fetch('https://api.github.com/repos/YOUR_USERNAME/YOUR_USERNAME/contents/README.md', {
-            method: 'PUT',
+          // Get the current README content and SHA
+          const readmeResponse = await fetch(`https://api.github.com/repos/${githubUsername}/${githubUsername}/contents/README.md`, {
             headers: {
-              'Authorization': `token ${localStorage.getItem('github_token')}`,
-              'Content-Type': 'application/json',
+              'Authorization': `token ${githubToken}`,
               'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-              message: `Daily coding challenge update: ${today}`,
-              content: Buffer.from(readmeContent).toString('base64'),
-              sha: readmeData.sha
-            })
+            }
           });
+          
+          if (readmeResponse.ok) {
+            const readmeData = await readmeResponse.json();
+            
+            // Update README
+            const updateResponse = await fetch(`https://api.github.com/repos/${githubUsername}/${githubUsername}/contents/README.md`, {
+              method: 'PUT',
+              headers: {
+                'Authorization': `token ${githubToken}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+              },
+              body: JSON.stringify({
+                message: `Daily coding challenge update: ${today}`,
+                content: Buffer.from(readmeContent).toString('base64'),
+                sha: readmeData.sha
+              })
+            });
 
+            if (updateResponse.ok) {
+              toast({
+                title: "Success",
+                description: "Challenge generated and README updated!",
+              });
+            } else {
+              const errorData = await updateResponse.json();
+              throw new Error(errorData.message || 'Failed to update README');
+            }
+          } else {
+            throw new Error('Failed to fetch current README');
+          }
+        } catch (error) {
+          console.error('Failed to update README:', error);
           toast({
-            title: "Success",
-            description: "Challenge generated and README updated!",
+            title: "Warning",
+            description: `Failed to update README: ${error.message}. Please check your GitHub credentials.`,
+            variant: "destructive",
           });
         }
-      } catch (error) {
-        console.error('Failed to update README:', error);
-        toast({
-          title: "Warning",
-          description: "Challenge generated but failed to update README. Please check your GitHub token.",
-          variant: "destructive",
-        });
       }
 
       return content;
@@ -119,7 +132,7 @@ const Index = () => {
             <CardTitle>Daily Coding Challenge</CardTitle>
             <CardDescription>
               A new programming challenge is generated every day to help you practice and improve your coding skills.
-              To enable auto-commits to your GitHub profile, please provide your GitHub personal access token.
+              To enable auto-commits to your GitHub profile, please provide your GitHub username and personal access token.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -153,9 +166,22 @@ const Index = () => {
                 <>
                   <div className="space-y-4">
                     <Input
+                      type="text"
+                      placeholder="Enter your GitHub username"
+                      value={githubUsername}
+                      onChange={(e) => {
+                        setGithubUsername(e.target.value);
+                        localStorage.setItem('github_username', e.target.value);
+                      }}
+                    />
+                    <Input
                       type="password"
                       placeholder="Enter your GitHub Personal Access Token"
-                      onChange={(e) => localStorage.setItem('github_token', e.target.value)}
+                      value={githubToken}
+                      onChange={(e) => {
+                        setGithubToken(e.target.value);
+                        localStorage.setItem('github_token', e.target.value);
+                      }}
                     />
                     <p className="text-xs text-muted-foreground">
                       Create a token with 'repo' scope at: https://github.com/settings/tokens
