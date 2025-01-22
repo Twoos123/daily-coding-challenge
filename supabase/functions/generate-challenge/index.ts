@@ -21,6 +21,11 @@ serve(async (req) => {
       throw new Error('Missing Perplexity API key')
     }
 
+    const githubToken = Deno.env.get('GITHUB_ACCESS_TOKEN')
+    if (!githubToken) {
+      throw new Error('Missing GitHub access token')
+    }
+
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -76,8 +81,8 @@ serve(async (req) => {
       throw new Error('Failed to store challenge')
     }
 
-    // Update README.md
-    console.log('Updating README.md...')
+    // Update README.md in GitHub
+    console.log('Updating README.md in GitHub...')
     const readmeContent = `# Daily Coding Challenge Project
 
 ## About
@@ -145,28 +150,46 @@ Simply open [Lovable](https://lovable.dev/projects/32867549-de20-4d11-a45f-71a96
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)`
 
     try {
-      // Convert string to Uint8Array
-      const encoder = new TextEncoder()
-      const fileContent = encoder.encode(readmeContent)
+      // Get the current README content and SHA
+      const repoResponse = await fetch('https://api.github.com/repos/lovable-dev/32867549-de20-4d11-a45f-71a962e14dbd/contents/README.md', {
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
 
-      // Upload README.md to storage
-      const { error: uploadError } = await supabase
-        .storage
-        .from('project-files')
-        .upload('README.md', fileContent, {
-          contentType: 'text/markdown',
-          upsert: true
-        })
-
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError)
-        throw new Error('Failed to update README')
+      if (!repoResponse.ok) {
+        console.error('GitHub API error:', await repoResponse.text());
+        throw new Error('Failed to get README from GitHub');
       }
 
-      console.log('README.md updated successfully')
+      const repoData = await repoResponse.json();
+      const currentSha = repoData.sha;
+
+      // Update README in GitHub
+      const updateResponse = await fetch('https://api.github.com/repos/lovable-dev/32867549-de20-4d11-a45f-71a962e14dbd/contents/README.md', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: 'Update daily challenge',
+          content: btoa(readmeContent),
+          sha: currentSha
+        })
+      });
+
+      if (!updateResponse.ok) {
+        console.error('GitHub update error:', await updateResponse.text());
+        throw new Error('Failed to update README in GitHub');
+      }
+
+      console.log('README.md updated successfully in GitHub');
     } catch (error) {
-      console.error('Error updating README:', error)
-      throw new Error('Failed to update README')
+      console.error('Error updating README in GitHub:', error);
+      throw new Error('Failed to update README in GitHub');
     }
 
     return new Response(
@@ -174,7 +197,7 @@ We don't support custom domains (yet). If you want to deploy your project under 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
