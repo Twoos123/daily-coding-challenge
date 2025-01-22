@@ -1,9 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { ApiKeyInput } from "@/components/ApiKeyInput";
+import { GitHubCredentials } from "@/components/GitHubCredentials";
+import { ChallengeDisplay } from "@/components/ChallengeDisplay";
 
 const Index = () => {
   const [apiKey, setApiKey] = useState("");
@@ -55,13 +56,11 @@ const Index = () => {
       const data = await response.json();
       const content = data.choices[0].message.content;
 
-      // Update README.md via GitHub API
       if (githubUsername && githubToken) {
         try {
           const today = new Date().toISOString().split('T')[0];
           const readmeContent = `# Daily Coding Challenge\n\n## ${today}\n\n${content}\n\n[Generated with ❤️ by Lovable](https://lovable.dev)`;
           
-          // Get the current README content and SHA
           const readmeResponse = await fetch(`https://api.github.com/repos/${githubUsername}/${githubUsername}/contents/README.md`, {
             headers: {
               'Authorization': `token ${githubToken}`,
@@ -72,7 +71,6 @@ const Index = () => {
           if (readmeResponse.ok) {
             const readmeData = await readmeResponse.json();
             
-            // Update README
             const updateResponse = await fetch(`https://api.github.com/repos/${githubUsername}/${githubUsername}/contents/README.md`, {
               method: 'PUT',
               headers: {
@@ -138,65 +136,17 @@ const Index = () => {
           <CardContent>
             <div className="space-y-4">
               {!apiKey ? (
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Please enter your Perplexity API key to start generating challenges:
-                  </p>
-                  <div className="flex gap-2">
-                    <Input
-                      type="password"
-                      placeholder="Enter your Perplexity API key"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                    />
-                    <Button onClick={() => {
-                      if (apiKey) {
-                        localStorage.setItem('perplexity_api_key', apiKey);
-                        toast({
-                          title: "Success",
-                          description: "API key saved successfully!",
-                        });
-                      }
-                    }}>
-                      Save Key
-                    </Button>
-                  </div>
-                </div>
+                <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} />
               ) : (
                 <>
+                  <GitHubCredentials
+                    githubUsername={githubUsername}
+                    setGithubUsername={setGithubUsername}
+                    githubToken={githubToken}
+                    setGithubToken={setGithubToken}
+                  />
                   <div className="space-y-4">
-                    <Input
-                      type="text"
-                      placeholder="Enter your GitHub username"
-                      value={githubUsername}
-                      onChange={(e) => {
-                        setGithubUsername(e.target.value);
-                        localStorage.setItem('github_username', e.target.value);
-                      }}
-                    />
-                    <Input
-                      type="password"
-                      placeholder="Enter your GitHub Personal Access Token"
-                      value={githubToken}
-                      onChange={(e) => {
-                        setGithubToken(e.target.value);
-                        localStorage.setItem('github_token', e.target.value);
-                      }}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Create a token with 'repo' scope at: https://github.com/settings/tokens
-                    </p>
-                  </div>
-                  <div className="space-y-4">
-                    {isLoading ? (
-                      <p>Generating challenge...</p>
-                    ) : challenge ? (
-                      <div className="prose prose-sm max-w-none dark:prose-invert prose-pre:bg-muted prose-pre:text-muted-foreground prose-code:text-muted-foreground">
-                        <div dangerouslySetInnerHTML={{ __html: challenge }} />
-                      </div>
-                    ) : (
-                      <p>No challenge generated yet.</p>
-                    )}
+                    <ChallengeDisplay isLoading={isLoading} challenge={challenge} />
                   </div>
                 </>
               )}
