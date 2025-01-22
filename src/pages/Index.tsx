@@ -8,12 +8,12 @@ import { ChallengeDisplay } from "@/components/ChallengeDisplay"
 export default function Index() {
   const { toast } = useToast()
 
-  const { data: challenge, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['dailyChallenge'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('daily_challenges')
-        .select('challenge')
+        .select('challenge, difficulty')
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -22,7 +22,7 @@ export default function Index() {
         throw error;
       }
 
-      return data?.challenge || null;
+      return data || null;
     },
   });
 
@@ -39,7 +39,6 @@ export default function Index() {
         description: "New challenge has been generated.",
       })
 
-      // Refetch the challenge instead of reloading the page
       refetch()
     } catch (error) {
       console.error('Error generating challenge:', error)
@@ -69,7 +68,11 @@ export default function Index() {
               Generate New Challenge
             </Button>
             <div className="space-y-4">
-              <ChallengeDisplay isLoading={isLoading} challenge={challenge} />
+              <ChallengeDisplay 
+                isLoading={isLoading} 
+                challenge={data?.challenge || null} 
+                difficulty={data?.difficulty}
+              />
             </div>
           </CardContent>
         </Card>

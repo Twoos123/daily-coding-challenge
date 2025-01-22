@@ -1,9 +1,12 @@
+import { DifficultyStars } from "./DifficultyStars";
+
 interface ChallengeDisplayProps {
   isLoading: boolean;
   challenge: string | null;
+  difficulty?: number;
 }
 
-export const ChallengeDisplay = ({ isLoading, challenge }: ChallengeDisplayProps) => {
+export const ChallengeDisplay = ({ isLoading, challenge, difficulty = 3 }: ChallengeDisplayProps) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center space-x-2">
@@ -23,8 +26,14 @@ export const ChallengeDisplay = ({ isLoading, challenge }: ChallengeDisplayProps
   }
 
   return (
-    <div className="prose prose-sm max-w-none dark:prose-invert prose-pre:bg-muted prose-pre:text-muted-foreground prose-code:text-muted-foreground">
-      <div dangerouslySetInnerHTML={{ __html: challenge }} />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Difficulty:</h3>
+        <DifficultyStars difficulty={difficulty} />
+      </div>
+      <div className="prose prose-sm max-w-none dark:prose-invert prose-pre:bg-muted prose-pre:text-muted-foreground prose-code:text-muted-foreground">
+        <div dangerouslySetInnerHTML={{ __html: challenge }} />
+      </div>
     </div>
   );
 };
