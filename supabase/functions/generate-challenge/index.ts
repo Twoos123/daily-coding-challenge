@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,7 +33,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A solution in TypeScript. Format the response in markdown.'
+            content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A solution in TypeScript. Format the response in markdown with proper headings and code blocks.'
           },
           {
             role: 'user',
@@ -51,7 +52,7 @@ serve(async (req) => {
 
     const data = await response.json()
     const content = data.choices[0].message.content
-    console.log('Challenge generated successfully')
+    console.log('Challenge generated successfully:', content.substring(0, 100) + '...')
 
     // Store the challenge in Supabase
     console.log('Storing challenge in database...')
