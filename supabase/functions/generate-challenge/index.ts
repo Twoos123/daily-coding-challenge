@@ -15,7 +15,7 @@ interface PerplexityResponse {
   }>;
 }
 
-async function generateChallengeWithAI(apiKey: string): Promise<string> {
+async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: string; difficulty: number }> {
   console.log('Calling Perplexity API...')
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
@@ -28,7 +28,7 @@ async function generateChallengeWithAI(apiKey: string): Promise<string> {
       messages: [
         {
           role: 'system',
-          content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A solution in Python. Format the response in markdown with proper headings and code blocks.'
+          content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A solution in Python. Also rate the difficulty from 1-5 where 1 is easiest and 5 is hardest. Format the response in markdown with proper headings and code blocks.'
         },
         {
           role: 'user',
@@ -45,15 +45,24 @@ async function generateChallengeWithAI(apiKey: string): Promise<string> {
     throw new Error('Failed to generate challenge')
   }
 
-  const data = await response.json() as PerplexityResponse
-  return data.choices[0].message.content
+  const data = await response.json() as PerplexityResponse;
+  const content = data.choices[0].message.content;
+  
+  // Extract difficulty rating from the content (assuming it's mentioned in the text)
+  const difficultyMatch = content.match(/difficulty.*?(\d)/i);
+  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 3; // Default to 3 if not found
+
+  return {
+    challenge: content,
+    difficulty
+  };
 }
 
-async function storeChallenge(supabase: any, challenge: string): Promise<void> {
+async function storeChallenge(supabase: any, challenge: string, difficulty: number): Promise<void> {
   console.log('Storing challenge in database...')
   const { error: insertError } = await supabase
     .from('daily_challenges')
-    .insert([{ challenge }])
+    .insert([{ challenge, difficulty }])
 
   if (insertError) {
     console.error('Database insert error:', insertError)
@@ -61,13 +70,16 @@ async function storeChallenge(supabase: any, challenge: string): Promise<void> {
   }
 }
 
-async function updateGitHubReadme(githubToken: string, challenge: string): Promise<void> {
+async function updateGitHubReadme(githubToken: string, challenge: string, difficulty: number): Promise<void> {
   console.log('Updating README.md in GitHub...')
+  const stars = '⭐'.repeat(difficulty);
   const readmeContent = `## About
 
 This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository.
 
 ## Today's Challenge
+
+Difficulty: ${stars} (${difficulty}/5)
 
 ${challenge}`
 
@@ -148,12 +160,12 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Generate, store, and update challenge
-    const challenge = await generateChallengeWithAI(perplexityApiKey)
-    await storeChallenge(supabase, challenge)
-    await updateGitHubReadme(githubToken, challenge)
+    const { challenge, difficulty } = await generateChallengeWithAI(perplexityApiKey)
+    await storeChallenge(supabase, challenge, difficulty)
+    await updateGitHubReadme(githubToken, challenge, difficulty)
 
     return new Response(
-      JSON.stringify({ success: true, challenge }),
+      JSON.stringify({ success: true, challenge, difficulty }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
