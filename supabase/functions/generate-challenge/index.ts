@@ -75,7 +75,7 @@ async function updateGitHubReadme(githubToken: string, challenge: string, diffic
   const stars = '⭐'.repeat(difficulty);
   const readmeContent = `## About
 
-This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository at 12 PM EST everyday.
+This repository contains daily coding challenges generated using the Perplexity API. Each challenge is automatically generated and committed to this repository at 12 AM EST everyday.
 
 ## Today's Challenge
 
