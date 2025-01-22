@@ -28,7 +28,7 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
       messages: [
         {
           role: 'system',
-          content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution works. Rate the difficulty as 2 out of 5, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:2". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.'
+          content: 'You are a programming challenge generator. Generate a unique LeetCode-style coding challenge. Include: 1) Problem Description 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution works. Rate the difficulty from 1-5, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:3". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.'
         },
         {
           role: 'user',
