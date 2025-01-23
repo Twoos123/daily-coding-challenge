@@ -12,7 +12,6 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 ## Built With
 
 - 🔥 **React + Vite**: For a fast and modern development experience
-- 🎨 **Tailwind CSS**: For beautiful, responsive styling
 - 🔷 **TypeScript**: For type-safe code
 - 🛠️ **Shadcn/UI**: For pre-built, customizable components
 - 🔌 **Supabase**: For backend functionality and database
@@ -22,76 +21,71 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: **Fractional Remainder Queue**
+**Challenge: Maximum Sum of Non-Overlapping Subarrays**
 
-**Problem Description:**
-Implement a queue data structure that supports efficient insertion and extraction of elements, with an additional constraint: each element in the queue is a fraction with a numerator and a denominator. The twist is that when an element is extracted, it must leave a fractional remainder in the queue. For example, if the fraction 3/4 is extracted, the remainder 1/4 should remain in the queue.
+### Problem Description
 
-**Example Input/Output:**
+Given an array of integers and a size `K`, find the maximum sum of non-overlapping subarrays of size `K`. Each subarray should be contiguous and non-overlapping.
 
-- **Input:** [Insertion of 1/2, 2/3, Extraction of 1/2]
-  - Queue: [2/3, 1/2]
-  - Remainders: [0, 1/2]
-  
-- **Input:** [Insertion of 3/4, Extraction of 2/3]
-  - Queue: [3/4, 1/2]
-  - Remainders: [1/3, 1/2]
+**Algorithmic Approach and Data Structures**
 
-**Constraints:**
-1. The queue should support insertion and extraction of fractions.
-2. When an element is extracted, it must leave a fractional remainder in the queue.
-3. The remainder should be calculated as `numerator / denominator` modulo `numerator` and `denominator`.
+This problem can be efficiently solved using a sliding window approach. The key idea is to maintain a window of size `K` that slides through the array, calculating the sum of elements within the current window and keeping track of the maximum sum found so far.
 
-**Solution in Python:**
+### Example Input/Output
 
-```python
-from fractions import Fraction
-
-class FractionalRemainderQueue:
-    def __init__(self):
-        self.queue = []
-        self.remainders = []
-
-    def insert(self, fraction):
-        self.queue.append(fraction)
-        # Calculate the remainder by finding the fractional part
-        remainder = fraction.numerator % fraction.denominator
-        self.remainders.append(Fraction(remainder, fraction.denominator))
-
-    def extract(self):
-        if not self.queue:
-            return None
-        
-        element = self.queue.pop(0)
-        remainder_index = self.remainders.index(Fraction(element.numerator % element.denominator, element.denominator))
-        
-        # Remove the corresponding remainder
-        del self.remainders[remainder_index]
-        
-        return element
-    
-    def print_status(self):
-        print("Queue:", [f"{fraction.numerator}/{fraction.denominator}" for fraction in self.queue])
-        print("Remainders:", [f"{remainder.numerator}/{remainder.denominator}" for remainder in self.remainders])
-
-# Usage:
-queue = FractionalRemainderQueue()
-queue.insert(Fraction(1, 2))
-queue.insert(Fraction(2, 3))
-extracted = queue.extract()
-print("Extracted:", f"{extracted.numerator}/{extracted.denominator}")
-queue.print_status()
-
-queue.insert(Fraction(3, 4))
-extracted = queue.extract()
-print("Extracted:", f"{extracted.numerator}/{extracted.denominator}")
-queue.print_status()
+**Input:**
+```
+Array = [1, 3, 2, 6, -1, 4, 1, 8, 2]
+K = 3
 ```
 
-**Explanation:**
-1. **Initialization:** The `FractionalRemainderQueue` class initializes two lists: `queue` and `remainders`.
-2. **Insert:** The `insert` method adds a fraction to the `queue` and calculates its remainder by finding the fractional part using `numerator % denominator`. The remainder is then appended to the `remainders` list.
-3. **Extract:** The `extract` method removes the first element from the `queue`, calculates its corresponding remainder index in the `remainders` list, and removes that element from the list.
-4. **Print Status:** The `print_status` method prints both the current state of the queue and the remainders.
+**Output:**
+```
+Maximum Sum of Non-Overlapping Subarrays = [10, 11, 2]
+```
+Explanation: The maximum sums for non-overlapping subarrays of size 3 are:
+- `[1, 3, 2]` with sum 6
+- `[3, 2, 6]` with sum 11
+- `[2, 6, -1]` with sum 7 (not the maximum, so it's ignored)
+- `[6, -1, 4]` with sum 9 (not the maximum, so it's ignored)
+- `[4, 1, 8]` with sum 13 (not the maximum, so it's ignored)
+- `[1, 8, 2]` with sum 11
 
-This implementation ensures that when an element is extracted, it leaves a fractional remainder in the queue as specified by the problem constraints.
+Only `[10, 11]` are considered because they have the highest sums.
+
+### Constraints
+
+- The input array will contain only integers.
+- The size `K` will be positive and less than or equal to the length of the array.
+
+### Solution in Python
+
+```python
+def max_sum_of_subarrays(arr, k):
+    max_sum = float('-inf')  # Initialize maximum sum as negative infinity
+    window_sum = sum(arr[:k])  # Calculate sum of first window
+    
+    # Slide window through array and keep track of maximum sum
+    for i in range(k, len(arr)):
+        window_sum = window_sum - arr[i-k] + arr[i]  # Update window sum by removing last element and adding new one
+        
+        if window_sum > max_sum:
+            max_sum = window_sum
+    
+    # Return list of maximum sums for non-overlapping subarrays
+    return [sum(arr[j:j+k]) for j in range(len(arr)-k+1) if sum(arr[j:j+k]) == max_sum]
+
+# Example usage
+arr = [1, 3, 2, 6, -1, 4, 1, 8, 2]
+k = 3
+print(max_sum_of_subarrays(arr, k))  # Output: [10, 11]
+```
+
+### Explanation
+
+1. **Initialization**: Set `max_sum` to negative infinity and calculate the initial window sum.
+2. **Sliding Window**: Iterate through the array starting from index `k`. For each position, update `window_sum` by subtracting the element that is moving out of the window and adding the new element entering the window.
+3. **Update Maximum Sum**: If `window_sum` is greater than `max_sum`, update `max_sum`.
+4. **Return Maximum Sums**: Return a list containing only those subarrays whose sum equals `max_sum`.
+
+This solution has a time complexity of O(n), where n is the length of the array, making it efficient for large inputs.
