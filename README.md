@@ -21,93 +21,107 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Coding Challenge: "Maximum Sum Subarray with Constraints"
 
-**Challenge: Maximum Sum Subarrays with Consecutive Elements**
+**Problem Description:**
+Given an array of integers and a constraint sum value, find the maximum sum subarray that does not exceed the given constraint sum. If no such subarray exists, return an empty array.
 
-Given an integer array `nums` and an integer `K`, find all subarrays in `nums` where the sum of the elements is maximum when the subarrays contain consecutive elements. The challenge is to find these subarrays efficiently and calculate their sums.
+**Example Input/Output:**
+- **Input:** Array = `[1, 2, 3, 4, -1, 4, 1, 8, 2]`, Constraint Sum = `10`
+- **Output:** `[2, 3, 4]` (because `2 + 3 + 4 = 9` which is less than `10`, and it's the maximum sum we can get without exceeding the constraint)
 
-**Algorithmic Approach:**
-This problem can be solved efficiently using a combination of dynamic programming and two-pointer techniques. We will maintain a window of size `K` and slide it through the array while keeping track of the maximum sum seen so far.
+**Constraints:**
+- The input array will contain integers between `-1000` and `1000`.
+- The constraint sum will be an integer between `-1000` and `1000`.
+- The length of the input array will be between `1` and `100`.
 
-**Data Structures Used:**
-- **Array:** To store the input and the subarray sums.
-- **Two Pointers:** To manage the sliding window.
-- **Dynamic Programming:** To keep track of the maximum sum seen so far.
+**Solution Explanation:**
+We will use a dynamic programming approach to solve this problem. The key idea is to maintain a table of maximum sums for each prefix of the array and check if these sums exceed the constraint at any point.
 
-### Example Input/Output
+1. **Initialization:** 
+   - Initialize a 2D table `dp` where `dp[i][j]` represents the maximum sum of a subarray ending at index `j` and not exceeding the constraint sum `i`.
+   - Initialize `max_sum` as a variable to store the maximum sum found so far.
 
-**Input:** 
-```plaintext
-nums = [1, 3, 2, 6, -1, 4, 1, 8, 2], K = 5
-```
-**Output:** 
-All subarrays with the maximum sum when considering consecutive elements:
-```plaintext
-[(2, 6), (1, 8), (2,)]
-```
+2. **Dynamic Programming:**
+   - Iterate through the array from left to right for each prefix ending at index `j`.
+   - For each prefix ending at index `j`, iterate from `i` from `0` to `constraint_sum`.
+   - For a given prefix ending at `j`, check if the current sum (`sum` from index `0` to `j`) exceeds the current constraint sum value (`i`). If it does, set `dp[i][j]` to zero.
+   - Otherwise, update `dp[i][j]` with the maximum of:
+     - The current sum (`sum` from index `0` to `j`) if it's less than or equal to the constraint sum value (`i`).
+     - The value of `dp[i-1][j-1]` if it's positive (indicating that we can extend this subarray further).
+   
+3. **Finding Maximum Sum Subarray:**
+   - After filling up the table using dynamic programming, find out which subarray gives us the maximum sum without exceeding the constraint sum by tracing back from where `dp[constraint_sum][n-1]` points.
 
-### Constraints:
-- The input array `nums` will contain integers.
-- The integer `K` will represent the size of the sliding window.
-- The subarrays should be contiguous segments of `K` consecutive elements.
-- The sum of elements in each subarray should be maximized.
+4. **Constructing Output Array:**
+   - Once we have found out which subarray gives us maximum sum, construct this subarray into our output.
 
-### Solution in Python
+Here's a Python implementation of this solution:
 
 ```python
-def max_sum_subarrays(nums, K):
-    n = len(nums)
-    if n < K:
-        return []
+def maximum_sum_subarray(arr, constraint_sum):
+    n = len(arr)
+    dp = [[0] * (constraint_sum + 1) for _ in range(n)]
     
-    # Initialize variables to keep track of the maximum sum and the current window's sum
-    max_sum = float('-inf')
-    max_subarrays = []
+    max_sum = 0
     
-    # Initialize variables for the sliding window
-    window_sum = sum(nums[:K])
-    
-    for i in range(K, n):
-        # Slide the window by adding the new element and subtracting the oldest element
-        window_sum = window_sum - nums[i - K] + nums[i]
+    for i in range(n):
+        current_sum = 0
         
-        # Update the maximum sum if the current window's sum is greater
-        if window_sum > max_sum:
-            max_sum = window_sum
-            max_subarrays = [(i - K + 1, i)]
+        for j in range(constraint_sum + 1):
+            if i == 0:
+                dp[i][j] = arr[i]
+            else:
+                temp_sum = current_sum + arr[i]
+                
+                if temp_sum > j:
+                    dp[i][j] = 0
+                else:
+                    dp[i][j] = max(temp_sum, dp[i-1][j])
+                    
+                current_sum = temp_sum
+                
+        max_sum = max(max_sum, dp[i][constraint_sum])
         
-        # Check if any subarray within this window has the maximum sum
-        for j in range(i - K + 1, i + 1):
-            if sum(nums[j:j+K]) == max_sum:
-                max_subarrays.append((j, j+K-1))
+    result = []
     
-    return max_subarrays
+    if max_sum > 0:
+        i_current, j_current = n - 1, constraint_sum
+        
+        while i_current >= 0 and j_current >= 0:
+            if dp[i_current][j_current] == max_sum and max_sum != 0:
+                result.append(arr[i_current])
+                max_sum -= arr[i_current]
+                i_current -= 1
+                
+            elif dp[i_current][j_current] != max_sum:
+                break
+                
+            
+        
+            
+        
+            
+        
+        
+        
+        
+        
+        
+        
+        
+
+    
+return result[::-1]
+
 
 # Example usage:
-nums = [1, 3, 2, 6, -1, 4, 1, 8, 2]
-K = 5
-print(max_sum_subarrays(nums, K))  # Output: [(3, 7), (6, 8)]
+array = [1, 2, 3, 4, -1, 4, 1, 8, 2]
+constraint_sum = 10
+
+output_array=maximum_sum_subarray(array , constraint_sum)
+
+print(output_array)# Output should be [3 ,4]
 ```
 
-### Explanation
-
-1. **Initialization**:
-   - We start by checking if the length of the array is less than `K`. If it is, we return an empty list because there are no valid subarrays.
-   - We initialize `max_sum` to negative infinity and `max_subarrays` to an empty list.
-   - We also initialize `window_sum` as the sum of the first `K` elements.
-
-2. **Sliding Window**:
-   - We use two pointers (`i` and `i - K`) to manage our sliding window.
-   - At each iteration from index `K` onwards, we slide our window by subtracting the oldest element (`nums[i-K]`) and adding the new element (`nums[i]`) to `window_sum`.
-   
-3. **Updating Maximum Sum**:
-   - If `window_sum` exceeds our current maximum sum (`max_sum`), we update `max_sum` and reset our `max_subarrays` list with the new maximum subarray indices.
-
-4. **Finding All Maximum Subarrays**:
-   - After updating our maximum sum, we check all subarrays within our current window. If any subarray's sum equals our maximum sum (`max_sum`), we append its indices to our result list.
-
-5. **Returning Result**:
-   - Finally, we return our list of indices representing all subarrays with their maximum sums when considering consecutive elements.
-
-This solution efficiently leverages dynamic programming by keeping track of cumulative sums within a sliding window and using two-pointer techniques to manage this window efficiently.
+This solution uses dynamic programming efficiently by reducing time complexity from O(N^3) to O(N^2) as we only need to process each prefix once. The space complexity remains O(N).
