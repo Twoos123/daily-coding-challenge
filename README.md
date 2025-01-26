@@ -19,109 +19,78 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: "Maximum Sum Subarray with Constraints"
+### Coding Challenge: Maximum Product Subarray with Constraints
 
-**Problem Description:**
-Given an array of integers and a constraint sum value, find the maximum sum subarray that does not exceed the given constraint sum. If no such subarray exists, return an empty array.
+#### Problem Description
 
-**Example Input/Output:**
-- **Input:** Array = `[1, 2, 3, 4, -1, 4, 1, 8, 2]`, Constraint Sum = `10`
-- **Output:** `[2, 3, 4]` (because `2 + 3 + 4 = 9` which is less than `10`, and it's the maximum sum we can get without exceeding the constraint)
+Given an array of integers and a constraint on the maximum sum of any subarray, find the maximum product of a subarray that does not exceed the given constraint.
 
-**Constraints:**
-- The input array will contain integers between `-1000` and `1000`.
-- The constraint sum will be an integer between `-1000` and `1000`.
-- The length of the input array will be between `1` and `100`.
+**Algorithmic Approach:**
 
-**Solution Explanation:**
-We will use a dynamic programming approach to solve this problem. The key idea is to maintain a table of maximum sums for each prefix of the array and check if these sums exceed the constraint at any point.
+1. **Dynamic Programming:** To find the maximum product subarray, we will use a dynamic programming approach. We will maintain two arrays: one for the maximum product ending at each position and one for the minimum product ending at each position. This is because a negative number can change the maximum product to minimum and vice versa.
 
-1. **Initialization:** 
-   - Initialize a 2D table `dp` where `dp[i][j]` represents the maximum sum of a subarray ending at index `j` and not exceeding the constraint sum `i`.
-   - Initialize `max_sum` as a variable to store the maximum sum found so far.
+2. **Sliding Window:** To enforce the constraint on the maximum sum of any subarray, we will use a sliding window approach. We will slide the window over the array, ensuring that the sum of elements in the current window does not exceed the given constraint.
 
-2. **Dynamic Programming:**
-   - Iterate through the array from left to right for each prefix ending at index `j`.
-   - For each prefix ending at index `j`, iterate from `i` from `0` to `constraint_sum`.
-   - For a given prefix ending at `j`, check if the current sum (`sum` from index `0` to `j`) exceeds the current constraint sum value (`i`). If it does, set `dp[i][j]` to zero.
-   - Otherwise, update `dp[i][j]` with the maximum of:
-     - The current sum (`sum` from index `0` to `j`) if it's less than or equal to the constraint sum value (`i`).
-     - The value of `dp[i-1][j-1]` if it's positive (indicating that we can extend this subarray further).
-   
-3. **Finding Maximum Sum Subarray:**
-   - After filling up the table using dynamic programming, find out which subarray gives us the maximum sum without exceeding the constraint sum by tracing back from where `dp[constraint_sum][n-1]` points.
+#### Example Input/Output
 
-4. **Constructing Output Array:**
-   - Once we have found out which subarray gives us maximum sum, construct this subarray into our output.
-
-Here's a Python implementation of this solution:
-
-```python
-def maximum_sum_subarray(arr, constraint_sum):
-    n = len(arr)
-    dp = [[0] * (constraint_sum + 1) for _ in range(n)]
-    
-    max_sum = 0
-    
-    for i in range(n):
-        current_sum = 0
-        
-        for j in range(constraint_sum + 1):
-            if i == 0:
-                dp[i][j] = arr[i]
-            else:
-                temp_sum = current_sum + arr[i]
-                
-                if temp_sum > j:
-                    dp[i][j] = 0
-                else:
-                    dp[i][j] = max(temp_sum, dp[i-1][j])
-                    
-                current_sum = temp_sum
-                
-        max_sum = max(max_sum, dp[i][constraint_sum])
-        
-    result = []
-    
-    if max_sum > 0:
-        i_current, j_current = n - 1, constraint_sum
-        
-        while i_current >= 0 and j_current >= 0:
-            if dp[i_current][j_current] == max_sum and max_sum != 0:
-                result.append(arr[i_current])
-                max_sum -= arr[i_current]
-                i_current -= 1
-                
-            elif dp[i_current][j_current] != max_sum:
-                break
-                
-            
-        
-            
-        
-            
-        
-        
-        
-        
-        
-        
-        
-        
-
-    
-return result[::-1]
-
-
-# Example usage:
-array = [1, 2, 3, 4, -1, 4, 1, 8, 2]
-constraint_sum = 10
-
-output_array=maximum_sum_subarray(array , constraint_sum)
-
-print(output_array)# Output should be [3 ,4]
+**Input:**
+```
+Array: [4, 1, -1, 3, -2]
+Constraint: 10
 ```
 
-This solution uses dynamic programming efficiently by reducing time complexity from O(N^3) to O(N^2) as we only need to process each prefix once. The space complexity remains O(N).
+**Output:**
+```
+Maximum Product Subarray: [4, 1, -1] or [1, -1, 3]
+Maximum Product: 4 * 1 * -1 = -4 or 1 * -1 * 3 = -3
+```
+
+#### Constraints
+
+- The array contains only integers.
+- The constraint on the maximum sum of any subarray is a positive integer.
+
+#### Solution in Python
+
+```python
+def max_product_subarray(arr, max_sum_constraint):
+    n = len(arr)
+    max_product_end = [0] * n
+    min_product_end = [0] * n
+    
+    max_product_end[0] = min_product_end[0] = arr[0]
+    
+    for i in range(1, n):
+        max_product_end[i] = max(arr[i], max_product_end[i-1] * arr[i], min_product_end[i-1] * arr[i])
+        min_product_end[i] = min(arr[i], max_product_end[i-1] * arr[i], min_product_end[i-1] * arr[i])
+        
+        # Enforce constraint using sliding window approach
+        if sum(arr[i-n+1:i+1]) > max_sum_constraint:
+            max_product_end[i] = float('-inf')
+            min_product_end[i] = float('inf')
+
+    max_product = float('-inf')
+    
+    for i in range(n):
+        if max_product_end[i] > max_product and min_product_end[i] <= max_sum_constraint:
+            max_product = max_product_end[i]
+
+    return max_product
+
+# Example usage
+arr = [4, 1, -1, 3, -2]
+max_sum_constraint = 10
+print("Maximum Product Subarray:", max_product_subarray(arr, max_sum_constraint))
+```
+
+#### Explanation
+
+1. **Dynamic Programming:** We initialize `max_product_end` and `min_product_end` arrays to keep track of the maximum and minimum product ending at each position.
+2. **Sliding Window:** We check if the sum of elements in the current window exceeds the given constraint. If it does, we reset our dynamic programming arrays.
+3. **Maximum Product Calculation:** We iterate through the array to find the maximum product that does not exceed the constraint.
+
+This solution leverages dynamic programming for finding maximum and minimum products efficiently while enforcing a constraint using a sliding window approach.
+
+---
