@@ -19,78 +19,76 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: Maximum Product Subarray with Constraints
+### Coding Challenge: Maximum Subarray with k-Size Window
 
-#### Problem Description
+**Problem Description:**
+Given an array of integers and an integer `k`, find the maximum sum of a subarray that has at most `k` elements. This problem involves using the **Sliding Window** technique to efficiently manage the subarray and **Dynamic Programming** to keep track of the maximum sum.
 
-Given an array of integers and a constraint on the maximum sum of any subarray, find the maximum product of a subarray that does not exceed the given constraint.
+**Example Input/Output:**
 
-**Algorithmic Approach:**
+**Input:** 
+- `array = [1, 2, 3, 4, 5]`
+- `k = 3`
 
-1. **Dynamic Programming:** To find the maximum product subarray, we will use a dynamic programming approach. We will maintain two arrays: one for the maximum product ending at each position and one for the minimum product ending at each position. This is because a negative number can change the maximum product to minimum and vice versa.
+**Output:** 
+- `Maximum sum = 12` (Subarray `[3, 4, 5]`)
 
-2. **Sliding Window:** To enforce the constraint on the maximum sum of any subarray, we will use a sliding window approach. We will slide the window over the array, ensuring that the sum of elements in the current window does not exceed the given constraint.
+**Constraints:**
+- The array will contain at least one element.
+- The integer `k` will be at least 1 and not greater than the length of the array.
 
-#### Example Input/Output
-
-**Input:**
-```
-Array: [4, 1, -1, 3, -2]
-Constraint: 10
-```
-
-**Output:**
-```
-Maximum Product Subarray: [4, 1, -1] or [1, -1, 3]
-Maximum Product: 4 * 1 * -1 = -4 or 1 * -1 * 3 = -3
-```
-
-#### Constraints
-
-- The array contains only integers.
-- The constraint on the maximum sum of any subarray is a positive integer.
-
-#### Solution in Python
+### Solution in Python
 
 ```python
-def max_product_subarray(arr, max_sum_constraint):
-    n = len(arr)
-    max_product_end = [0] * n
-    min_product_end = [0] * n
+def max_subarray_sum_with_k_elements(arr, k):
+    """
+    Find the maximum sum of a subarray with at most k elements in the given array.
     
-    max_product_end[0] = min_product_end[0] = arr[0]
+    :param arr: The input array of integers.
+    :type arr: List[int]
+    :param k: The maximum number of elements in the subarray.
+    :type k: int
+    :return: The maximum sum of a subarray with at most k elements.
+    :rtype: int
+    """
     
-    for i in range(1, n):
-        max_product_end[i] = max(arr[i], max_product_end[i-1] * arr[i], min_product_end[i-1] * arr[i])
-        min_product_end[i] = min(arr[i], max_product_end[i-1] * arr[i], min_product_end[i-1] * arr[i])
+    # Initialize variables to keep track of the maximum sum and the current window sum
+    max_sum = float('-inf')
+    window_sum = 0
+    
+    # Initialize variables for the sliding window
+    left = 0
+    
+    # Iterate over the array using the sliding window technique
+    for right in range(len(arr)):
+        window_sum += arr[right]
         
-        # Enforce constraint using sliding window approach
-        if sum(arr[i-n+1:i+1]) > max_sum_constraint:
-            max_product_end[i] = float('-inf')
-            min_product_end[i] = float('inf')
+        # If the window size exceeds k, slide the window to the right by subtracting elements on the left
+        if right - left + 1 > k:
+            window_sum -= arr[left]
+            left += 1
+        
+        # Update max_sum if the current window sum is greater than max_sum
+        if right - left + 1 <= k and window_sum > max_sum:
+            max_sum = window_sum
 
-    max_product = float('-inf')
-    
-    for i in range(n):
-        if max_product_end[i] > max_product and min_product_end[i] <= max_sum_constraint:
-            max_product = max_product_end[i]
+    return max_sum
 
-    return max_product
-
-# Example usage
-arr = [4, 1, -1, 3, -2]
-max_sum_constraint = 10
-print("Maximum Product Subarray:", max_product_subarray(arr, max_sum_constraint))
+# Example usage:
+array = [1, 2, 3, 4, 5]
+k = 3
+result = max_subarray_sum_with_k_elements(array, k)
+print(f"Maximum sum = {result}")
 ```
 
-#### Explanation
+### Explanation:
+The solution uses a **Sliding Window** approach to efficiently manage the subarray. Here’s how it works:
+1. **Initialization:** We initialize `max_sum` as negative infinity and `window_sum` as zero. We also initialize `left` to zero to keep track of the start of the window.
+2. **Sliding Window:** We iterate over the array using `right`. For each element, we add it to `window_sum`.
+3. **Window Size Management:** If the size of the window (`right - left + 1`) exceeds `k`, we slide the window to the right by subtracting elements on the left until the size is less than or equal to `k`.
+4. **Update Maximum Sum:** We update `max_sum` if `window_sum` is greater than `max_sum`.
+5. **Return Result:** Finally, we return the maximum sum found.
 
-1. **Dynamic Programming:** We initialize `max_product_end` and `min_product_end` arrays to keep track of the maximum and minimum product ending at each position.
-2. **Sliding Window:** We check if the sum of elements in the current window exceeds the given constraint. If it does, we reset our dynamic programming arrays.
-3. **Maximum Product Calculation:** We iterate through the array to find the maximum product that does not exceed the constraint.
-
-This solution leverages dynamic programming for finding maximum and minimum products efficiently while enforcing a constraint using a sliding window approach.
-
----
+This approach ensures that we consider all possible subarrays with at most `k` elements and efficiently handle them using dynamic programming concepts within a sliding window framework.
