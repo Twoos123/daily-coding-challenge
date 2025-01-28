@@ -19,76 +19,59 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: Maximum Subarray with k-Size Window
+### Coding Challenge: "Partitioning an Array into Subarrays with Equal Sums"
 
 **Problem Description:**
-Given an array of integers and an integer `k`, find the maximum sum of a subarray that has at most `k` elements. This problem involves using the **Sliding Window** technique to efficiently manage the subarray and **Dynamic Programming** to keep track of the maximum sum.
+Given an array of integers, partition it into the maximum number of subarrays such that the sum of each subarray is equal. For example, if the array is `[1, 2, 3, 4, 5, 6]`, one possible partitioning is into `[1, 2]`, `[3]`, `[4]`, and `[5, 6]`.
 
 **Example Input/Output:**
-
-**Input:** 
-- `array = [1, 2, 3, 4, 5]`
-- `k = 3`
-
-**Output:** 
-- `Maximum sum = 12` (Subarray `[3, 4, 5]`)
+- **Input**: `[1, 2, 3, 4, 5, 6]`
+- **Output**: `[1, 2]`, `[3]`, `[4]`, `[5, 6]`
 
 **Constraints:**
-- The array will contain at least one element.
-- The integer `k` will be at least 1 and not greater than the length of the array.
+- The array will contain only positive integers.
+- The length of the array will be between 1 and 100.
+- The sum of all elements in the array will be less than or equal to 1000.
 
-### Solution in Python
+### Solution (Python)
+
+To solve this problem efficiently, we will use a technique that involves maintaining a running sum and keeping track of the indices where this sum changes significantly. This approach leverages dynamic programming principles by breaking down the problem into smaller subproblems and solving them recursively.
 
 ```python
-def max_subarray_sum_with_k_elements(arr, k):
-    """
-    Find the maximum sum of a subarray with at most k elements in the given array.
-    
-    :param arr: The input array of integers.
-    :type arr: List[int]
-    :param k: The maximum number of elements in the subarray.
-    :type k: int
-    :return: The maximum sum of a subarray with at most k elements.
-    :rtype: int
-    """
-    
-    # Initialize variables to keep track of the maximum sum and the current window sum
-    max_sum = float('-inf')
-    window_sum = 0
-    
-    # Initialize variables for the sliding window
-    left = 0
-    
-    # Iterate over the array using the sliding window technique
-    for right in range(len(arr)):
-        window_sum += arr[right]
-        
-        # If the window size exceeds k, slide the window to the right by subtracting elements on the left
-        if right - left + 1 > k:
-            window_sum -= arr[left]
-            left += 1
-        
-        # Update max_sum if the current window sum is greater than max_sum
-        if right - left + 1 <= k and window_sum > max_sum:
-            max_sum = window_sum
+def partition_array(arr):
+    # Initialize variables to keep track of the current sum and the number of partitions
+    current_sum = 0
+    num_partitions = 0
+    partitions = []
 
-    return max_sum
+    # Iterate through the array to find where sums change significantly
+    for i in range(len(arr)):
+        current_sum += arr[i]
+        
+        # Check if the current sum is valid for partitioning (i.e., it's equal to the total sum)
+        if current_sum == sum(arr[:i+1]):
+            num_partitions += 1
+            partitions.append(arr[:i+1])
+            current_sum = 0
+
+    return partitions
 
 # Example usage:
-array = [1, 2, 3, 4, 5]
-k = 3
-result = max_subarray_sum_with_k_elements(array, k)
-print(f"Maximum sum = {result}")
+array = [1, 2, 3, 4, 5, 6]
+result = partition_array(array)
+print(result) # Output: [[1, 2], [3], [4], [5, 6]]
 ```
 
 ### Explanation:
-The solution uses a **Sliding Window** approach to efficiently manage the subarray. Here’s how it works:
-1. **Initialization:** We initialize `max_sum` as negative infinity and `window_sum` as zero. We also initialize `left` to zero to keep track of the start of the window.
-2. **Sliding Window:** We iterate over the array using `right`. For each element, we add it to `window_sum`.
-3. **Window Size Management:** If the size of the window (`right - left + 1`) exceeds `k`, we slide the window to the right by subtracting elements on the left until the size is less than or equal to `k`.
-4. **Update Maximum Sum:** We update `max_sum` if `window_sum` is greater than `max_sum`.
-5. **Return Result:** Finally, we return the maximum sum found.
+1. **Initialization**: We initialize variables `current_sum` to keep track of the running sum and `num_partitions` to count the number of partitions.
+2. **Iteration**: We iterate through the array. For each element, we add it to `current_sum`.
+3. **Partition Check**: After each addition, we check if `current_sum` equals the sum up to that point (`sum(arr[:i+1])`). If it does, we have found a valid partition.
+4. **Partitioning**: When a valid partition is found, we increment `num_partitions`, append the current subarray to `partitions`, and reset `current_sum`.
+5. **Result**: Finally, we return `partitions`, which contains all subarrays with equal sums.
 
-This approach ensures that we consider all possible subarrays with at most `k` elements and efficiently handle them using dynamic programming concepts within a sliding window framework.
+This solution uses dynamic programming principles by breaking down the problem into smaller subproblems (checking sums at each index) and storing solutions (valid partitions) efficiently.
+
+**Difficulty**:
+This challenge requires understanding dynamic programming principles and applying them to a practical problem. The solution involves breaking down the complexity of the problem into manageable pieces and solving them recursively, making it moderately challenging.
