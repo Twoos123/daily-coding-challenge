@@ -19,59 +19,56 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Partitioning an Array into Subarrays with Equal Sums"
+### Coding Challenge: "Array of Trailing Zeros in Factorials"
 
 **Problem Description:**
-Given an array of integers, partition it into the maximum number of subarrays such that the sum of each subarray is equal. For example, if the array is `[1, 2, 3, 4, 5, 6]`, one possible partitioning is into `[1, 2]`, `[3]`, `[4]`, and `[5, 6]`.
+Given an integer `n`, find the number of trailing zeros in `n` (factorial). This problem involves understanding the concept of trailing zeros in factorials and leveraging dynamic programming to efficiently calculate the result.
 
-**Example Input/Output:**
-- **Input**: `[1, 2, 3, 4, 5, 6]`
-- **Output**: `[1, 2]`, `[3]`, `[4]`, `[5, 6]`
+**Algorithmic Approach:**
+To solve this problem, we need to understand that trailing zeros in a factorial are caused by pairs of 2 and 5. Since there are always more factors of 2 than 5, we only need to count the factors of 5. We will use dynamic programming to count the number of times 5 is a factor in all numbers from 1 to `n`.
+
+**Data Structures Used:**
+- **Dynamic Programming:** To count the number of times 5 is a factor in all numbers from 1 to `n`.
 
 **Constraints:**
-- The array will contain only positive integers.
-- The length of the array will be between 1 and 100.
-- The sum of all elements in the array will be less than or equal to 1000.
+- The input `n` is a single integer.
+- The result should be an integer representing the number of trailing zeros in `n`.
 
-### Solution (Python)
+**Example Input/Output:**
 
-To solve this problem efficiently, we will use a technique that involves maintaining a running sum and keeping track of the indices where this sum changes significantly. This approach leverages dynamic programming principles by breaking down the problem into smaller subproblems and solving them recursively.
+| Input | Output |
+|-------|--------|
+| 5    | 1      |
+| 10   | 2      |
+| 25   | 6      |
+
+**Solution in Python:**
 
 ```python
-def partition_array(arr):
-    # Initialize variables to keep track of the current sum and the number of partitions
-    current_sum = 0
-    num_partitions = 0
-    partitions = []
-
-    # Iterate through the array to find where sums change significantly
-    for i in range(len(arr)):
-        current_sum += arr[i]
-        
-        # Check if the current sum is valid for partitioning (i.e., it's equal to the total sum)
-        if current_sum == sum(arr[:i+1]):
-            num_partitions += 1
-            partitions.append(arr[:i+1])
-            current_sum = 0
-
-    return partitions
+def trailing_zeros(n):
+    # Initialize count of trailing zeros
+    count = 0
+    
+    # Loop through powers of 5
+    i = 5
+    while n // i >= 1:
+        count += n // i
+        i *= 5
+    
+    return count
 
 # Example usage:
-array = [1, 2, 3, 4, 5, 6]
-result = partition_array(array)
-print(result) # Output: [[1, 2], [3], [4], [5, 6]]
+print(trailing_zeros(5))   # Output: 1
+print(trailing_zeros(10))  # Output: 2
+print(trailing_zeros(25))  # Output: 6
 ```
 
-### Explanation:
-1. **Initialization**: We initialize variables `current_sum` to keep track of the running sum and `num_partitions` to count the number of partitions.
-2. **Iteration**: We iterate through the array. For each element, we add it to `current_sum`.
-3. **Partition Check**: After each addition, we check if `current_sum` equals the sum up to that point (`sum(arr[:i+1])`). If it does, we have found a valid partition.
-4. **Partitioning**: When a valid partition is found, we increment `num_partitions`, append the current subarray to `partitions`, and reset `current_sum`.
-5. **Result**: Finally, we return `partitions`, which contains all subarrays with equal sums.
+**Explanation:**
+1. **Initialization:** We start with `count` initialized to 0.
+2. **Looping through Powers of 5:** We use a loop that starts with `i = 5` and multiplies it by 5 each iteration, effectively stepping through each power of 5.
+3. **Accumulating Count:** For each iteration, we add the integer division of `n` by the current power of 5 to `count`. This effectively counts how many times that power of 5 is a factor in all numbers up to `n`.
+4. **Returning Result:** Finally, we return the accumulated count.
 
-This solution uses dynamic programming principles by breaking down the problem into smaller subproblems (checking sums at each index) and storing solutions (valid partitions) efficiently.
-
-**Difficulty**:
-This challenge requires understanding dynamic programming principles and applying them to a practical problem. The solution involves breaking down the complexity of the problem into manageable pieces and solving them recursively, making it moderately challenging.
+This solution leverages dynamic programming by breaking down the problem into smaller sub-problems (counting factors of powers of five) and storing solutions to these sub-problems in a structured way to avoid redundant calculations.
