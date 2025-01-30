@@ -21,54 +21,66 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Array of Trailing Zeros in Factorials"
+### Coding Challenge: "Minimum Removals to Sort an Array"
 
 **Problem Description:**
-Given an integer `n`, find the number of trailing zeros in `n` (factorial). This problem involves understanding the concept of trailing zeros in factorials and leveraging dynamic programming to efficiently calculate the result.
-
-**Algorithmic Approach:**
-To solve this problem, we need to understand that trailing zeros in a factorial are caused by pairs of 2 and 5. Since there are always more factors of 2 than 5, we only need to count the factors of 5. We will use dynamic programming to count the number of times 5 is a factor in all numbers from 1 to `n`.
-
-**Data Structures Used:**
-- **Dynamic Programming:** To count the number of times 5 is a factor in all numbers from 1 to `n`.
-
-**Constraints:**
-- The input `n` is a single integer.
-- The result should be an integer representing the number of trailing zeros in `n`.
+Given an unsorted array of integers, determine the minimum number of elements that need to be removed from the array to sort it in ascending order.
 
 **Example Input/Output:**
+- **Input:** `[5, 4, 3, 2, 1]`
+- **Output:** `0` (The array is already sorted)
+- **Input:** `[6, 5, 3, 1, 8, 7, 2, 4]`
+- **Output:** `3` (Removing elements 6, 8, and 5 will sort the array)
 
-| Input | Output |
-|-------|--------|
-| 5    | 1      |
-| 10   | 2      |
-| 25   | 6      |
+**Constraints:**
+- The input array will contain integers in the range `[1, n]`.
+- The size of the array `n` will be between `1` and `100`.
+- The array may contain duplicates.
+
+**Algorithmic Approach:**
+To solve this problem efficiently, we can use a combination of sorting and dynamic programming.
+
+1. **Step 1: Sort the Array**
+   - First, sort the given array in ascending order. This step has a time complexity of `O(n log n)`.
+
+2. **Step 2: Dynamic Programming for Minimum Removals**
+   - Initialize an array `dp` of size `n + 1` where `dp[i]` represents the minimum number of elements that need to be removed to sort the first `i` elements.
+   - For `i` ranging from `1` to `n`, if the current element is equal to its index, then `dp[i] = dp[i-1]`. Otherwise, `dp[i] = dp[i-1] + 1`.
+   - The final answer will be stored in `dp[n]`.
 
 **Solution in Python:**
 
 ```python
-def trailing_zeros(n):
-    # Initialize count of trailing zeros
-    count = 0
+def min_removals_to_sort(arr):
+    # Step 1: Sort the Array
+    arr.sort()
     
-    # Loop through powers of 5
-    i = 5
-    while n // i >= 1:
-        count += n // i
-        i *= 5
+    # Step 2: Dynamic Programming for Minimum Removals
+    n = len(arr)
+    if n == 1:
+        return 0
     
-    return count
+    # Initialize dp array
+    dp = [0] * (n + 1)
+    
+    for i in range(1, n):
+        if arr[i] == i:
+            dp[i] = dp[i - 1]
+        else:
+            dp[i] = dp[i - 1] + 1
+    
+    return dp[n]
 
 # Example usage:
-print(trailing_zeros(5))   # Output: 1
-print(trailing_zeros(10))  # Output: 2
-print(trailing_zeros(25))  # Output: 6
+input_array = [6, 5, 3, 1, 8, 7, 2, 4]
+output = min_removals_to_sort(input_array)
+print("Minimum elements to remove:", output)
 ```
 
 **Explanation:**
-1. **Initialization:** We start with `count` initialized to 0.
-2. **Looping through Powers of 5:** We use a loop that starts with `i = 5` and multiplies it by 5 each iteration, effectively stepping through each power of 5.
-3. **Accumulating Count:** For each iteration, we add the integer division of `n` by the current power of 5 to `count`. This effectively counts how many times that power of 5 is a factor in all numbers up to `n`.
-4. **Returning Result:** Finally, we return the accumulated count.
+- The `arr.sort()` function sorts the input array in ascending order.
+- The dynamic programming approach initializes an array `dp` where each element represents the minimum number of elements that need to be removed up to that index.
+- The loop iterates through each element in the sorted array. If the current element matches its index (`arr[i] == i`), it means it's already in its correct position and doesn't need to be removed. Otherwise (`arr[i] != i`), it increments by one because one more element needs to be removed.
+- Finally, the function returns `dp[n]`, which holds the total minimum number of elements that need to be removed from the entire array.
 
-This solution leverages dynamic programming by breaking down the problem into smaller sub-problems (counting factors of powers of five) and storing solutions to these sub-problems in a structured way to avoid redundant calculations.
+This solution efficiently leverages both sorting and dynamic programming to solve the problem within reasonable time complexity (`O(n log n)` for sorting plus `O(n)` for dynamic programming).
