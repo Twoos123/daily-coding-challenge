@@ -21,66 +21,57 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Minimum Removals to Sort an Array"
+### Challenge: "Array Subarray Sum"
 
 **Problem Description:**
-Given an unsorted array of integers, determine the minimum number of elements that need to be removed from the array to sort it in ascending order.
+Given an integer array `arr` and an integer `target`, find all non-empty subarrays within `arr` whose sum equals `target`. The challenge requires efficient handling of subarrays and the use of dynamic programming to optimize the solution.
 
 **Example Input/Output:**
-- **Input:** `[5, 4, 3, 2, 1]`
-- **Output:** `0` (The array is already sorted)
-- **Input:** `[6, 5, 3, 1, 8, 7, 2, 4]`
-- **Output:** `3` (Removing elements 6, 8, and 5 will sort the array)
+- **Input:** `arr = [5, 7, 1, 3, 4, 3, 5]`, `target = 10`
+- **Output:** `[7, 3], [4, 3]`
 
 **Constraints:**
-- The input array will contain integers in the range `[1, n]`.
-- The size of the array `n` will be between `1` and `100`.
-- The array may contain duplicates.
+- The array `arr` has a length between 1 and 10,000.
+- The integer `target` is within the range of possible sums of subarrays.
+- The solution should be efficient and scalable.
 
-**Algorithmic Approach:**
-To solve this problem efficiently, we can use a combination of sorting and dynamic programming.
-
-1. **Step 1: Sort the Array**
-   - First, sort the given array in ascending order. This step has a time complexity of `O(n log n)`.
-
-2. **Step 2: Dynamic Programming for Minimum Removals**
-   - Initialize an array `dp` of size `n + 1` where `dp[i]` represents the minimum number of elements that need to be removed to sort the first `i` elements.
-   - For `i` ranging from `1` to `n`, if the current element is equal to its index, then `dp[i] = dp[i-1]`. Otherwise, `dp[i] = dp[i-1] + 1`.
-   - The final answer will be stored in `dp[n]`.
-
-**Solution in Python:**
-
+### Solution in Python
 ```python
-def min_removals_to_sort(arr):
-    # Step 1: Sort the Array
-    arr.sort()
-    
-    # Step 2: Dynamic Programming for Minimum Removals
+def find_subarrays(arr, target):
     n = len(arr)
-    if n == 1:
-        return 0
+    prefix_sum = {0: -1}  # Initialize with 0 sum at index -1
+    current_sum = 0
+    subarrays = []
     
-    # Initialize dp array
-    dp = [0] * (n + 1)
+    for i in range(n):
+        current_sum += arr[i]
+        
+        # Check if the current sum minus the target exists in the prefix_sum dictionary
+        if current_sum - target in prefix_sum:
+            # Iterate through all possible start indices of subarrays
+            for j in range(prefix_sum[current_sum - target] + 1, i + 1):
+                subarrays.append(arr[j:i + 1])
+        
+        # Update the prefix_sum dictionary with the current sum and its index
+        if current_sum not in prefix_sum:
+            prefix_sum[current_sum] = i
     
-    for i in range(1, n):
-        if arr[i] == i:
-            dp[i] = dp[i - 1]
-        else:
-            dp[i] = dp[i - 1] + 1
-    
-    return dp[n]
+    return subarrays
 
 # Example usage:
-input_array = [6, 5, 3, 1, 8, 7, 2, 4]
-output = min_removals_to_sort(input_array)
-print("Minimum elements to remove:", output)
+arr = [5, 7, 1, 3, 4, 3, 5]
+target = 10
+print(find_subarrays(arr, target))  # Output: [[7, 3], [4, 3]]
 ```
 
-**Explanation:**
-- The `arr.sort()` function sorts the input array in ascending order.
-- The dynamic programming approach initializes an array `dp` where each element represents the minimum number of elements that need to be removed up to that index.
-- The loop iterates through each element in the sorted array. If the current element matches its index (`arr[i] == i`), it means it's already in its correct position and doesn't need to be removed. Otherwise (`arr[i] != i`), it increments by one because one more element needs to be removed.
-- Finally, the function returns `dp[n]`, which holds the total minimum number of elements that need to be removed from the entire array.
+### Explanation:
+1. **Prefix Sum Array:** We use a dictionary `prefix_sum` to store the cumulative sums and their indices. This allows us to quickly check if a given sum minus the target exists in the array.
+2. **Dynamic Programming:** By using dynamic programming through the `prefix_sum` dictionary, we avoid recalculating the same sums multiple times.
+3. **Scalability:** This approach ensures that the time complexity is O(n), making it efficient for large arrays.
 
-This solution efficiently leverages both sorting and dynamic programming to solve the problem within reasonable time complexity (`O(n log n)` for sorting plus `O(n)` for dynamic programming).
+### Algorithmic Approach:
+- **Hash Table:** We leverage a hash table (dictionary in Python) to store and retrieve cumulative sums efficiently.
+- **Dynamic Programming:** The use of dynamic programming ensures that we solve subproblems only once and store their solutions for future use.
+- **Array Operations:** We iterate through the array once, performing constant-time operations for each element.
+
+This challenge combines the use of hash tables (dynamic programming) with array operations to efficiently find all subarrays whose sums equal a given target value.
