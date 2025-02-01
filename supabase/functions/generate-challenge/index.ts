@@ -34,9 +34,6 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
   
   const randomStructure = dataStructures[Math.floor(Math.random() * dataStructures.length)];
   
-  // Get a random target difficulty level (1-5)
-  const targetDifficulty = Math.floor(Math.random() * 5) + 1;
-  
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
     headers: {
@@ -48,11 +45,11 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
       messages: [
         {
           role: 'system',
-          content: `You are a programming challenge generator specializing in algorithms and data structures. Generate a unique LeetCode-style coding challenge that focuses specifically on ${randomStructure}. The challenge should require implementing or manipulating this data structure in an interesting way. The challenge should be around difficulty level ${targetDifficulty} out of 5 (where 1 is easiest and 5 is hardest). Include: 1) Problem Description emphasizing how the specific data structure should be used 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution leverages the chosen data structure effectively. Rate the difficulty from 1-5, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:${targetDifficulty}". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.`
+          content: `You are a programming challenge generator specializing in algorithms and data structures. Generate a unique LeetCode-style coding challenge that focuses specifically on ${randomStructure}. The challenge should require implementing or manipulating this data structure in an interesting way. After generating the challenge, carefully analyze its complexity, algorithmic requirements, and implementation difficulty to rate it from 1-5 (where 1 is very easy/beginner friendly and 5 is extremely challenging like a hard LeetCode problem). Include: 1) Problem Description emphasizing how the specific data structure should be used 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution leverages the chosen data structure effectively. Add your analyzed difficulty rating in a machine-readable format at the start of your response like "DIFFICULTY:X". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.`
         },
         {
           role: 'user',
-          content: `Generate a new coding challenge that focuses on ${randomStructure} with approximate difficulty level ${targetDifficulty}/5`
+          content: `Generate a new coding challenge that focuses on ${randomStructure}. Analyze its complexity and rate its difficulty from 1-5.`
         }
       ],
       temperature: 0.7,
@@ -68,7 +65,7 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
   const data = await response.json() as PerplexityResponse;
   const content = data.choices[0].message.content;
   
-  // Improved difficulty parsing
+  // Parse the AI-analyzed difficulty rating
   const difficultyMatch = content.match(/DIFFICULTY:(\d)/i);
   let difficulty;
   
@@ -76,12 +73,12 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
     difficulty = parseInt(difficultyMatch[1]);
     // Validate the difficulty is within bounds
     if (difficulty < 1 || difficulty > 5) {
-      console.log('Invalid difficulty detected:', difficulty, 'using target difficulty:', targetDifficulty);
-      difficulty = targetDifficulty;
+      console.log('Invalid difficulty rating detected:', difficulty, 'defaulting to 3');
+      difficulty = 3;
     }
   } else {
-    console.log('No difficulty found in response, using target difficulty:', targetDifficulty);
-    difficulty = targetDifficulty;
+    console.log('No difficulty rating found in response, defaulting to 3');
+    difficulty = 3;
   }
   
   const challenge = content.replace(/DIFFICULTY:\d\n*/i, '').trim();
