@@ -19,83 +19,109 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐ (2/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-# Matrix Operations Challenge: Rotate Matrix 90 Degrees
+**DIFFICULTY: 4**
 
-## Problem Description
+### Challenge: "Flatten and Reorder a Sorted LinkedList"
 
-Given a 2D matrix `matrix`, implement a function `rotate` that rotates the matrix 90 degrees clockwise. The function should perform the rotation in-place, meaning it should modify the original matrix without creating a new one.
+#### Problem Description
+Given a sorted singly linked list, flatten it into a doubly linked list such that the elements are reordered in alternating ascending and descending order. For example, if the input is 1 -> 2 -> 3 -> 4 -> 5, the output should be 1 -> 5 -> 2 -> 4 -> 3.
 
-## Example Input/Output
+#### Example Input/Output
+Input: `1 -> 2 -> 3 -> 4 -> 5`
+Output: `1 -> 5 -> 2 -> 4 -> 3`
 
-Input:
-```
-[[1, 2, 3],
- [4, 5, 6],
- [7, 8, 9]]
-```
+#### Constraints
+- The input linked list is sorted in ascending order.
+- The resulting doubly linked list should have alternating elements in ascending and descending order.
+- The linked list nodes contain integers.
 
-Output after rotation:
-```
-[[7, 4, 1],
- [8, 5, 2],
- [9, 6, 3]]
-```
-
-## Constraints
-
-- The input matrix will be a square matrix (i.e., it has the same number of rows and columns).
-- The size of the matrix will be between 1 and 1000.
-
-## Solution in Python
+#### Solution in Python
 
 ```python
-def rotate(matrix):
-    n = len(matrix)
-    
-    # Transpose the matrix
-    for i in range(n):
-        for j in range(i + 1, n):
-            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
-    
-    # Reverse each row
-    for i in range(n):
-        matrix[i] = matrix[i][::-1]
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+        self.prev = None
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def append(self, value):
+        if not self.head:
+            self.head = Node(value)
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = Node(value)
+            current.next.prev = current
+
+    def flatten_and_reorder(self):
+        # Convert to list for easier manipulation
+        values = []
+        current = self.head
+        while current:
+            values.append(current.value)
+            current = current.next
+        
+        # Reorder values
+        reordered_values = []
+        for i in range(len(values)):
+            if i % 2 == 0:
+                reordered_values.append(values[i])
+            else:
+                reordered_values.append(values[-i-1])
+        
+        # Create a new doubly linked list with reordered values
+        result_head = None
+        result_tail = None
+        
+        for value in reordered_values:
+            new_node = Node(value)
+            if not result_head:
+                result_head = new_node
+                result_tail = new_node
+            else:
+                result_tail.next = new_node
+                new_node.prev = result_tail
+                result_tail = new_node
+        
+        # Update the head of the original LinkedList to point to the new head
+        self.head = result_head
 
 # Example usage
-matrix = [[1, 2, 3],
-          [4, 5, 6],
-          [7, 8, 9]]
+linked_list = LinkedList()
+linked_list.append(1)
+linked_list.append(2)
+linked_list.append(3)
+linked_list.append(4)
+linked_list.append(5)
 
-print("Before Rotation:")
-for row in matrix:
-    print(row)
+print("Original List:", end=" ")
+current = linked_list.head
+while current:
+    print(current.value, end=" -> ")
+    current = current.next
+print("nil")
 
-rotate(matrix)
+linked_list.flatten_and_reorder()
 
-print("\nAfter Rotation:")
-for row in matrix:
-    print(row)
+print("Flattened and Reordered List:", end=" ")
+current = linked_list.head
+while current:
+    print(current.value, end=" -> ")
+    current = current.next
+print("nil")
 ```
 
-## Explanation
+#### Analysis
+- **Time Complexity**: The flattening process involves converting the linked list to a list, which takes O(n) time where n is the number of nodes. The reordering operation also takes O(n) time. Therefore, the overall time complexity is O(n).
+- **Space Complexity**: The additional space needed for storing the values in a list is O(n), but this can be reduced by performing the flattening and reordering operations directly on the linked list without using extra space for the list representation. However, considering the conversion step for clarity, the space complexity is O(n).
 
-1. **Transpose the Matrix**: The first step is to transpose the matrix. This can be done by swapping elements from the current row with the corresponding elements from the next row. This operation transforms the matrix from:
-   ```plaintext
-   1 2 3 
-   4 5 6 
-   7 8 9  
-   ```
-   into:
-   ```plaintext
-   1 4 7 
-   2 5 8 
-   3 6 9  
-   ```
-   
-2. **Reverse Each Row**: After transposing the matrix, each row needs to be reversed. This can be achieved by slicing each row with a step of `-1`, which reverses it in place.
+This challenge requires manipulating a linked list while maintaining its structure and then reordering its elements in an alternating fashion, which adds some complexity compared to basic linked list operations. It is more challenging than basic linked list operations but less complex than designing a custom linked list implementation from scratch.
 
-By combining these two operations, we effectively rotate the matrix 90 degrees clockwise.
-
-This solution has a time complexity of O(n^2), where n is the size of the matrix. The space complexity remains O(1) since we are modifying the original matrix in-place.
+Thus, it is rated as a difficulty level of 4.
