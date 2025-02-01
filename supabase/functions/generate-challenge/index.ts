@@ -17,6 +17,23 @@ interface PerplexityResponse {
 
 async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: string; difficulty: number }> {
   console.log('Calling Perplexity API...')
+  
+  // Get a random data structure type to focus on
+  const dataStructures = [
+    'Tree (Binary Tree, BST, or N-ary Tree)',
+    'Graph (DFS, BFS, or Topological Sort)',
+    'LinkedList (Singly or Doubly)',
+    'Stack or Queue',
+    'Heap (Min Heap or Max Heap)',
+    'Trie',
+    'Hash Table',
+    'Dynamic Programming with Arrays',
+    'Matrix Operations',
+    'String Manipulation'
+  ];
+  
+  const randomStructure = dataStructures[Math.floor(Math.random() * dataStructures.length)];
+  
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
     headers: {
@@ -28,11 +45,11 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
       messages: [
         {
           role: 'system',
-          content: 'You are a programming challenge generator specializing in algorithms and data structures. Generate a unique LeetCode-style coding challenge that focuses on one or more of the following categories: Dynamic Programming, Divide and Conquer, Trie, Hash Table, Depth-First Search, Tree, Array, String, Two Pointers, Sorting, Matrix, Linked List, Stack, or other common data structures (like queues, heaps, graphs). Include: 1) Problem Description emphasizing the algorithmic approach and data structures used 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution leverages the chosen algorithm and data structures effectively. Rate the difficulty from 1-5, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:3". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.'
+          content: `You are a programming challenge generator specializing in algorithms and data structures. Generate a unique LeetCode-style coding challenge that focuses specifically on ${randomStructure}. The challenge should require implementing or manipulating this data structure in an interesting way. Include: 1) Problem Description emphasizing how the specific data structure should be used 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution leverages the chosen data structure effectively. Rate the difficulty from 1-5, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:3". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.`
         },
         {
           role: 'user',
-          content: 'Generate a new coding challenge that uses one or more of the specified algorithms and data structures'
+          content: `Generate a new coding challenge that focuses on ${randomStructure}`
         }
       ],
       temperature: 0.7,
