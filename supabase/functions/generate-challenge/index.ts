@@ -45,11 +45,25 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
       messages: [
         {
           role: 'system',
-          content: `You are a programming challenge generator specializing in algorithms and data structures. Generate a unique LeetCode-style coding challenge that focuses specifically on ${randomStructure}. The challenge should require implementing or manipulating this data structure in an interesting way. After generating the challenge, carefully analyze its complexity, algorithmic requirements, and implementation difficulty to rate it from 1-5 (where 1 is very easy/beginner friendly and 5 is extremely challenging like a hard LeetCode problem). Include: 1) Problem Description emphasizing how the specific data structure should be used 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution leverages the chosen data structure effectively. Add your analyzed difficulty rating in a machine-readable format at the start of your response like "DIFFICULTY:X". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.`
+          content: `You are a programming challenge generator specializing in algorithms and data structures. Generate a unique LeetCode-style coding challenge that focuses specifically on ${randomStructure}. The challenge should require implementing or manipulating this data structure in an interesting way. After generating the challenge, carefully analyze its complexity, algorithmic requirements, and implementation difficulty to rate it from 1-5 (where 1 is very easy/beginner friendly and 5 is extremely challenging like a hard LeetCode problem). 
+
+IMPORTANT: You must provide the most optimal solution possible in terms of both time and space complexity. If there are multiple approaches, explain why the chosen solution is the most efficient one. Include:
+
+1) Problem Description emphasizing how the specific data structure should be used
+2) Example Input/Output
+3) Constraints
+4) The most efficient solution in Python with:
+   - Detailed explanation of the algorithm
+   - Clear analysis of both time and space complexity
+   - Explanation of why this approach is optimal
+   - If there are any trade-offs between time and space, explain them
+5) Add your analyzed difficulty rating in a machine-readable format at the start of your response like "DIFFICULTY:X".
+
+Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.`
         },
         {
           role: 'user',
-          content: `Generate a new coding challenge that focuses on ${randomStructure}. Analyze its complexity and rate its difficulty from 1-5.`
+          content: `Generate a new coding challenge that focuses on ${randomStructure}. Analyze its complexity and rate its difficulty from 1-5. Ensure the solution provided is the most optimal approach possible.`
         }
       ],
       temperature: 0.7,
