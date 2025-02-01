@@ -21,57 +21,59 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: "Array Subarray Sum"
+### Coding Challenge: "Maximum Sum of Non-Consecutive Subarrays"
 
 **Problem Description:**
-Given an integer array `arr` and an integer `target`, find all non-empty subarrays within `arr` whose sum equals `target`. The challenge requires efficient handling of subarrays and the use of dynamic programming to optimize the solution.
+Given an array of integers, find the maximum sum of all non-consecutive subarrays. A subarray is considered non-consecutive if no two elements in the subarray are adjacent.
 
 **Example Input/Output:**
-- **Input:** `arr = [5, 7, 1, 3, 4, 3, 5]`, `target = 10`
-- **Output:** `[7, 3], [4, 3]`
+- **Input:** `arr = [2, 4, 6, 2, 5]`
+- **Output:** `15` (The maximum sum is achieved by considering the subarray `[2, 4, 6, 5]`)
 
 **Constraints:**
-- The array `arr` has a length between 1 and 10,000.
-- The integer `target` is within the range of possible sums of subarrays.
-- The solution should be efficient and scalable.
+- The array can contain both positive and negative integers.
+- The array length can vary from 1 to 1000 elements.
 
-### Solution in Python
+**Algorithm and Data Structure:**
+This problem can be solved using dynamic programming. The idea is to maintain two arrays, `dp` and `prev`, where `dp[i]` represents the maximum sum of a non-consecutive subarray ending at index `i`, and `prev[i]` represents the maximum sum of a non-consecutive subarray ending at index `i-1`.
+
+**Solution:**
+
 ```python
-def find_subarrays(arr, target):
+def max_sum_non_consecutive(arr):
+    if not arr:
+        return 0
+    
     n = len(arr)
-    prefix_sum = {0: -1}  # Initialize with 0 sum at index -1
-    current_sum = 0
-    subarrays = []
     
-    for i in range(n):
-        current_sum += arr[i]
-        
-        # Check if the current sum minus the target exists in the prefix_sum dictionary
-        if current_sum - target in prefix_sum:
-            # Iterate through all possible start indices of subarrays
-            for j in range(prefix_sum[current_sum - target] + 1, i + 1):
-                subarrays.append(arr[j:i + 1])
-        
-        # Update the prefix_sum dictionary with the current sum and its index
-        if current_sum not in prefix_sum:
-            prefix_sum[current_sum] = i
+    # Initialize dp array with the first element of the array
+    dp = [0] * n
+    dp[0] = arr[0]
     
-    return subarrays
+    # If there are more than one element, consider the sum of two non-consecutive elements
+    if n > 1:
+        dp[1] = max(arr[0], arr[1])
+    
+    # Fill up the dp array
+    for i in range(2, n):
+        # A subarray is non-consecutive if the current element is not adjacent to the previous one
+        # So, we consider two cases: 
+        # 1. Exclude the current element from the previous non-consecutive subarray.
+        # 2. Include the current element in the previous non-consecutive subarray.
+        dp[i] = max(dp[i-1], dp[i-2] + arr[i])
+    
+    return dp[-1]
 
-# Example usage:
-arr = [5, 7, 1, 3, 4, 3, 5]
-target = 10
-print(find_subarrays(arr, target))  # Output: [[7, 3], [4, 3]]
+# Example usage
+arr = [2, 4, 6, 2, 5]
+print(max_sum_non_consecutive(arr))  # Output: 15
 ```
 
-### Explanation:
-1. **Prefix Sum Array:** We use a dictionary `prefix_sum` to store the cumulative sums and their indices. This allows us to quickly check if a given sum minus the target exists in the array.
-2. **Dynamic Programming:** By using dynamic programming through the `prefix_sum` dictionary, we avoid recalculating the same sums multiple times.
-3. **Scalability:** This approach ensures that the time complexity is O(n), making it efficient for large arrays.
+**Explanation:**
+1. **Initialization:** `dp` is set to the first element of the array, and `dp[1]` is set to the maximum of the first two elements.
+2. **Dynamic Programming Loop:** For each element starting from index `2`, we calculate `dp[i]` as the maximum of two possibilities:
+   - Exclude the current element from the previous non-consecutive subarray (`dp[i-1]`).
+   - Include the current element in the previous non-consecutive subarray (`dp[i-2] + arr[i]`).
+3. **Return Maximum Sum:** The final result is stored in `dp[-1]`.
 
-### Algorithmic Approach:
-- **Hash Table:** We leverage a hash table (dictionary in Python) to store and retrieve cumulative sums efficiently.
-- **Dynamic Programming:** The use of dynamic programming ensures that we solve subproblems only once and store their solutions for future use.
-- **Array Operations:** We iterate through the array once, performing constant-time operations for each element.
-
-This challenge combines the use of hash tables (dynamic programming) with array operations to efficiently find all subarrays whose sums equal a given target value.
+This solution leverages dynamic programming to efficiently compute the maximum sum of non-consecutive subarrays in linear time complexity `O(n)`, where `n` is the length of the input array.
