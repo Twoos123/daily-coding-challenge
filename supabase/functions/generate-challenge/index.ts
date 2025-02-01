@@ -34,6 +34,9 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
   
   const randomStructure = dataStructures[Math.floor(Math.random() * dataStructures.length)];
   
+  // Get a random target difficulty level (1-5)
+  const targetDifficulty = Math.floor(Math.random() * 5) + 1;
+  
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
     headers: {
@@ -45,11 +48,11 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
       messages: [
         {
           role: 'system',
-          content: `You are a programming challenge generator specializing in algorithms and data structures. Generate a unique LeetCode-style coding challenge that focuses specifically on ${randomStructure}. The challenge should require implementing or manipulating this data structure in an interesting way. Include: 1) Problem Description emphasizing how the specific data structure should be used 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution leverages the chosen data structure effectively. Rate the difficulty from 1-5, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:3". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.`
+          content: `You are a programming challenge generator specializing in algorithms and data structures. Generate a unique LeetCode-style coding challenge that focuses specifically on ${randomStructure}. The challenge should require implementing or manipulating this data structure in an interesting way. The challenge should be around difficulty level ${targetDifficulty} out of 5 (where 1 is easiest and 5 is hardest). Include: 1) Problem Description emphasizing how the specific data structure should be used 2) Example Input/Output 3) Constraints 4) A complete solution in Python with detailed explanation of how the solution leverages the chosen data structure effectively. Rate the difficulty from 1-5, but only include this rating in a machine-readable format at the start of your response like "DIFFICULTY:${targetDifficulty}". Format the rest of the response in markdown with proper headings and code blocks, excluding any mention of difficulty.`
         },
         {
           role: 'user',
-          content: `Generate a new coding challenge that focuses on ${randomStructure}`
+          content: `Generate a new coding challenge that focuses on ${randomStructure} with approximate difficulty level ${targetDifficulty}/5`
         }
       ],
       temperature: 0.7,
@@ -65,8 +68,21 @@ async function generateChallengeWithAI(apiKey: string): Promise<{ challenge: str
   const data = await response.json() as PerplexityResponse;
   const content = data.choices[0].message.content;
   
+  // Improved difficulty parsing
   const difficultyMatch = content.match(/DIFFICULTY:(\d)/i);
-  const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 3;
+  let difficulty;
+  
+  if (difficultyMatch) {
+    difficulty = parseInt(difficultyMatch[1]);
+    // Validate the difficulty is within bounds
+    if (difficulty < 1 || difficulty > 5) {
+      console.log('Invalid difficulty detected:', difficulty, 'using target difficulty:', targetDifficulty);
+      difficulty = targetDifficulty;
+    }
+  } else {
+    console.log('No difficulty found in response, using target difficulty:', targetDifficulty);
+    difficulty = targetDifficulty;
+  }
   
   const challenge = content.replace(/DIFFICULTY:\d\n*/i, '').trim();
 
