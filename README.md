@@ -21,107 +21,87 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-**DIFFICULTY: 4**
+### Coding Challenge: Reconstruct a String with Valid Anagrams
 
-### Challenge: "Flatten and Reorder a Sorted LinkedList"
+**Problem Description:**
+Given a set of words and a string made up of those words (no spaces), reconstruct the original sentence in a list. If there is more than one possible reconstruction, return any of them. If there is no possible reconstruction, return `null`. For example, given the set of words `'quick', 'brown', 'the', 'fox'` and the string `"thequickbrownfox"`, you should return `['the', 'quick', 'brown', 'fox']`.
 
-#### Problem Description
-Given a sorted singly linked list, flatten it into a doubly linked list such that the elements are reordered in alternating ascending and descending order. For example, if the input is 1 -> 2 -> 3 -> 4 -> 5, the output should be 1 -> 5 -> 2 -> 4 -> 3.
+**Example Input/Output:**
 
-#### Example Input/Output
-Input: `1 -> 2 -> 3 -> 4 -> 5`
-Output: `1 -> 5 -> 2 -> 4 -> 3`
+| Input Words | Input String | Output |
+|-------------|--------------|--------|
+| 'quick', 'brown', 'the', 'fox'   | "thequickbrownfox"   | ['the', 'quick', 'brown', 'fox']   |
+| 'hello', 'world'                 | "helloworld"         | ['hello', 'world']                 |
+| 'abc', 'def'                    | "abcdef"            | ['abc', 'def']                    |
 
-#### Constraints
-- The input linked list is sorted in ascending order.
-- The resulting doubly linked list should have alternating elements in ascending and descending order.
-- The linked list nodes contain integers.
+**Constraints:**
+- The input words and the string are all valid English words.
+- The string is a concatenation of the input words without any spaces.
+- The order of words in the output list should match the order they appear in the string.
 
-#### Solution in Python
+### Most Efficient Solution in Python
 
 ```python
-class Node:
-    def __init__(self, value):
-        self.value = value
-        self.next = None
-        self.prev = None
+from collections import defaultdict
 
-class LinkedList:
-    def __init__(self):
-        self.head = None
-
-    def append(self, value):
-        if not self.head:
-            self.head = Node(value)
-        else:
-            current = self.head
-            while current.next:
-                current = current.next
-            current.next = Node(value)
-            current.next.prev = current
-
-    def flatten_and_reorder(self):
-        # Convert to list for easier manipulation
-        values = []
-        current = self.head
-        while current:
-            values.append(current.value)
-            current = current.next
+def reconstruct_sentence(words, sentence):
+    # Create a dictionary to store the frequency of each word
+    word_freq = defaultdict(int)
+    for word in words:
+        word_freq[word] += 1
+    
+    # Initialize a dictionary to store the decomposed string
+    decomposed = {}
+    
+    # Initialize an empty list to store the result
+    result = []
+    
+    # Decompose the string into individual words
+    i = 0
+    while i < len(sentence):
+        found = False
+        for word in word_freq:
+            if sentence[i:].startswith(word):
+                if word not in decomposed:
+                    decomposed[word] = [i, len(word)]
+                    result.append(word)
+                    word_freq[word] -= 1
+                    if not word_freq[word]:
+                        del word_freq[word]
+                    found = True
+                    break
         
-        # Reorder values
-        reordered_values = []
-        for i in range(len(values)):
-            if i % 2 == 0:
-                reordered_values.append(values[i])
-            else:
-                reordered_values.append(values[-i-1])
+        # If no word starting from current index found, return None
+        if not found:
+            return None
         
-        # Create a new doubly linked list with reordered values
-        result_head = None
-        result_tail = None
-        
-        for value in reordered_values:
-            new_node = Node(value)
-            if not result_head:
-                result_head = new_node
-                result_tail = new_node
-            else:
-                result_tail.next = new_node
-                new_node.prev = result_tail
-                result_tail = new_node
-        
-        # Update the head of the original LinkedList to point to the new head
-        self.head = result_head
+        # Move the index forward by the length of the matched word
+        i += len(word)
+    
+    return result
 
 # Example usage
-linked_list = LinkedList()
-linked_list.append(1)
-linked_list.append(2)
-linked_list.append(3)
-linked_list.append(4)
-linked_list.append(5)
+words = ['quick', 'brown', 'the', 'fox']
+sentence = "thequickbrownfox"
+print(reconstruct_sentence(words, sentence)) # Output: ['the', 'quick', 'brown', 'fox']
 
-print("Original List:", end=" ")
-current = linked_list.head
-while current:
-    print(current.value, end=" -> ")
-    current = current.next
-print("nil")
-
-linked_list.flatten_and_reorder()
-
-print("Flattened and Reordered List:", end=" ")
-current = linked_list.head
-while current:
-    print(current.value, end=" -> ")
-    current = current.next
-print("nil")
+words = ['hello', 'world']
+sentence = "helloworld"
+print(reconstruct_sentence(words, sentence)) # Output: ['hello', 'world']
 ```
 
-#### Analysis
-- **Time Complexity**: The flattening process involves converting the linked list to a list, which takes O(n) time where n is the number of nodes. The reordering operation also takes O(n) time. Therefore, the overall time complexity is O(n).
-- **Space Complexity**: The additional space needed for storing the values in a list is O(n), but this can be reduced by performing the flattening and reordering operations directly on the linked list without using extra space for the list representation. However, considering the conversion step for clarity, the space complexity is O(n).
+### Analysis and Explanation
 
-This challenge requires manipulating a linked list while maintaining its structure and then reordering its elements in an alternating fashion, which adds some complexity compared to basic linked list operations. It is more challenging than basic linked list operations but less complex than designing a custom linked list implementation from scratch.
+1. **Complexity Analysis:**
+   - **Time Complexity:** The algorithm iterates over the input string once and performs constant time operations for each character it encounters. It also performs a search for each character in the `word_freq` dictionary, which is expected to be O(1) on average due to the use of a hash map. Thus, the overall time complexity is approximately O(n), where n is the length of the input string.
+   - **Space Complexity:** The space complexity includes storing the frequency of each word (O(m)), where m is the number of unique words, and storing the decomposed string (O(n)). Therefore, the total space complexity is approximately O(n + m).
 
-Thus, it is rated as a difficulty level of 4.
+2. **Optimal Approach:**
+   - The solution uses a dictionary to store word frequencies (`word_freq`) and another dictionary to decompose the string into individual words (`decomposed`). This approach allows for efficient lookups and keeps track of which words have been used in reconstructing the sentence.
+   - It iterates through each character of the input string only once, making it efficient for long inputs.
+   - If no valid reconstruction is possible, it returns `None` immediately upon finding that no word starts from the current index.
+
+3. **Difficulty Rating:**
+   - **Difficulty Rating: 3**
+
+This problem requires understanding of string manipulation and data structures like dictionaries. It involves decomposing a given string into individual words while ensuring that all words are used exactly once in their original order, making it moderately challenging but solvable with clear thinking about how to use dictionaries efficiently for word frequencies and decomposition tracking.
