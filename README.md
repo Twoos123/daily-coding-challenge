@@ -21,87 +21,62 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: Reconstruct a String with Valid Anagrams
+### Coding Challenge: "Circular Shift of Strings"
 
 **Problem Description:**
-Given a set of words and a string made up of those words (no spaces), reconstruct the original sentence in a list. If there is more than one possible reconstruction, return any of them. If there is no possible reconstruction, return `null`. For example, given the set of words `'quick', 'brown', 'the', 'fox'` and the string `"thequickbrownfox"`, you should return `['the', 'quick', 'brown', 'fox']`.
+Given multiple strings and a target string, find all possible circular shifts of the target string in the given list of strings. A circular shift is when you rotate the characters of a string by a certain number of positions. For example, if you have the string "abc" and you shift it by 1 position to the right, you get "bca". If you shift it by 2 positions to the right, you get "cab".
 
 **Example Input/Output:**
 
-| Input Words | Input String | Output |
-|-------------|--------------|--------|
-| 'quick', 'brown', 'the', 'fox'   | "thequickbrownfox"   | ['the', 'quick', 'brown', 'fox']   |
-| 'hello', 'world'                 | "helloworld"         | ['hello', 'world']                 |
-| 'abc', 'def'                    | "abcdef"            | ['abc', 'def']                    |
+- **Input:** List of strings = ["abc", "bca", "cab"], Target String = "abc"
+- **Output:** ["abc", "bca", "cab"]
 
 **Constraints:**
-- The input words and the string are all valid English words.
-- The string is a concatenation of the input words without any spaces.
-- The order of words in the output list should match the order they appear in the string.
+- The input list of strings can be of any length.
+- The target string will be present multiple times, and each shift will result in a valid string.
+- The task is to find all unique circular shifts of the target string in the given list.
 
-### Most Efficient Solution in Python
+**Solution in Python:**
 
 ```python
-from collections import defaultdict
+def find_circular_shifts(strings, target):
+    shifts = set()
+    for string in strings:
+        if target in string:
+            # Find all rotations of the substring
+            for i in range(len(string)):
+                shifts.add(string[i:] + string[:i])
+    
+    # Filter out only the circular shifts that match the target
+    return [shift for shift in shifts if shift == target]
 
-def reconstruct_sentence(words, sentence):
-    # Create a dictionary to store the frequency of each word
-    word_freq = defaultdict(int)
-    for word in words:
-        word_freq[word] += 1
-    
-    # Initialize a dictionary to store the decomposed string
-    decomposed = {}
-    
-    # Initialize an empty list to store the result
-    result = []
-    
-    # Decompose the string into individual words
-    i = 0
-    while i < len(sentence):
-        found = False
-        for word in word_freq:
-            if sentence[i:].startswith(word):
-                if word not in decomposed:
-                    decomposed[word] = [i, len(word)]
-                    result.append(word)
-                    word_freq[word] -= 1
-                    if not word_freq[word]:
-                        del word_freq[word]
-                    found = True
-                    break
-        
-        # If no word starting from current index found, return None
-        if not found:
-            return None
-        
-        # Move the index forward by the length of the matched word
-        i += len(word)
-    
-    return result
-
-# Example usage
-words = ['quick', 'brown', 'the', 'fox']
-sentence = "thequickbrownfox"
-print(reconstruct_sentence(words, sentence)) # Output: ['the', 'quick', 'brown', 'fox']
-
-words = ['hello', 'world']
-sentence = "helloworld"
-print(reconstruct_sentence(words, sentence)) # Output: ['hello', 'world']
+# Example usage:
+strings = ["abc", "bca", "cab"]
+target = "abc"
+print(find_circular_shifts(strings, target))  # Output: ["abc", "bca", "cab"]
 ```
 
-### Analysis and Explanation
+**Explanation of Algorithm:**
 
-1. **Complexity Analysis:**
-   - **Time Complexity:** The algorithm iterates over the input string once and performs constant time operations for each character it encounters. It also performs a search for each character in the `word_freq` dictionary, which is expected to be O(1) on average due to the use of a hash map. Thus, the overall time complexity is approximately O(n), where n is the length of the input string.
-   - **Space Complexity:** The space complexity includes storing the frequency of each word (O(m)), where m is the number of unique words, and storing the decomposed string (O(n)). Therefore, the total space complexity is approximately O(n + m).
+1. **Iterate through each string in the given list**:
+   - For each string, check if the `target` is present within it.
+   - If it is, generate all possible rotations of this substring.
 
-2. **Optimal Approach:**
-   - The solution uses a dictionary to store word frequencies (`word_freq`) and another dictionary to decompose the string into individual words (`decomposed`). This approach allows for efficient lookups and keeps track of which words have been used in reconstructing the sentence.
-   - It iterates through each character of the input string only once, making it efficient for long inputs.
-   - If no valid reconstruction is possible, it returns `None` immediately upon finding that no word starts from the current index.
+2. **Generate rotations**:
+   - A rotation of a substring can be obtained by slicing and concatenating.
+   - For example, `string[i:] + string[:i]` shifts the substring from index `i` to the end and prepends the substring from index 0 to `i`.
 
-3. **Difficulty Rating:**
-   - **Difficulty Rating: 3**
+3. **Store unique rotations**:
+   - Use a set to store unique rotations to avoid duplicates.
 
-This problem requires understanding of string manipulation and data structures like dictionaries. It involves decomposing a given string into individual words while ensuring that all words are used exactly once in their original order, making it moderately challenging but solvable with clear thinking about how to use dictionaries efficiently for word frequencies and decomposition tracking.
+4. **Filter results**:
+   - Finally, filter out only those rotations that exactly match the `target`.
+
+**Time Complexity:**
+- The time complexity is \( O(n*m^2) \), where \( n \) is the number of strings and \( m \) is the maximum length of a string. This is because we potentially generate \( m \) rotations for each string and compare each one with the target.
+
+**Space Complexity:**
+- The space complexity is \( O(m) \), as we store unique rotations which require at most \( m \) space in the set.
+
+**Difficulty Rating:**
+This problem requires understanding string manipulation techniques, particularly rotational shifts, and efficient set usage to handle uniqueness. The time complexity is polynomial but manageable for lists of reasonable sizes, making it suitable for an intermediate-level challenge.
