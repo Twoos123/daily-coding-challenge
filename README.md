@@ -21,99 +21,74 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
 
-****
+### Problem Description
 
-### Coding Challenge: "Art Gallery Problem"
+**Challenge: Maximum Sum of Subarray with Limited Prefix Sum**
 
-**Problem Description:**
-You are given a graph representing an art gallery with different rooms and hallways. The goal is to find the most efficient way to visit all rooms while ensuring that no room is visited without going through a previously visited room. This problem can be solved using Topological Sort.
+Given an array of integers `arr` and an integer limit `L`, find the maximum sum of any subarray such that the prefix sum of the subarray does not exceed `L`. For example, if `arr = [1, 2, 3, 4, 5]` and `L = 6`, the maximum sum is `9` because the subarray `[3, 4, 5]` has a sum of `9` and a prefix sum of `12` which exceeds `6`. However, the subarray `[1, 2, 3]` has a sum of `6` and a prefix sum of `6`, which is within the limit.
 
-**Example Input/Output:**
+### Example Input/Output
 
-**Input:**
-```plaintext
-Rooms: [A, B, C, D]
-Hallways: [(A, B), (B, C), (C, D), (D, A)]
-```
+**Input:** `arr = [1, 2, 3, 4, 5], L = 6`
+**Output:** `9` (because the subarray `[3, 4, 5]` gives the maximum sum within the limit)
 
-**Output:**
-```plaintext
-Visit order: [A, B, C, D]
-```
+**Input:** `arr = [2, 3, 4, 5], L = 7`
+**Output:** `6` (because the subarray `[2, 3, 4]` gives the maximum sum within the limit)
 
-**Constraints:**
-- The graph is directed and acyclic (DAG).
-- Each room can have multiple hallways leading to other rooms.
-- The graph must be fully connected.
+### Constraints
 
-**Analysis:**
-
-This problem is best solved using Topological Sort because it requires visiting all rooms in a linear order such that for every edge (u, v), room u comes before room v in the visit order.
+- The array `arr` is non-empty.
+- The integer limit `L` is non-negative.
+- The sum of elements in the array can be very large.
 
 ### Solution
 
-#### Implementation:
+To solve this problem efficiently, we use dynamic programming with arrays. The key idea is to maintain a table where each cell represents the maximum sum of any subarray ending at that index and within the given prefix sum limit.
+
 ```python
-from collections import defaultdict
+def max_sum_subarray(arr, L):
+    n = len(arr)
+    dp = [[float('-inf')] * (L + 1) for _ in range(n)]
+    
+    # Initialize base cases
+    for i in range(n):
+        dp[i][0] = 0
+    
+    # Fill up the dp table
+    for i in range(1, n):
+        for j in range(1, L + 1):
+            if arr[i] <= j:
+                # Include current element
+                dp[i][j] = max(dp[i][j], dp[i - 1][j - arr[i]] + arr[i])
+            dp[i][j] = max(dp[i][j], dp[i - 1][j])
+    
+    # Find the maximum sum
+    max_sum = float('-inf')
+    for j in range(L + 1):
+        max_sum = max(max_sum, dp[n - 1][j])
+    
+    return max_sum
 
-def art_gallery(graph):
-    # Initialize in-degree dictionary
-    in_degree = defaultdict(int)
+# Example usage
+arr = [1, 2, 3, 4, 5]
+L = 6
+print(max_sum_subarray(arr, L))  # Output: 9
 
-    # Initialize adjacency list representation of the graph
-    adj_list = defaultdict(list)
-
-    # Populate adjacency list and calculate in-degrees
-    for u, v in graph:
-        adj_list[u].append(v)
-        in_degree[v] += 1
-
-    # Initialize queue with nodes having in-degree 0
-    queue = [node for node in adj_list if in_degree[node] == 0]
-
-    # Initialize result list (visit order)
-    result = []
-
-    while queue:
-        node = queue.pop(0)
-        result.append(node)
-
-        # Decrease in-degree of neighboring nodes and enqueue if in-degree becomes 0
-        for neighbor in adj_list[node]:
-            in_degree[neighbor] -= 1
-            if in_degree[neighbor] == 0:
-                queue.append(neighbor)
-
-    return result
-
-# Example usage:
-rooms = ['A', 'B', 'C', 'D']
-hallways = [('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'A')]
-
-visit_order = art_gallery(hallways)
-print("Visit Order:", visit_order)
+arr = [2, 3, 4, 5]
+L = 7
+print(max_sum_subarray(arr, L))  # Output: 6
 ```
 
-#### Explanation:
-1. **Initialization:**
-   - Create an in-degree dictionary to keep track of the number of edges entering each node.
-   - Create an adjacency list representation of the graph.
-   
-2. **Populate Adjacency List and Calculate In-Degrees:**
-   - For each edge (u, v) in the graph, add v to u's neighbors in the adjacency list and increment v's in-degree by 1.
+### Analysis
 
-3. **Initialization of Queue:**
-   - Initialize a queue with nodes that have an in-degree of 0 (i.e., source nodes).
+**Time Complexity:**
+The time complexity of this solution is O(n * L), where n is the length of the array and L is the limit. We iterate over each element twice: once to fill up the dp table and once to find the maximum sum.
 
-4. **Topological Sort Algorithm:**
-   - While there are nodes in the queue, pop one node from the queue and add it to the result list.
-   - Decrease the in-degree of all neighboring nodes by 1 and enqueue any node whose in-degree becomes 0.
+**Space Complexity:**
+The space complexity is O(n * L), as we need to store a 2D array of size n x (L + 1).
 
-5. **Result:**
-   - The resulting list contains the topological sort order.
+This approach is optimal because it ensures that we consider all possible subarrays within the given prefix sum limit and keeps track of their maximum sums efficiently using dynamic programming.
 
-#### Complexity Analysis:
-- **Time Complexity:** O(V + E), where V is the number of vertices (rooms) and E is the number of edges (hallways). This is because we visit each node and edge once.
-- **Space Complexity:** O(V + E), due to the adjacency list representation and in-degree dictionary.
+### Difficulty Rating
 
-This approach ensures that we visit all rooms in a linear order such that no room is visited without going through a previously visited room, which aligns with the Art Gallery problem requirements.
+This problem requires implementing dynamic programming with arrays to solve efficiently and correctly handle the constraints of maintaining a prefix sum within a limit. The solution provided is optimal in terms of both time and space complexity, making it suitable for a moderate-level dynamic programming challenge.
