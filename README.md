@@ -19,76 +19,67 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Problem Description: 
+**Two String Anagrams Detection**
 
-**Challenge: Maximum Sum of Subarray with Limited Prefix Sum**
+Given two strings `s1` and `s2`, determine if the two strings are anagrams of each other. An anagram is a word or phrase formed by rearranging the letters of another word or phrase, typically using all the original letters exactly once.
 
-Given an array of integers `arr` and an integer limit `L`, find the maximum sum of any subarray such that the prefix sum of the subarray does not exceed `L`. For example, if `arr = [1, 2, 3, 4, 5]` and `L = 6`, the maximum sum is `9` because the subarray `[3, 4, 5]` has a sum of `9` and a prefix sum of `12` which exceeds `6`. However, the subarray `[1, 2, 3]` has a sum of `6` and a prefix sum of `6`, which is within the limit.
+**Example Input/Output:**
+- **Input:** `s1 = "listen", s2 = "silent"`
+- **Output:** `True`
+- **Input:** `s1 = "hello", s2 = "world"`
+- **Output:** `False`
 
-### Example Input/Output
+### Constraints:
+- The length of both strings can vary.
+- The strings can contain any character from the alphabet (no spaces, punctuation, etc.).
+- The solution should be efficient in terms of both time and space complexity.
 
-**Input:** `arr = [1, 2, 3, 4, 5], L = 6`
-**Output:** `9` (because the subarray `[3, 4, 5]` gives the maximum sum within the limit)
+### Solution:
+The most efficient solution for this problem is to use a hash table (dictionary in Python) to count the frequency of each character in both strings. If the two strings are anagrams, their character counts will be identical.
 
-**Input:** `arr = [2, 3, 4, 5], L = 7`
-**Output:** `6` (because the subarray `[2, 3, 4]` gives the maximum sum within the limit)
-
-### Constraints
-
-- The array `arr` is non-empty.
-- The integer limit `L` is non-negative.
-- The sum of elements in the array can be very large.
-
-### Solution
-
-To solve this problem efficiently, we use dynamic programming with arrays. The key idea is to maintain a table where each cell represents the maximum sum of any subarray ending at that index and within the given prefix sum limit.
+#### Python Solution
 
 ```python
-def max_sum_subarray(arr, L):
-    n = len(arr)
-    dp = [[float('-inf')] * (L + 1) for _ in range(n)]
-    
-    # Initialize base cases
-    for i in range(n):
-        dp[i][0] = 0
-    
-    # Fill up the dp table
-    for i in range(1, n):
-        for j in range(1, L + 1):
-            if arr[i] <= j:
-                # Include current element
-                dp[i][j] = max(dp[i][j], dp[i - 1][j - arr[i]] + arr[i])
-            dp[i][j] = max(dp[i][j], dp[i - 1][j])
-    
-    # Find the maximum sum
-    max_sum = float('-inf')
-    for j in range(L + 1):
-        max_sum = max(max_sum, dp[n - 1][j])
-    
-    return max_sum
+def are_anagrams(s1, s2):
+    # If lengths differ, they can't be anagrams
+    if len(s1) != len(s2):
+        return False
 
-# Example usage
-arr = [1, 2, 3, 4, 5]
-L = 6
-print(max_sum_subarray(arr, L))  # Output: 9
+    # Create a hash table to count characters
+    char_counts = {}
 
-arr = [2, 3, 4, 5]
-L = 7
-print(max_sum_subarray(arr, L))  # Output: 6
+    # Count characters in s1
+    for char in s1:
+        char_counts[char] = char_counts.get(char, 0) + 1
+
+    # Decrease counts for s2
+    for char in s2:
+        char_counts[char] = char_counts.get(char, 0) - 1
+        # If count becomes negative, strings are not anagrams
+        if char_counts[char] < 0:
+            return False
+
+    return True
+
+# Example usage:
+print(are_anagrams("listen", "silent"))   # True
+print(are_anagrams("hello", "world"))     # False
 ```
 
-### Analysis
+#### Analysis of Complexity:
+1. **Time Complexity:**
+   - The first loop to count characters in `s1` iterates over `len(s1)` characters, making it O(n).
+   - The second loop to decrease counts for `s2` also iterates over `len(s2)` characters, making it another O(n).
+   - Therefore, the overall time complexity is O(n) + O(n) = O(2n), which simplifies to O(n).
 
-**Time Complexity:**
-The time complexity of this solution is O(n * L), where n is the length of the array and L is the limit. We iterate over each element twice: once to fill up the dp table and once to find the maximum sum.
+2. **Space Complexity:**
+   - We need a hash table (dictionary) that stores at most 26 entries (for English alphabet), assuming no repeated characters.
+   - Therefore, the space complexity is O(26), which simplifies to O(1) because it does not grow with input size.
 
-**Space Complexity:**
-The space complexity is O(n * L), as we need to store a 2D array of size n x (L + 1).
+### Difficulty Rating:
+****
 
-This approach is optimal because it ensures that we consider all possible subarrays within the given prefix sum limit and keeps track of their maximum sums efficiently using dynamic programming.
-
-### Difficulty Rating
-
-This problem requires implementing dynamic programming with arrays to solve efficiently and correctly handle the constraints of maintaining a prefix sum within a limit. The solution provided is optimal in terms of both time and space complexity, making it suitable for a moderate-level dynamic programming challenge.
+This problem requires understanding how to effectively use a hash table for counting and comparing frequencies of characters in two strings. The solution is straightforward and efficient with a linear time complexity and constant space complexity. It is moderately challenging due to requiring precise handling of character counts but does not involve complex collision resolution techniques or advanced data structures.
