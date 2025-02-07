@@ -19,67 +19,69 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem Description: 
-**Two String Anagrams Detection**
+### Problem Description
 
-Given two strings `s1` and `s2`, determine if the two strings are anagrams of each other. An anagram is a word or phrase formed by rearranging the letters of another word or phrase, typically using all the original letters exactly once.
+**Challenge: Maximum Subarray Sum with Consecutive Elements**
 
-**Example Input/Output:**
-- **Input:** `s1 = "listen", s2 = "silent"`
-- **Output:** `True`
-- **Input:** `s1 = "hello", s2 = "world"`
-- **Output:** `False`
+Given an array `arr` of integers, find the maximum sum of any subarray where all elements are consecutive. The subarray can start at any index and end at any index within the bounds of the array.
 
-### Constraints:
-- The length of both strings can vary.
-- The strings can contain any character from the alphabet (no spaces, punctuation, etc.).
-- The solution should be efficient in terms of both time and space complexity.
+### Example Input/Output
 
-### Solution:
-The most efficient solution for this problem is to use a hash table (dictionary in Python) to count the frequency of each character in both strings. If the two strings are anagrams, their character counts will be identical.
-
-#### Python Solution
-
-```python
-def are_anagrams(s1, s2):
-    # If lengths differ, they can't be anagrams
-    if len(s1) != len(s2):
-        return False
-
-    # Create a hash table to count characters
-    char_counts = {}
-
-    # Count characters in s1
-    for char in s1:
-        char_counts[char] = char_counts.get(char, 0) + 1
-
-    # Decrease counts for s2
-    for char in s2:
-        char_counts[char] = char_counts.get(char, 0) - 1
-        # If count becomes negative, strings are not anagrams
-        if char_counts[char] < 0:
-            return False
-
-    return True
-
-# Example usage:
-print(are_anagrams("listen", "silent"))   # True
-print(are_anagrams("hello", "world"))     # False
+**Input:**
+```
+arr = [1, -2, 3, -4, 5]
 ```
 
-#### Analysis of Complexity:
-1. **Time Complexity:**
-   - The first loop to count characters in `s1` iterates over `len(s1)` characters, making it O(n).
-   - The second loop to decrease counts for `s2` also iterates over `len(s2)` characters, making it another O(n).
-   - Therefore, the overall time complexity is O(n) + O(n) = O(2n), which simplifies to O(n).
+**Output:**
+```
+Maximum sum of consecutive subarray: 7 (subarray: [3, -4, 5])
+```
 
-2. **Space Complexity:**
-   - We need a hash table (dictionary) that stores at most 26 entries (for English alphabet), assuming no repeated characters.
-   - Therefore, the space complexity is O(26), which simplifies to O(1) because it does not grow with input size.
+### Constraints
+- The array `arr` will not be empty.
+- The integers in the array are not guaranteed to be positive.
 
-### Difficulty Rating:
-****
+### Detailed Explanation and Optimal Solution
 
-This problem requires understanding how to effectively use a hash table for counting and comparing frequencies of characters in two strings. The solution is straightforward and efficient with a linear time complexity and constant space complexity. It is moderately challenging due to requiring precise handling of character counts but does not involve complex collision resolution techniques or advanced data structures.
+To solve this problem efficiently using dynamic programming, we can utilize a 2D array `dp` where `dp[i][j]` represents the maximum sum of a subarray starting from index `i` and ending at index `j`.
+
+#### Solution in Python
+
+```python
+def max_consecutive_subarray_sum(arr):
+    n = len(arr)
+    
+    # Initialize dp array with zeros
+    dp = [[0]*n for _ in range(n)]
+    
+    # Initialize maximum sum variable
+    max_sum = float('-inf')
+    
+    # Fill dp array using bottom-up approach
+    for i in range(n):
+        for j in range(i, n):
+            if i == j:
+                dp[i][j] = arr[i]
+            else:
+                dp[i][j] = max(dp[i][j-1] + arr[j], arr[j])
+            
+            # Update max_sum if current sum is greater
+            max_sum = max(max_sum, dp[i][j])
+    
+    return max_sum
+```
+
+#### Analysis of Complexity and Difficulty Rating
+
+#### Time Complexity: 
+The time complexity is O(n^2) due to the nested loops used to fill the dp array. This is because we iterate over each possible subarray and calculate its maximum sum.
+
+#### Space Complexity: 
+The space complexity is O(n^2) as well, since we use a 2D dp array to store the maximum sums of all possible subarrays.
+
+#### Difficulty Rating:
+This problem requires a good understanding of dynamic programming and how to apply it to solve problems involving arrays. The solution involves a 2D dp array, which adds complexity compared to simpler dynamic programming problems like Fibonacci or subsets sum problems. However, it remains within the realm of moderately challenging problems suitable for someone with basic dynamic programming skills.
+
+The chosen approach is most efficient because it systematically builds up the dp array by considering all possible subarrays and their sums, ensuring that we find the maximum sum among all consecutive subarrays in a single pass. This approach avoids redundant calculations and ensures that we capture all potential solutions efficiently.
