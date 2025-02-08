@@ -21,67 +21,132 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem Description
+****
 
-**Challenge: Maximum Subarray Sum with Consecutive Elements**
+### Challenge: Rearrange Linked List to Alternate Odd and Even Nodes
 
-Given an array `arr` of integers, find the maximum sum of any subarray where all elements are consecutive. The subarray can start at any index and end at any index within the bounds of the array.
+Given a singly linked list, rearrange it such that all odd-indexed nodes come before all even-indexed nodes. If there are multiple odd-indexed nodes, they should be arranged in ascending order of their values, and similarly, even-indexed nodes should be arranged in ascending order of their values.
 
-### Example Input/Output
+#### Example Input/Output
 
 **Input:**
 ```
-arr = [1, -2, 3, -4, 5]
+1 -> 2 -> 3 -> 4 -> 5
 ```
 
 **Output:**
 ```
-Maximum sum of consecutive subarray: 7 (subarray: [3, -4, 5])
+1 -> 3 -> 5 -> 2 -> 4
 ```
 
-### Constraints
-- The array `arr` will not be empty.
-- The integers in the array are not guaranteed to be positive.
+#### Constraints:
+- The linked list is singly linked.
+- The rearrangement should be done in place.
+- The time complexity should be as efficient as possible.
 
-### Detailed Explanation and Optimal Solution
+#### Solution
 
-To solve this problem efficiently using dynamic programming, we can utilize a 2D array `dp` where `dp[i][j]` represents the maximum sum of a subarray starting from index `i` and ending at index `j`.
+To solve this problem efficiently, we can use two pointers: one for traversing and one for building the new list. We will iterate through the original list, adding nodes to the new list based on their index (odd or even).
 
-#### Solution in Python
+Here's the detailed solution in Python:
 
 ```python
-def max_consecutive_subarray_sum(arr):
-    n = len(arr)
-    
-    # Initialize dp array with zeros
-    dp = [[0]*n for _ in range(n)]
-    
-    # Initialize maximum sum variable
-    max_sum = float('-inf')
-    
-    # Fill dp array using bottom-up approach
-    for i in range(n):
-        for j in range(i, n):
-            if i == j:
-                dp[i][j] = arr[i]
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class Solution:
+    def rearrange(self, head: ListNode) -> ListNode:
+        if not head or not head.next:
+            return head
+
+        # Step 1: Find length of linked list
+        length = 0
+        current = head
+        while current:
+            length += 1
+            current = current.next
+        
+        # Step 2: Rearrange the linked list
+        odd = even = dummy_odd = dummy_even = ListNode(0)
+        
+        for _ in range(length):
+            if _ % 2 == 0:
+                even_next = even.next
+                even.next = ListNode(head.val)
+                even.next.next = even_next
+                even = even.next
             else:
-                dp[i][j] = max(dp[i][j-1] + arr[j], arr[j])
+                odd_next = odd.next
+                odd.next = ListNode(head.val)
+                odd.next.next = odd_next
+                odd = odd.next
             
-            # Update max_sum if current sum is greater
-            max_sum = max(max_sum, dp[i][j])
-    
-    return max_sum
-```
+            head = head.next
+        
+        # Step 3: Combine odd and even lists
+        dummy_odd.next = dummy_even.next = None
+        head_odd, head_even = dummy_odd.next, dummy_even.next
+        
+        current_odd, current_even = head_odd, head_even
+        
+        while current_even:
+            if current_odd.next is None or current_even.val < current_odd.next.val:
+                temp = current_even.next
+                current_even.next = current_odd.next
+                current_odd.next = temp
+                
+                # Move pointers forward
+                current_odd = current_odd.next
+                
+                # Reset pointers to maintain correct order
+                current_odd.next = current_even.next
+                
+            else:
+                temp = current_even.next
+                
+                # Move pointers forward but keep track of last node in odd list for insertion
+                current_even.next = current_odd.next
+                
+                # Insert even node before odd node
+                temp.next = current_odd.next
+                
+                # Update pointers to maintain correct order and position of elements after insertion
+                current_even.next = current_odd.next
+                
+                # Reset pointers to maintain correct sequence of elements being processed from both lists
+            
+            # Move forward with both pointers accordingly 
+            current_even = current_even.next
+            
+        
+       return dummy_odd.next 
 
-#### Analysis of Complexity and Difficulty Rating
+# Commentary on how this code might be used:
 
-#### Time Complexity: 
-The time complexity is O(n^2) due to the nested loops used to fill the dp array. This is because we iterate over each possible subarray and calculate its maximum sum.
+# This solution works by first determining whether each node should be part of the "odd" or "even" linked list based on its index (modulo operation). 
+# It then constructs these two separate linked lists while maintaining their relative order within each list type (ascending order). 
+# Finally, it merges these lists together such that all odd-indexed nodes come before all even-indexed nodes while maintaining ascending order within each segment.
 
-#### Space Complexity: 
-The space complexity is O(n^2) as well, since we use a 2D dp array to store the maximum sums of all possible subarrays.
+### Complexity Analysis
 
-#### Difficulty Rating:
-This problem requires a good understanding of dynamic programming and how to apply it to solve problems involving arrays. The solution involves a 2D dp array, which adds complexity compared to simpler dynamic programming problems like Fibonacci or subsets sum problems. However, it remains within the realm of moderately challenging problems suitable for someone with basic dynamic programming skills.
+1. **Time Complexity:**
+   - Finding length: O(n)
+   - Rearranging nodes into two separate lists: O(n)
+   - Merging lists while keeping ascending order: O(n)
 
-The chosen approach is most efficient because it systematically builds up the dp array by considering all possible subarrays and their sums, ensuring that we find the maximum sum among all consecutive subarrays in a single pass. This approach avoids redundant calculations and ensures that we capture all potential solutions efficiently.
+Total time complexity is O(n).
+
+2. **Space Complexity:**
+   - Additional space used for dummy nodes and temporary variables during merging step: O(1)
+
+The space complexity remains constant because we only need a constant amount of extra space to manage the pointers and temporary nodes.
+
+### Why This Approach is Optimal
+
+This approach is optimal because it avoids unnecessary extra space complexity beyond what's needed for managing pointers and nodes. It also maintains linear time complexity by ensuring each operation (insertion into separate lists and merging) is performed iteratively without recursive calls or additional loops beyond necessary iterations.
+
+The use of dummy nodes simplifies handling edge cases like dealing with head nodes without special handling needed for them.
+
+Overall, this solution strikes a balance between simplicity and efficiency, making it suitable for both clarity and performance considerations in linked list operations.
