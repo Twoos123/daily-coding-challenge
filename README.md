@@ -19,134 +19,108 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-****
+### Problem Description
 
-### Challenge: Rearrange Linked List to Alternate Odd and Even Nodes
+**Challenge: "Find the Closest Common Ancestor in a Binary Tree"**
 
-Given a singly linked list, rearrange it such that all odd-indexed nodes come before all even-indexed nodes. If there are multiple odd-indexed nodes, they should be arranged in ascending order of their values, and similarly, even-indexed nodes should be arranged in ascending order of their values.
+Given a binary tree and two nodes, find the closest common ancestor of these two nodes. The closest common ancestor is the node that is the farthest from the root but still has both nodes as descendants.
 
-#### Example Input/Output
+**Example Input/Output:**
 
-**Input:**
-```
-1 -> 2 -> 3 -> 4 -> 5
-```
+- **Input:** Root of a binary tree, nodes `A` and `B`.
+- **Output:** The closest common ancestor of nodes `A` and `B`.
 
-**Output:**
-```
-1 -> 3 -> 5 -> 2 -> 4
-```
+### Constraints
 
-#### Constraints:
-- The linked list is singly linked.
-- The rearrangement should be done in place.
-- The time complexity should be as efficient as possible.
+- The binary tree does not have any null nodes.
+- The nodes `A` and `B` exist in the binary tree.
 
-#### Solution
+### Optimal Solution
 
-To solve this problem efficiently, we can use two pointers: one for traversing and one for building the new list. We will iterate through the original list, adding nodes to the new list based on their index (odd or even).
+To solve this problem efficiently, we can use a recursive approach combined with a clever traversal strategy. The key insight is to find the lowest common ancestor by traversing both paths from the root to the nodes `A` and `B` simultaneously.
 
-Here's the detailed solution in Python:
+Here is the most optimal solution in Python:
 
 ```python
-class ListNode:
-    def __init__(self, val=0, next=None):
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
         self.val = val
-        self.next = next
+        self.left = left
+        self.right = right
 
-class Solution:
-    def rearrange(self, head: ListNode) -> ListNode:
-        if not head or not head.next:
-            return head
+def lowestCommonAncestor(root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
+    """
+    Find the closest common ancestor of two nodes in a binary tree.
+    
+    :param root: The root of the binary tree.
+    :param p: The first node.
+    :param q: The second node.
+    :return: The closest common ancestor.
+    """
+    
+    # Base case: If the tree is empty, return None.
+    if not root:
+        return None
+    
+    # If the current node is one of the target nodes, return it.
+    if root == p or root == q:
+        return root
+    
+    # Recursively search for the target nodes in the left and right subtrees.
+    left_lca = lowestCommonAncestor(root.left, p, q)
+    right_lca = lowestCommonAncestor(root.right, p, q)
+    
+    # If both target nodes are found in different subtrees, the current node is the LCA.
+    if left_lca and right_lca:
+        return root
+    
+    # If both target nodes are found in the left subtree, return the LCA from the left subtree.
+    if left_lca:
+        return left_lca
+    
+    # If both target nodes are found in the right subtree, return the LCA from the right subtree.
+    if right_lca:
+        return right_lca
+    
+    # If neither of the above conditions are met, return None.
+    return None
 
-        # Step 1: Find length of linked list
-        length = 0
-        current = head
-        while current:
-            length += 1
-            current = current.next
-        
-        # Step 2: Rearrange the linked list
-        odd = even = dummy_odd = dummy_even = ListNode(0)
-        
-        for _ in range(length):
-            if _ % 2 == 0:
-                even_next = even.next
-                even.next = ListNode(head.val)
-                even.next.next = even_next
-                even = even.next
-            else:
-                odd_next = odd.next
-                odd.next = ListNode(head.val)
-                odd.next.next = odd_next
-                odd = odd.next
-            
-            head = head.next
-        
-        # Step 3: Combine odd and even lists
-        dummy_odd.next = dummy_even.next = None
-        head_odd, head_even = dummy_odd.next, dummy_even.next
-        
-        current_odd, current_even = head_odd, head_even
-        
-        while current_even:
-            if current_odd.next is None or current_even.val < current_odd.next.val:
-                temp = current_even.next
-                current_even.next = current_odd.next
-                current_odd.next = temp
-                
-                # Move pointers forward
-                current_odd = current_odd.next
-                
-                # Reset pointers to maintain correct order
-                current_odd.next = current_even.next
-                
-            else:
-                temp = current_even.next
-                
-                # Move pointers forward but keep track of last node in odd list for insertion
-                current_even.next = current_odd.next
-                
-                # Insert even node before odd node
-                temp.next = current_odd.next
-                
-                # Update pointers to maintain correct order and position of elements after insertion
-                current_even.next = current_odd.next
-                
-                # Reset pointers to maintain correct sequence of elements being processed from both lists
-            
-            # Move forward with both pointers accordingly 
-            current_even = current_even.next
-            
-        
-       return dummy_odd.next 
+# Example usage:
+# Create a sample binary tree:
+#         3
+#        / \
+#       5   1
+#      / \ / \
+#     6  2 0  8
 
-# Commentary on how this code might be used:
+root = TreeNode(3)
+root.left = TreeNode(5)
+root.right = TreeNode(1)
+root.left.left = TreeNode(6)
+root.left.right = TreeNode(2)
+root.right.left = TreeNode(0)
+root.right.right = TreeNode(8)
 
-# This solution works by first determining whether each node should be part of the "odd" or "even" linked list based on its index (modulo operation). 
-# It then constructs these two separate linked lists while maintaining their relative order within each list type (ascending order). 
-# Finally, it merges these lists together such that all odd-indexed nodes come before all even-indexed nodes while maintaining ascending order within each segment.
+p = root.left.left  # Node 6
+q = root.right.right # Node 8
 
-### Complexity Analysis
+lca = lowestCommonAncestor(root, p, q)  # Output: Node with value 3
 
-1. **Time Complexity:**
-   - Finding length: O(n)
-   - Rearranging nodes into two separate lists: O(n)
-   - Merging lists while keeping ascending order: O(n)
+print("Lowest Common Ancestor:", lca.val)  # Output: 3
 
-Total time complexity is O(n).
+```
 
-2. **Space Complexity:**
-   - Additional space used for dummy nodes and temporary variables during merging step: O(1)
+### Analysis
 
-The space complexity remains constant because we only need a constant amount of extra space to manage the pointers and temporary nodes.
+#### Time Complexity:
+The time complexity of this solution is O(N), where N is the number of nodes in the binary tree. This is because we potentially visit each node once during our recursive traversal.
 
-### Why This Approach is Optimal
+#### Space Complexity:
+The space complexity is O(H), where H is the height of the binary tree. This is due to the maximum depth of our recursive call stack, which in the worst case can be equal to H. However, if we consider the space complexity in terms of recursion and iteration, it remains O(H) but practically it's more efficient because we avoid unnecessary recursion by directly returning when we find both nodes.
 
-This approach is optimal because it avoids unnecessary extra space complexity beyond what's needed for managing pointers and nodes. It also maintains linear time complexity by ensuring each operation (insertion into separate lists and merging) is performed iteratively without recursive calls or additional loops beyond necessary iterations.
+### Difficulty Rating:
+DIFFICULTY: 4
 
-The use of dummy nodes simplifies handling edge cases like dealing with head nodes without special handling needed for them.
-
-Overall, this solution strikes a balance between simplicity and efficiency, making it suitable for both clarity and performance considerations in linked list operations.
+This problem requires understanding how to traverse a binary tree and find a specific node or path efficiently. The solution involves a straightforward recursive approach but requires careful handling of base cases and recursive conditions, making it moderately challenging.
