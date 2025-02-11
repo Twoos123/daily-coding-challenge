@@ -19,97 +19,88 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Challenge: Implement a Sliding Window Stack
+### Challenge: Efficient Median Maintenance Using Two Heaps
 
 **Problem Description:**
-Implement a Sliding Window Stack where you have a stack with a sliding window of size `k`. The following operations should be supported:
-- `push(x)`: Push an element `x` onto the stack.
-- `pop()`: Remove the topmost element from the stack.
-- `peek()`: Return the topmost element without removing it.
-- `getMax()`: Return the maximum element within the current window.
-- `moveWindow()`: Move the window by one position to the right.
-
-The challenge lies in efficiently managing the stack to ensure that all operations, including maintaining the sliding window and finding the maximum element within it, are performed in O(1) or O(log n) time complexity.
-
-**Example Input/Output:**
-```
-push(1)
-push(2)
-push(3)
-getMax() -> 3
-moveWindow()
-push(4)
-getMax() -> 4
-```
+Given a stream of integers, design an efficient algorithm to maintain a running median of the numbers in the stream. The algorithm should use two heaps, one min-heap and one max-heap, to achieve this.
 
 **Constraints:**
-1. The size of the sliding window is fixed at `k`.
-2. All operations should be performed efficiently.
-3. The stack should not store duplicate elements.
+- The stream of integers can be either ascending or descending.
+- The median should be updated whenever a new number is added.
+- The implementation should be efficient in terms of time complexity.
 
-### Solution
+**Example Input/Output:**
+- Input: `[1, 2, 3, 4, 5]`
+- Output: `[1, 1.5, 2, 2.5, 3]`
+- Explanation: The median is calculated as follows:
+  - For `[1]`, median = `1`.
+  - For `[1, 2]`, median = `(1 + 2) / 2 = 1.5`.
+  - For `[1, 2, 3]`, median = `(1 + 2) / 2 = 1.5`.
+  - For `[1, 2, 3, 4]`, median = `(2 + 3) / 2 = 2.5`.
+  - For `[1, 2, 3, 4, 5]`, median = `(3 + 4) / 2 = 3`.
 
-To solve this problem efficiently, we can use a combination of two stacks: one to handle the elements within the current window and another to keep track of the maximum elements encountered so far.
+**Solution:**
 
 ```python
-class SlidingWindowStack:
-    def __init__(self, k):
-        self.k = k
-        self.stack = []
-        self.max_stack = []
+import heapq
 
-    def push(self, x):
-        if x not in self.stack:
-            self.stack.append(x)
-            if not self.max_stack or x >= self.max_stack[-1]:
-                self.max_stack.append(x)
+class MedianFinder:
+    def __init__(self):
+        self.min_heap = []  # Stores smaller half of numbers (max heap)
+        self.max_heap = []  # Stores larger half of numbers (min heap)
 
-    def pop(self):
-        if self.stack:
-            if self.stack[-1] == self.max_stack[-1]:
-                self.max_stack.pop()
-            self.stack.pop()
-
-    def peek(self):
-        if self.stack:
-            return self.stack[-1]
-
-    def getMax(self):
-        if self.max_stack:
-            return self.max_stack[-1]
-
-    def moveWindow(self):
-        if len(self.stack) == self.k:
-            self.pop()
+    def add_num(self, num):
+        # Add the number to the appropriate heap
+        if not self.max_heap or num < -self.max_heap[0]:
+            # If max_heap is empty or num is smaller than max_heap's root,
+            # add it to max_heap.
+            heapq.heappush(self.max_heap, -num)
         else:
-            raise ValueError("Window size not reached")
+            # Otherwise, add it to min_heap.
+            heapq.heappush(self.min_heap, num)
+        
+        # Balance heaps to ensure size difference does not exceed one.
+        if len(self.max_heap) > len(self.min_heap) + 1:
+            # If max_heap has more than one more element than min_heap,
+            # move an element from max_heap to min_heap.
+            heapq.heappush(self.min_heap, heapq.heappop(self.max_heap))
+        elif len(self.min_heap) > len(self.max_heap):
+            # If min_heap has more elements than max_heap,
+            # move an element from min_heap to max_heap.
+            heapq.heappush(self.max_heap, -heapq.heappop(self.min_heap))
+
+    def find_median(self):
+        if len(self.max_heap) == len(self.min_heap):
+            # If heaps have equal number of elements,
+            # median is the average of roots.
+            return (-self.max_heap[0] + self.min_heap[0]) / 2.0
+        else:
+            # If max_heap has more elements,
+            # median is the root of max_heap.
+            return (-self.max_heap[0])
 
 # Example usage:
-s = SlidingWindowStack(3)
-s.push(1)
-s.push(2)
-s.push(3)
-print(s.getMax())  # Output: 3
-s.moveWindow()
-s.push(4)
-print(s.getMax())  # Output: 4
-
+mf = MedianFinder()
+mf.add_num(1)
+mf.add_num(2)
+mf.add_num(3)
+print("Median:", mf.find_median())  # Output: 2.0
 ```
 
-### Analysis of Complexity:
-
+**Complexity Analysis:**
 - **Time Complexity:**
-  - `push(x)`: O(1) since it involves checking if `x` is already in the stack and appending it if not. The maximum stack operation is also O(1).
-  - `pop()`: O(1) as it involves removing the top element from both stacks if it matches with the maximum stack.
-  - `peek()`: O(1) since it simply returns the top element of the stack.
-  - `getMax()`: O(1) as it returns the top element of the maximum stack.
-  - `moveWindow()`: O(1) if the window size is reached; otherwise, it raises an error.
+  - `add_num` operation: \(O(\log n)\) due to heap operations.
+  - `find_median` operation: \(O(1)\) as it simply accesses the roots of the heaps.
+  
+**Explanation of Approach:**
+The solution uses two heaps: one max-heap (`self.max_heap`) for storing smaller numbers (inverted to represent max heap), and one min-heap (`self.min_heap`) for storing larger numbers. This allows efficient insertion and retrieval of the median value.
 
-- **Space Complexity:** 
-  - The space complexity is O(k) for storing up to k elements in both stacks.
+1. **Insertion:** The new number is added to either the max-heap or the min-heap based on whether it is smaller than the root of the max-heap. After insertion, the heaps are balanced to ensure that their size difference does not exceed one, maintaining efficiency.
 
-### Difficulty Rating
+2. **Median Calculation:** The median is calculated by accessing the roots of both heaps. If the number of elements in both heaps is equal, the median is the average of these roots; otherwise, it is the root from the heap with more elements (which represents the max value).
 
-This problem requires implementing a custom stack with additional functionality to manage a sliding window and find the maximum element within it. The use of two stacks ensures efficient operations while maintaining the required properties of the sliding window. The solution is moderately complex due to the need to balance between efficient operations and maintaining structural integrity across different operations.
+This approach ensures that both insertion and retrieval operations are performed efficiently, leveraging the properties of heaps for maintaining a balanced distribution of numbers.
+
+### Difficulty Rating: This challenge requires a deep understanding of heap properties and operations, as well as an effective strategy for
