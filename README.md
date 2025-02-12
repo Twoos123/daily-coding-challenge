@@ -21,86 +21,77 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Challenge: Efficient Median Maintenance Using Two Heaps
+****
 
-**Problem Description:**
-Given a stream of integers, design an efficient algorithm to maintain a running median of the numbers in the stream. The algorithm should use two heaps, one min-heap and one max-heap, to achieve this.
+### Problem Description
 
-**Constraints:**
-- The stream of integers can be either ascending or descending.
-- The median should be updated whenever a new number is added.
-- The implementation should be efficient in terms of time complexity.
+**String Rotation Segmentation:**
 
-**Example Input/Output:**
-- Input: `[1, 2, 3, 4, 5]`
-- Output: `[1, 1.5, 2, 2.5, 3]`
-- Explanation: The median is calculated as follows:
-  - For `[1]`, median = `1`.
-  - For `[1, 2]`, median = `(1 + 2) / 2 = 1.5`.
-  - For `[1, 2, 3]`, median = `(1 + 2) / 2 = 1.5`.
-  - For `[1, 2, 3, 4]`, median = `(2 + 3) / 2 = 2.5`.
-  - For `[1, 2, 3, 4, 5]`, median = `(3 + 4) / 2 = 3`.
+Given a string `S` of length `N`, find the number of unique ways to segment it into substrings such that each substring is a rotation of a dictionary word. A dictionary word is considered a rotation if it can be obtained by rotating the letters of another word in the dictionary.
 
-**Solution:**
+For example, if `S = "abcbac"` and the dictionary contains `"abc"` and `"bac"`, then one valid segmentation is `"ab", "cb", "ac"`.
+
+### Example Input/Output
+
+- **Input:** `S = "abcbac", dictionary = ["abc", "bac"]`
+- **Output:** `2`
+
+### Constraints
+
+- The input string `S` is guaranteed to have at least one unique substring that is a rotation of a dictionary word.
+- Dictionary words are at most as long as the input string.
+
+### Solution
+
+To solve this problem efficiently, we need to identify rotations of dictionary words within the given string. Here's an optimal approach:
+
+1. **Preprocess the Dictionary:**
+   - For each dictionary word, generate all its rotations and store them in a set.
+
+2. **Check for Rotations:**
+   - Iterate through the input string and check if any segment starting at each position is a rotation of any word in the preprocessed set.
+
+3. **Segmentation Counting:**
+   - Keep track of the number of unique segments that are valid rotations.
+
+Here's the most efficient solution in Python:
 
 ```python
-import heapq
-
-class MedianFinder:
-    def __init__(self):
-        self.min_heap = []  # Stores smaller half of numbers (max heap)
-        self.max_heap = []  # Stores larger half of numbers (min heap)
-
-    def add_num(self, num):
-        # Add the number to the appropriate heap
-        if not self.max_heap or num < -self.max_heap[0]:
-            # If max_heap is empty or num is smaller than max_heap's root,
-            # add it to max_heap.
-            heapq.heappush(self.max_heap, -num)
-        else:
-            # Otherwise, add it to min_heap.
-            heapq.heappush(self.min_heap, num)
-        
-        # Balance heaps to ensure size difference does not exceed one.
-        if len(self.max_heap) > len(self.min_heap) + 1:
-            # If max_heap has more than one more element than min_heap,
-            # move an element from max_heap to min_heap.
-            heapq.heappush(self.min_heap, heapq.heappop(self.max_heap))
-        elif len(self.min_heap) > len(self.max_heap):
-            # If min_heap has more elements than max_heap,
-            # move an element from min_heap to max_heap.
-            heapq.heappush(self.max_heap, -heapq.heappop(self.min_heap))
-
-    def find_median(self):
-        if len(self.max_heap) == len(self.min_heap):
-            # If heaps have equal number of elements,
-            # median is the average of roots.
-            return (-self.max_heap[0] + self.min_heap[0]) / 2.0
-        else:
-            # If max_heap has more elements,
-            # median is the root of max_heap.
-            return (-self.max_heap[0])
+def count_segments(S, dictionary):
+    # Preprocess the dictionary to include rotations of each word
+    rotations = set()
+    for word in dictionary:
+        for i in range(len(word)):
+            rotations.add(word[i:] + word[:i])
+    
+    # Initialize count for unique segments
+    count = 0
+    
+    # Iterate through all possible segment lengths
+    for length in range(1, len(S) + 1):
+        for start in range(len(S) - length + 1):
+            segment = S[start:start + length]
+            
+            # Check if segment is a rotation of any word in the dictionary
+            if segment in rotations:
+                count += 1
+                
+    return count
 
 # Example usage:
-mf = MedianFinder()
-mf.add_num(1)
-mf.add_num(2)
-mf.add_num(3)
-print("Median:", mf.find_median())  # Output: 2.0
+S = "abcbac"
+dictionary = ["abc", "bac"]
+print(count_segments(S, dictionary))  # Output: 2
 ```
 
-**Complexity Analysis:**
-- **Time Complexity:**
-  - `add_num` operation: \(O(\log n)\) due to heap operations.
-  - `find_median` operation: \(O(1)\) as it simply accesses the roots of the heaps.
+### Analysis of Complexity:
+
+- **Time Complexity:** The time complexity is O(N * L * W), where N is the length of the input string, L is the maximum length of any word in the dictionary, and W is the average number of unique rotations for each word. This is because we iterate through all possible segments of the input string and check each segment against all rotations of dictionary words.
   
-**Explanation of Approach:**
-The solution uses two heaps: one max-heap (`self.max_heap`) for storing smaller numbers (inverted to represent max heap), and one min-heap (`self.min_heap`) for storing larger numbers. This allows efficient insertion and retrieval of the median value.
+- **Space Complexity:** The space complexity is O(W * L), as we store unique rotations of each word in a set.
 
-1. **Insertion:** The new number is added to either the max-heap or the min-heap based on whether it is smaller than the root of the max-heap. After insertion, the heaps are balanced to ensure that their size difference does not exceed one, maintaining efficiency.
+### Why This Approach is Optimal:
 
-2. **Median Calculation:** The median is calculated by accessing the roots of both heaps. If the number of elements in both heaps is equal, the median is the average of these roots; otherwise, it is the root from the heap with more elements (which represents the max value).
+This approach ensures that we do not miss any valid rotations by considering all possible segments and checking each one against the rotated forms of dictionary words. The use of a set for storing rotations prevents redundant checks and ensures uniqueness.
 
-This approach ensures that both insertion and retrieval operations are performed efficiently, leveraging the properties of heaps for maintaining a balanced distribution of numbers.
-
-### Difficulty Rating: This challenge requires a deep understanding of heap properties and operations, as well as an effective strategy for
+This problem requires careful consideration of string manipulation techniques and efficient data structure usage, making it challenging yet solvable with proper optimization.
