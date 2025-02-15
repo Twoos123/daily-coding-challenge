@@ -19,84 +19,101 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: "Balanced Median Heap"
-
-**Problem Description:**
-
-Given a stream of integers, maintain a data structure that efficiently tracks the median of the numbers seen so far. The data structure should support inserting a new number into the stream and retrieving the current median in constant time. The twist is that the data structure should handle streams with both odd and even lengths of unique elements.
-
-**Constraints:**
-- The stream of integers is initially empty.
-- The stream will contain only positive integers.
-- The median calculation should handle both odd and even lengths of the stream.
-- Insertion and retrieval operations should be efficient.
+### **Problem Description:**
+Given an `m x n` matrix `A`, where each element is a real number, implement a function to find the maximum sum of a rectangular sub-matrix within the given matrix. The sub-matrix must be non-empty and contiguous.
 
 **Example Input/Output:**
-- **Input Stream:** [1, 3, 5]
-- **Output:** [1, 2, 3]
-- **Input Stream:** [1, 3, 5, 7]
-- **Output:** [1, 2, 3, 4]
-
-**Solution:**
-
-To solve this problem efficiently, we can use two heaps: a Min Heap and a Max Heap. The Min Heap will store the smaller half of the numbers, and the Max Heap will store the larger half. This approach ensures that the root of one heap will always correspond to the current median.
-
-Here’s an implementation in Python:
 
 ```python
-import heapq
+# Input matrix A
+A = [
+    [1, 2, -1, -4, -20],
+    [-8, -3, 4, 2, 1],
+    [3, 8, 10, 1, 3],
+    [15, 2, 5, -8, -3]
+]
 
-class BalancedMedianHeap:
-    def __init__(self):
-        self.min_heap = []  # Stores smaller half of numbers
-        self.max_heap = []  # Stores larger half of numbers
+# Output: The maximum sum of a rectangular sub-matrix
+max_sum = max_submatrix_sum(A)
 
-    def insert(self, num):
-        if not self.min_heap or num < -self.max_heap[0]:
-            heapq.heappush(self.min_heap, -num)
-        else:
-            heapq.heappush(self.max_heap, num)
-
-        # Balance the heaps to maintain efficient retrieval of median
-        if len(self.min_heap) > len(self.max_heap) + 1:
-            heapq.heappush(self.max_heap, -heapq.heappop(self.min_heap))
-        elif len(self.max_heap) > len(self.min_heap):
-            heapq.heappush(self.min_heap, -heapq.heappop(self.max_heap))
-
-    def find_median(self):
-        if len(self.min_heap) == len(self.max_heap):
-            return (-self.min_heap[0] + self.max_heap[0]) / 2.0
-        else:
-            return -self.min_heap[0]
-
-# Example usage
-bmmh = BalancedMedianHeap()
-bmmh.insert(1)
-bmmh.insert(3)
-print("Median:", bmmh.find_median())  # Output: 2
-
-bmmh.insert(5)
-print("Median:", bmmh.find_median())  # Output: 3
-
-bmmh.insert(7)
-print("Median:", bmmh.find_median())  # Output: 4
-
+print(max_sum) # Output should be 29 (Maximum sum is in the sub-matrix [[4,2],[10,1],[15,-8]])
 ```
 
-**Analysis:**
+**Constraints:**
+- The input matrix `A` will be a list of lists where each inner list represents a row of the matrix.
+- The elements in the matrix are real numbers.
+- The size of the matrix `(m x n)` is assumed to be positive integers.
 
-- **Time Complexity:**
-  - Insert operation: The time complexity of inserting an element into either heap is \( O(\log n) \) due to the `heapq.heappush` operation.
-  - Finding the median: The time complexity for retrieving the median is \( O(1) \) as it involves accessing the roots of both heaps.
+### Most Efficient Solution
 
-- **Space Complexity:** The space complexity is \( O(n) \) because we need to store all elements in the two heaps.
+To find the maximum sum of a rectangular sub-matrix within a given matrix, we can use Kadane's algorithm to scan through the matrix and keep track of the maximum sum encountered so far. This approach ensures that we efficiently handle both horizontal and vertical scans of the matrix.
 
-**Optimality:**
+Here's the Python solution:
 
-This approach is optimal because it uses two heaps to efficiently manage the stream of integers, ensuring that both insertion and retrieval operations are performed in logarithmic and constant time respectively. The balancing mechanism ensures that one heap always contains the smaller elements and the other contains the larger elements, making it easy to calculate the median in constant time.
+```python
+def max_submatrix_sum(matrix):
+    if not matrix or not matrix[0]:
+        return 0
+    
+    m, n = len(matrix), len(matrix[0])
+    
+    # Initialize result with negative infinity
+    res = float('-inf')
+    
+    # Iterate over all possible widths of sub-matrices
+    for width in range(1, n + 1):
+        dp = [[0] * (n - width + 1) for _ in range(m)]
+        
+        # Initialize first row with cumulative sums using Kadane's algorithm
+        for j in range(n - width + 1):
+            for i in range(m):
+                dp[i][j] = max(dp[i][j], matrix[i][j] + dp[(i - 1) % m][j] if i > 0 else matrix[i][j])
+        
+        # Update result with maximum sum for each width
+        for j in range(n - width + 1):
+            res = max(res, max_subarray(dp, width))
+    
+    return res
 
-**Difficulty Rating:** 3
+def max_subarray(dp, width):
+    max_end_here = dp[0][0]
+    max_so_far = dp[0][0]
+    
+    for i in range(1, len(dp)):
+        dp[i][0] += dp[(i - 1) % len(dp)][0]
+        
+        max_end_here = max(dp[i][0], max_end_here + dp[i][0])
+        
+        if max_end_here > max_so_far:
+            max_so_far = max_end_here
+            
+    return max_so_far
 
-This problem requires understanding how to balance two heaps to maintain the median efficiently, which is a more advanced concept but still within the realm of typical LeetCode-style challenges. The solution involves handling both insertion and retrieval operations efficiently, making it slightly challenging but not extremely so.
+# Example usage
+A = [
+    [1, 2, -1, -4, -20],
+    [-8, -3, 4, 2, 1],
+    [3, 8, 10, 1, 3],
+    [15, 2, 5, -8, -3]
+]
+
+print(max_submatrix_sum(A)) # Output should be 29 (Maximum sum is in the sub-matrix [[4,2],[10,1],[15,-8]])
+```
+
+### Analysis of Complexity:
+
+- **Time Complexity:** The outer loop iterates over all possible widths (`O(n)`), and for each width, we perform a scan using Kadane's algorithm (`O(m*n)`). Therefore, the overall time complexity is `O(m*n*n)` or `O(m*n^2)`.
+
+- **Space Complexity:** We use additional space to store cumulative sums (`O(m*n)`).
+
+This approach ensures that we efficiently handle both horizontal and vertical scans of the matrix without needing to consider every possible sub-matrix individually.
+
+### Explanation of the Algorithm:
+
+1. **Initialization:** We initialize an auxiliary dynamic programming matrix (`dp`) where each element will store cumulative sums up to that point.
+2. **First Scan:** We perform an initial scan using Kadane's algorithm for cumulative sums along each row.
+3. **Subsequent Scans:** For each possible width of sub-matrices starting from `width=1`, we update our `dp` matrix by adding cumulative sums from previous rows.
+4. **Local Maxima Calculation:** We use Kadane's algorithm again within this dynamically updated `dp` matrix to find local maxima within each width.
+5
