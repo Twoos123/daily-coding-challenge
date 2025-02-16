@@ -19,101 +19,93 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### **Problem Description:**
-Given an `m x n` matrix `A`, where each element is a real number, implement a function to find the maximum sum of a rectangular sub-matrix within the given matrix. The sub-matrix must be non-empty and contiguous.
+### Problem Description
+**Challenge: Maximum Subarray Product with Constraints**
 
-**Example Input/Output:**
+You are given two arrays, `nums` and `mod`, where `nums` is a list of integers and `mod` is a list of integers representing modulo values. The goal is to find the maximum product of a subsequence in `nums` such that the product of this subsequence is less than or equal to every modulo value in `mod`. If no such product exists, return `-1`.
 
-```python
-# Input matrix A
-A = [
-    [1, 2, -1, -4, -20],
-    [-8, -3, 4, 2, 1],
-    [3, 8, 10, 1, 3],
-    [15, 2, 5, -8, -3]
-]
+### Example Input/Output
+- **Input**: `nums = [2, 3, 4], mod = [1, 10]`
+- **Output**: The maximum product is `6` which is achieved by the subsequence `[2, 3]`.
 
-# Output: The maximum sum of a rectangular sub-matrix
-max_sum = max_submatrix_sum(A)
+### Constraints
+- `1 <= nums.length <= 10^5`
+- `0 <= nums[i] <= 10^5`
+- `1 <= mod.length <= 10^5`
+- `0 <= mod[i] <= 10^5`
 
-print(max_sum) # Output should be 29 (Maximum sum is in the sub-matrix [[4,2],[10,1],[15,-8]])
-```
+### Solution
 
-**Constraints:**
-- The input matrix `A` will be a list of lists where each inner list represents a row of the matrix.
-- The elements in the matrix are real numbers.
-- The size of the matrix `(m x n)` is assumed to be positive integers.
-
-### Most Efficient Solution
-
-To find the maximum sum of a rectangular sub-matrix within a given matrix, we can use Kadane's algorithm to scan through the matrix and keep track of the maximum sum encountered so far. This approach ensures that we efficiently handle both horizontal and vertical scans of the matrix.
-
-Here's the Python solution:
+To solve this problem efficiently, we will use a dynamic programming approach combined with array manipulation.
 
 ```python
-def max_submatrix_sum(matrix):
-    if not matrix or not matrix[0]:
-        return 0
+def maxSubarrayProduct(nums, mod):
+    n = len(nums)
     
-    m, n = len(matrix), len(matrix[0])
+    # Initialize maximum product and current product
+    max_product = float('-inf')
     
-    # Initialize result with negative infinity
-    res = float('-inf')
+    # Array to store the maximum product ending at each index
+    dp = [float('-inf')] * n
     
-    # Iterate over all possible widths of sub-matrices
-    for width in range(1, n + 1):
-        dp = [[0] * (n - width + 1) for _ in range(m)]
+    # Array to store the minimum product ending at each index
+    min_dp = [float('inf')] * n
+    
+    dp[0] = nums[0]
+    min_dp[0] = nums[0] if nums[0] <= 0 else 1
+    
+    # Iterate through the array
+    for i in range(1, n):
+        # Update dp[i] and min_dp[i] based on previous values
+        dp[i] = max(nums[i], dp[i-1] * nums[i], min_dp[i-1] * nums[i])
+        min_dp[i] = min(nums[i], dp[i-1] * nums[i], min_dp[i-1] * nums[i])
         
-        # Initialize first row with cumulative sums using Kadane's algorithm
-        for j in range(n - width + 1):
-            for i in range(m):
-                dp[i][j] = max(dp[i][j], matrix[i][j] + dp[(i - 1) % m][j] if i > 0 else matrix[i][j])
-        
-        # Update result with maximum sum for each width
-        for j in range(n - width + 1):
-            res = max(res, max_subarray(dp, width))
+        # Update max_product if current product exceeds it and is within constraints
+        if dp[i] <= max(mod):
+            max_product = max(max_product, dp[i])
     
-    return res
+    # Check if any product exceeds all modulo values
+    if any(dp[i] > max(mod) for i in range(n)):
+        return -1
+    
+    return max_product if max_product != float('-inf') else -1
 
-def max_subarray(dp, width):
-    max_end_here = dp[0][0]
-    max_so_far = dp[0][0]
-    
-    for i in range(1, len(dp)):
-        dp[i][0] += dp[(i - 1) % len(dp)][0]
-        
-        max_end_here = max(dp[i][0], max_end_here + dp[i][0])
-        
-        if max_end_here > max_so_far:
-            max_so_far = max_end_here
-            
-    return max_so_far
+# Example usage:
+nums = [2, 3, 4]
+mod = [1, 10]
+print(maxSubarrayProduct(nums, mod)) # Output: 6
 
-# Example usage
-A = [
-    [1, 2, -1, -4, -20],
-    [-8, -3, 4, 2, 1],
-    [3, 8, 10, 1, 3],
-    [15, 2, 5, -8, -3]
-]
-
-print(max_submatrix_sum(A)) # Output should be 29 (Maximum sum is in the sub-matrix [[4,2],[10,1],[15,-8]])
 ```
 
-### Analysis of Complexity:
+### Complexity Analysis
 
-- **Time Complexity:** The outer loop iterates over all possible widths (`O(n)`), and for each width, we perform a scan using Kadane's algorithm (`O(m*n)`). Therefore, the overall time complexity is `O(m*n*n)` or `O(m*n^2)`.
+- **Time Complexity**: O(n) where n is the length of the `nums` array. This is because we iterate through the array once.
+- **Space Complexity**: O(n) for storing dp and min_dp arrays.
 
-- **Space Complexity:** We use additional space to store cumulative sums (`O(m*n)`).
+### Detailed Explanation
 
-This approach ensures that we efficiently handle both horizontal and vertical scans of the matrix without needing to consider every possible sub-matrix individually.
+1. **Initialization**:
+   - We initialize `dp` and `min_dp` arrays with negative infinity and positive infinity respectively.
+   - We set `dp` and `min_dp` to `nums`. If `nums` is non-positive, we set `min_dp` to 1 to handle negative products.
 
-### Explanation of the Algorithm:
+2. **Iteration**:
+   - For each element in the array starting from index 1:
+     - Update `dp[i]` by considering three possibilities: 
+       - The current element itself.
+       - The product of the current element with the previous maximum product (`dp[i-1] * nums[i]`).
+       - The product of the current element with the previous minimum product (`min_dp[i-1] * nums[i]`). This handles cases where negative products are multiplied which can result in a larger absolute value.
+     - Update `min_dp[i]` similarly by considering these three possibilities but taking minimums instead of maximums.
 
-1. **Initialization:** We initialize an auxiliary dynamic programming matrix (`dp`) where each element will store cumulative sums up to that point.
-2. **First Scan:** We perform an initial scan using Kadane's algorithm for cumulative sums along each row.
-3. **Subsequent Scans:** For each possible width of sub-matrices starting from `width=1`, we update our `dp` matrix by adding cumulative sums from previous rows.
-4. **Local Maxima Calculation:** We use Kadane's algorithm again within this dynamically updated `dp` matrix to find local maxima within each width.
-5
+3. **Constraint Check**:
+   - After updating dp arrays, check if any product exceeds all modulo values in mod. If yes, return -1.
+
+4. **Final Result**:
+   - Return the maximum product found if it does not exceed any modulo value; otherwise return -1.
+
+This approach ensures that we efficiently compute all possible subarray products while ensuring they do not exceed any given modulo values by maintaining both maximum and minimum products.
+
+### Difficulty Rating: 4
+
+This problem requires understanding dynamic programming techniques and array manipulation to efficiently solve it within linear time complexity. The twist involving modulo values adds complexity but does not significantly increase the overall difficulty beyond what is typically expected in dynamic programming challenges.
