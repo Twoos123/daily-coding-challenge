@@ -19,93 +19,84 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
 ### Problem Description
-**Challenge: Maximum Subarray Product with Constraints**
 
-You are given two arrays, `nums` and `mod`, where `nums` is a list of integers and `mod` is a list of integers representing modulo values. The goal is to find the maximum product of a subsequence in `nums` such that the product of this subsequence is less than or equal to every modulo value in `mod`. If no such product exists, return `-1`.
+**Challenge: Median Maintenance with Heaps**
+
+Given a sequence of integers, maintain the median of the sequence using two heaps: one max heap and one min heap. The max heap should store the smaller half of the integers, and the min heap should store the larger half. Ensure that both heaps are balanced and that the median is efficiently updated.
+
+**Constraints:**
+- The input sequence can be very large.
+- The median needs to be updated after each insertion.
+- The heaps must be balanced (i.e., both heaps should have approximately equal sizes).
 
 ### Example Input/Output
-- **Input**: `nums = [2, 3, 4], mod = [1, 10]`
-- **Output**: The maximum product is `6` which is achieved by the subsequence `[2, 3]`.
 
-### Constraints
-- `1 <= nums.length <= 10^5`
-- `0 <= nums[i] <= 10^5`
-- `1 <= mod.length <= 10^5`
-- `0 <= mod[i] <= 10^5`
-
-### Solution
-
-To solve this problem efficiently, we will use a dynamic programming approach combined with array manipulation.
-
-```python
-def maxSubarrayProduct(nums, mod):
-    n = len(nums)
-    
-    # Initialize maximum product and current product
-    max_product = float('-inf')
-    
-    # Array to store the maximum product ending at each index
-    dp = [float('-inf')] * n
-    
-    # Array to store the minimum product ending at each index
-    min_dp = [float('inf')] * n
-    
-    dp[0] = nums[0]
-    min_dp[0] = nums[0] if nums[0] <= 0 else 1
-    
-    # Iterate through the array
-    for i in range(1, n):
-        # Update dp[i] and min_dp[i] based on previous values
-        dp[i] = max(nums[i], dp[i-1] * nums[i], min_dp[i-1] * nums[i])
-        min_dp[i] = min(nums[i], dp[i-1] * nums[i], min_dp[i-1] * nums[i])
-        
-        # Update max_product if current product exceeds it and is within constraints
-        if dp[i] <= max(mod):
-            max_product = max(max_product, dp[i])
-    
-    # Check if any product exceeds all modulo values
-    if any(dp[i] > max(mod) for i in range(n)):
-        return -1
-    
-    return max_product if max_product != float('-inf') else -1
-
-# Example usage:
-nums = [2, 3, 4]
-mod = [1, 10]
-print(maxSubarrayProduct(nums, mod)) # Output: 6
-
-```
+**Input:** `[3, 1, 4, 1, 5, 9, 2, 6]`
+**Output:** `Median values: 1, 1, 2, 2, 3, 3, 4, 4`
 
 ### Complexity Analysis
 
-- **Time Complexity**: O(n) where n is the length of the `nums` array. This is because we iterate through the array once.
-- **Space Complexity**: O(n) for storing dp and min_dp arrays.
+1. **Time Complexity:**
+   - **Insertion:** \(O(\log n)\) because we need to insert an element into either the max heap or the min heap.
+   - **Median Update:** Since we are maintaining two heaps, the worst-case scenario is that we have to restore balance by moving elements between heaps, which takes \(O(\log n)\) time.
+   - **Total:** The overall time complexity for maintaining the median with insertions is \(O(\log n)\).
 
-### Detailed Explanation
+2. **Space Complexity:**
+   - The space complexity is \(O(n)\) because in the worst case, we might need to store all elements in both heaps.
 
-1. **Initialization**:
-   - We initialize `dp` and `min_dp` arrays with negative infinity and positive infinity respectively.
-   - We set `dp` and `min_dp` to `nums`. If `nums` is non-positive, we set `min_dp` to 1 to handle negative products.
+### Optimal Solution
 
-2. **Iteration**:
-   - For each element in the array starting from index 1:
-     - Update `dp[i]` by considering three possibilities: 
-       - The current element itself.
-       - The product of the current element with the previous maximum product (`dp[i-1] * nums[i]`).
-       - The product of the current element with the previous minimum product (`min_dp[i-1] * nums[i]`). This handles cases where negative products are multiplied which can result in a larger absolute value.
-     - Update `min_dp[i]` similarly by considering these three possibilities but taking minimums instead of maximums.
+Here is the most efficient solution in Python:
 
-3. **Constraint Check**:
-   - After updating dp arrays, check if any product exceeds all modulo values in mod. If yes, return -1.
+```python
+import heapq
 
-4. **Final Result**:
-   - Return the maximum product found if it does not exceed any modulo value; otherwise return -1.
+class MedianFinder:
+    def __init__(self):
+        # Max heap to store smaller half of the numbers
+        self.max_heap = []
+        # Min heap to store larger half of the numbers
+        self.min_heap = []
 
-This approach ensures that we efficiently compute all possible subarray products while ensuring they do not exceed any given modulo values by maintaining both maximum and minimum products.
+    def add_num(self, num):
+        if not self.max_heap or num < -self.max_heap[0]:
+            heapq.heappush(self.max_heap, -num)
+        else:
+            heapq.heappush(self.min_heap, num)
 
-### Difficulty Rating: 4
+        # Maintain balance between two heaps
+        if len(self.max_heap) > len(self.min_heap) + 1:
+            heapq.heappush(self.min_heap, -heapq.heappop(self.max_heap))
+        elif len(self.min_heap) > len(self.max_heap):
+            heapq.heappush(self.max_heap, -heapq.heappop(self.min_heap))
 
-This problem requires understanding dynamic programming techniques and array manipulation to efficiently solve it within linear time complexity. The twist involving modulo values adds complexity but does not significantly increase the overall difficulty beyond what is typically expected in dynamic programming challenges.
+    def find_median(self):
+        if len(self.max_heap) == len(self.min_heap):
+            return (-self.max_heap[0] + self.min_heap[0]) / 2
+        else:
+            return -self.max_heap[0]
+
+# Example usage:
+median_finder = MedianFinder()
+median_finder.add_num(3)
+median_finder.add_num(1)
+print("Median after adding 1: ", median_finder.find_median())
+median_finder.add_num(4)
+print("Median after adding 4: ", median_finder.find_median())
+```
+
+### Explanation
+
+- **Initialization:** Two heaps are initialized, one as a max heap and one as a min heap.
+- **Insertion:** When adding a new number, it is either inserted into the max heap if it is smaller than the smallest element in the max heap, or into the min heap if it is larger than the largest element in the min heap.
+- **Balancing Heaps:** After each insertion, the heaps are checked to ensure they are balanced. If the max heap has more than one more element than the min heap, an element is moved from the max heap to the min heap and vice versa to balance them.
+- **Median Calculation:** The median is calculated by finding the middle value between the roots of both heaps when they have equal sizes, or just taking the root of the larger heap when one heap is significantly larger.
+
+This approach ensures that both heaps remain balanced and that the median can be efficiently updated in \(O(\log n)\) time per insertion.
+
+### Difficulty Rating
+
+This challenge requires understanding the properties of min and max heaps, balancing them efficiently, and implementing these operations in a Python solution. While it involves standard operations like heap insertion and balancing, the need to maintain balance between two heaps adds complexity, making it more challenging than typical beginner-friendly problems.
