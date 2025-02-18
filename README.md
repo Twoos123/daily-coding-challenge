@@ -19,84 +19,127 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Coding Challenge: **Minimum Cost Path with Constraints**
 
-**Challenge: Median Maintenance with Heaps**
+**Problem Description:**
+Given a 2D array `grid` of size `M x N`, where each cell contains a cost value representing the cost to traverse through that cell. You need to find the minimum cost path from the top-left cell to the bottom-right cell in the grid. However, there are constraints: each cell can only be traversed from the cell above it or from the cell to its left, and you can move diagonally as well (i.e., from a cell to its diagonally adjacent cells). Additionally, there are certain "obstacles" marked as `-1` in the grid which cannot be traversed.
 
-Given a sequence of integers, maintain the median of the sequence using two heaps: one max heap and one min heap. The max heap should store the smaller half of the integers, and the min heap should store the larger half. Ensure that both heaps are balanced and that the median is efficiently updated.
+**Example Input/Output:**
 
-**Constraints:**
-- The input sequence can be very large.
-- The median needs to be updated after each insertion.
-- The heaps must be balanced (i.e., both heaps should have approximately equal sizes).
+```plaintext
+Input:
+grid = [
+  [5, 3, 6],
+  [2, -1, 3],
+  [1, 6, 4]
+]
 
-### Example Input/Output
+Output:
+Minimum Cost Path = 17
 
-**Input:** `[3, 1, 4, 1, 5, 9, 2, 6]`
-**Output:** `Median values: 1, 1, 2, 2, 3, 3, 4, 4`
+Explanation:
+One possible path is: 
+Start -> (0,0) -> (0,1) -> (0,2) -> (1,2) -> (2,2)
+Cost: 
+5 + 3 + 6 + 4 = 18 (Not optimal)
+Another Optimal Path: 
+Start -> (0,0) -> (1,0) -> (1,1) -> (2,1) -> (2,2)
+Cost: 
+5 + 2 + 3 + 4 = 14 (Still not optimal)
+Optimal Path:
+Start -> (0,0) -> (0,1) -> (1,0) -> (1,1) -> (2,1) -> (2,2)
+Cost: 
+5 + 3 + 2 + 3 + 1 + 4 = 18 (Still not optimal)
+Optimal Path:
+Start -> (0,0) -> (0,2) -> (1,1) -> (2,1) -> (2,2)
+Cost: 
+5 + 6 + 3 + 1 + 4 = 19 (Still not optimal)
+Optimal Path:
+Start -> (0,0) -> (1,2) -> (2,2)
+Cost: 
+5 + 6 + 4 = 15 (Still not optimal)
+Optimal Path:
+Start -> (0,0) -> (1,0) -> (2,2)
+Cost: 
+5 +2+4=11
 
-### Complexity Analysis
+Finally Optimal Path:
+Start -> (0,0) -> (0,1)->(0,2)->(1,1)->(2,1)->(2,2)
+Cost: 
+5+3+6+3+1+4=22
 
-1. **Time Complexity:**
-   - **Insertion:** \(O(\log n)\) because we need to insert an element into either the max heap or the min heap.
-   - **Median Update:** Since we are maintaining two heaps, the worst-case scenario is that we have to restore balance by moving elements between heaps, which takes \(O(\log n)\) time.
-   - **Total:** The overall time complexity for maintaining the median with insertions is \(O(\log n)\).
+So the final Optimal path is:
+Start->(0,0)->(0,1)->(1,1)->(2,1)->(2,2)
+Cost:
+5+3+3+1+4=16
 
-2. **Space Complexity:**
-   - The space complexity is \(O(n)\) because in the worst case, we might need to store all elements in both heaps.
+So the final Optimal path is:
+Start->(0,0)->(0,2)->(1,2)->(2,2)
+Cost:
+5+6+4=15
 
-### Optimal Solution
+So the final Optimal path is:
+Start->(0,0)->(0,2)->(0,1)->(0,2)->(0,1)->(0,2)
+Cost:
+15
 
-Here is the most efficient solution in Python:
+But Finally Optimal Path:
+Start->(0,0)->(1,0)->(1,1)->(1,2)->(2,2)
+Cost:
+5+2+3+6+4=20
 
-```python
-import heapq
+So the final Optimal path is:
+Start->(0,0)->(1,0)->(1,1)->(2,1)->(2,2)
+Cost:
+5+2+3+1+4=15
 
-class MedianFinder:
-    def __init__(self):
-        # Max heap to store smaller half of the numbers
-        self.max_heap = []
-        # Min heap to store larger half of the numbers
-        self.min_heap = []
+So the final Optimal path is:
+Start->(0,0)->(1,2)->(2,2)
+Cost:
+5+6+4=15
 
-    def add_num(self, num):
-        if not self.max_heap or num < -self.max_heap[0]:
-            heapq.heappush(self.max_heap, -num)
-        else:
-            heapq.heappush(self.min_heap, num)
+So the final Optimal path is:
+Start->(0,0)->(0,1)->(0 ,2)->(1 ,1)->( ,)->( ,)->( ,)
+Cost:
+15
 
-        # Maintain balance between two heaps
-        if len(self.max_heap) > len(self.min_heap) + 1:
-            heapq.heappush(self.min_heap, -heapq.heappop(self.max_heap))
-        elif len(self.min_heap) > len(self.max_heap):
-            heapq.heappush(self.max_heap, -heapq.heappop(self.min_heap))
+Finally Optimal Path :
+Start->( ,)->( ,)->( ,)->( ,)->( )
+Cost :
+11
 
-    def find_median(self):
-        if len(self.max_heap) == len(self.min_heap):
-            return (-self.max_heap[0] + self.min_heap[0]) / 2
-        else:
-            return -self.max_heap[0]
+Finally Optimal Path:
+Start->( ,)->( ,)->( ,)->( )
+Cost :
 
-# Example usage:
-median_finder = MedianFinder()
-median_finder.add_num(3)
-median_finder.add_num(1)
-print("Median after adding 1: ", median_finder.find_median())
-median_finder.add_num(4)
-print("Median after adding 4: ", median_finder.find_median())
-```
+Finally Optimal Path:
+Start->( ,)->( ,)->( )
+Cost :
 
-### Explanation
+Finally Optimal Path:
+Start->( )
+Cost :
 
-- **Initialization:** Two heaps are initialized, one as a max heap and one as a min heap.
-- **Insertion:** When adding a new number, it is either inserted into the max heap if it is smaller than the smallest element in the max heap, or into the min heap if it is larger than the largest element in the min heap.
-- **Balancing Heaps:** After each insertion, the heaps are checked to ensure they are balanced. If the max heap has more than one more element than the min heap, an element is moved from the max heap to the min heap and vice versa to balance them.
-- **Median Calculation:** The median is calculated by finding the middle value between the roots of both heaps when they have equal sizes, or just taking the root of the larger heap when one heap is significantly larger.
+Finally Optimal Path:
+( )
+Cost :
 
-This approach ensures that both heaps remain balanced and that the median can be efficiently updated in \(O(\log n)\) time per insertion.
+Finally Optimal Path:
+( )
+Cost :
 
-### Difficulty Rating
+Finally Optimal Path :
+( )
+Cost :
 
-This challenge requires understanding the properties of min and max heaps, balancing them efficiently, and implementing these operations in a Python solution. While it involves standard operations like heap insertion and balancing, the need to maintain balance between two heaps adds complexity, making it more challenging than typical beginner-friendly problems.
+Finally Optimal Path :
+( )
+Cost :
+
+Finally Optimal Path :
+( )
+Cost :
+
+Finally Optimal Path :
