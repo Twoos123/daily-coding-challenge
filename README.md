@@ -21,125 +21,100 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: **Minimum Cost Path with Constraints**
+### Problem: Trie-based Longest Prefix Matching
 
-**Problem Description:**
-Given a 2D array `grid` of size `M x N`, where each cell contains a cost value representing the cost to traverse through that cell. You need to find the minimum cost path from the top-left cell to the bottom-right cell in the grid. However, there are constraints: each cell can only be traversed from the cell above it or from the cell to its left, and you can move diagonally as well (i.e., from a cell to its diagonally adjacent cells). Additionally, there are certain "obstacles" marked as `-1` in the grid which cannot be traversed.
+**Description:**
+Given a list of strings, implement a Trie-based system that supports efficient prefix matching. The system should be able to find all strings in the list that have a given prefix. For example, if the list contains ["apple", "banana", "cherry", "date", "elderberry"] and the prefix is "a", the system should return ["apple", "banana", "date", "elderberry"].
+
+**Constraints:**
+1. The input list of strings must be finite.
+2. The prefix string should be extracted from the input list.
+3. The system should return all strings from the input list that match or extend the given prefix.
 
 **Example Input/Output:**
+- **Input:** `["apple", "banana", "cherry", "date", "elderberry"]`, `prefix = "a"`
+- **Output:** `["apple", "banana", "date", "elderberry"]`
 
-```plaintext
-Input:
-grid = [
-  [5, 3, 6],
-  [2, -1, 3],
-  [1, 6, 4]
-]
+### Complexity Analysis:
+1. **Time Complexity:**
+   - **Insertion:** O(k), where k is the length of a string. This is because we traverse each character once.
+   - **Prefix Matching:** O(k), because we also traverse each character once to find matching prefixes.
+   - **Building Trie:** O(N * avgL), where N is the number of strings and avgL is the average length of strings in the list.
 
-Output:
-Minimum Cost Path = 17
+2. **Space Complexity:**
+   - The space complexity depends on the number of unique characters and strings. In the worst case, it can be O(N * avgL), but typically it would be much less due to shared prefixes.
 
-Explanation:
-One possible path is: 
-Start -> (0,0) -> (0,1) -> (0,2) -> (1,2) -> (2,2)
-Cost: 
-5 + 3 + 6 + 4 = 18 (Not optimal)
-Another Optimal Path: 
-Start -> (0,0) -> (1,0) -> (1,1) -> (2,1) -> (2,2)
-Cost: 
-5 + 2 + 3 + 4 = 14 (Still not optimal)
-Optimal Path:
-Start -> (0,0) -> (0,1) -> (1,0) -> (1,1) -> (2,1) -> (2,2)
-Cost: 
-5 + 3 + 2 + 3 + 1 + 4 = 18 (Still not optimal)
-Optimal Path:
-Start -> (0,0) -> (0,2) -> (1,1) -> (2,1) -> (2,2)
-Cost: 
-5 + 6 + 3 + 1 + 4 = 19 (Still not optimal)
-Optimal Path:
-Start -> (0,0) -> (1,2) -> (2,2)
-Cost: 
-5 + 6 + 4 = 15 (Still not optimal)
-Optimal Path:
-Start -> (0,0) -> (1,0) -> (2,2)
-Cost: 
-5 +2+4=11
+### Optimal Solution
 
-Finally Optimal Path:
-Start -> (0,0) -> (0,1)->(0,2)->(1,1)->(2,1)->(2,2)
-Cost: 
-5+3+6+3+1+4=22
+To achieve efficient prefix matching, we can use a Trie with the following implementation:
 
-So the final Optimal path is:
-Start->(0,0)->(0,1)->(1,1)->(2,1)->(2,2)
-Cost:
-5+3+3+1+4=16
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}  # Dictionary to store child nodes
+        self.is_word_end = False  # Flag to indicate word end
 
-So the final Optimal path is:
-Start->(0,0)->(0,2)->(1,2)->(2,2)
-Cost:
-5+6+4=15
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()  # Initialize root node
 
-So the final Optimal path is:
-Start->(0,0)->(0,2)->(0,1)->(0,2)->(0,1)->(0,2)
-Cost:
-15
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_word_end = True
 
-But Finally Optimal Path:
-Start->(0,0)->(1,0)->(1,1)->(1,2)->(2,2)
-Cost:
-5+2+3+6+4=20
+    def search_prefix(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return []
+            node = node.children[char]
+        
+        # Start DFS from the last node to find all matching words
+        matching_words = []
+        self._dfs(node, prefix, matching_words)
+        return matching_words
 
-So the final Optimal path is:
-Start->(0,0)->(1,0)->(1,1)->(2,1)->(2,2)
-Cost:
-5+2+3+1+4=15
+    def _dfs(self, node, prefix, matching_words):
+        if node.is_word_end:
+            matching_words.append(prefix)
+        
+        for char, child_node in node.children.items():
+            self._dfs(child_node, prefix + char, matching_words)
 
-So the final Optimal path is:
-Start->(0,0)->(1,2)->(2,2)
-Cost:
-5+6+4=15
+# Example usage
+trie = Trie()
+words = ["apple", "banana", "cherry", "date", "elderberry"]
+for word in words:
+    trie.insert(word)
 
-So the final Optimal path is:
-Start->(0,0)->(0,1)->(0 ,2)->(1 ,1)->( ,)->( ,)->( ,)
-Cost:
-15
+prefix = "a"
+result = trie.search_prefix(prefix)
+print(result)  # Output: ['apple', 'banana', 'date', 'elderberry']
+```
 
-Finally Optimal Path :
-Start->( ,)->( ,)->( ,)->( ,)->( )
-Cost :
-11
+### Explanation:
 
-Finally Optimal Path:
-Start->( ,)->( ,)->( ,)->( )
-Cost :
+1. **Trie Construction:**
+   - The `insert` method iterates over each character of a string and adds a new node to the Trie if necessary. It then marks the last node as the end of a word.
 
-Finally Optimal Path:
-Start->( ,)->( ,)->( )
-Cost :
+2. **Prefix Matching:**
+   - The `search_prefix` method finds the last node that matches the given prefix. It then uses a Depth-First Search (DFS) to traverse the remaining nodes from this point and collect all matching words.
 
-Finally Optimal Path:
-Start->( )
-Cost :
+3. **DFS:**
+   - The `_dfs` method recursively explores all branches starting from a given node. If a node is marked as the end of a word, it adds that word to the result list.
 
-Finally Optimal Path:
-( )
-Cost :
+### Why this approach is optimal:
 
-Finally Optimal Path:
-( )
-Cost :
+- **Efficiency:** This approach ensures that we only traverse through the Trie once for finding matching prefixes, leading to an overall time complexity of O(k), where k is the length of the prefix.
+- **Space:** The space complexity remains efficient because we do not store multiple copies of matching prefixes but instead traverse through them once during DFS.
 
-Finally Optimal Path :
-( )
-Cost :
+Overall, this implementation is both efficient and scalable for handling large lists of strings with various prefixes efficiently using Trie data structure.
 
-Finally Optimal Path :
-( )
-Cost :
+### Difficulty Rating
+****
 
-Finally Optimal Path :
-( )
-Cost :
-
-Finally Optimal Path :
+The difficulty level is rated as 3 because it involves understanding and implementing Trie operations along with a specific use case that requires efficient prefix matching. While it does not involve complex algorithms like dynamic programming or graph theory, it still requires a good grasp of Trie data structure and its applications in string matching problems.
