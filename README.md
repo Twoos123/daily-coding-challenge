@@ -19,102 +19,91 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem: Trie-based Longest Prefix Matching
-
-**Description:**
-Given a list of strings, implement a Trie-based system that supports efficient prefix matching. The system should be able to find all strings in the list that have a given prefix. For example, if the list contains ["apple", "banana", "cherry", "date", "elderberry"] and the prefix is "a", the system should return ["apple", "banana", "date", "elderberry"].
-
-**Constraints:**
-1. The input list of strings must be finite.
-2. The prefix string should be extracted from the input list.
-3. The system should return all strings from the input list that match or extend the given prefix.
-
-**Example Input/Output:**
-- **Input:** `["apple", "banana", "cherry", "date", "elderberry"]`, `prefix = "a"`
-- **Output:** `["apple", "banana", "date", "elderberry"]`
-
-### Complexity Analysis:
-1. **Time Complexity:**
-   - **Insertion:** O(k), where k is the length of a string. This is because we traverse each character once.
-   - **Prefix Matching:** O(k), because we also traverse each character once to find matching prefixes.
-   - **Building Trie:** O(N * avgL), where N is the number of strings and avgL is the average length of strings in the list.
-
-2. **Space Complexity:**
-   - The space complexity depends on the number of unique characters and strings. In the worst case, it can be O(N * avgL), but typically it would be much less due to shared prefixes.
-
-### Optimal Solution
-
-To achieve efficient prefix matching, we can use a Trie with the following implementation:
-
-```python
-class TrieNode:
-    def __init__(self):
-        self.children = {}  # Dictionary to store child nodes
-        self.is_word_end = False  # Flag to indicate word end
-
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()  # Initialize root node
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-        node.is_word_end = True
-
-    def search_prefix(self, prefix):
-        node = self.root
-        for char in prefix:
-            if char not in node.children:
-                return []
-            node = node.children[char]
-        
-        # Start DFS from the last node to find all matching words
-        matching_words = []
-        self._dfs(node, prefix, matching_words)
-        return matching_words
-
-    def _dfs(self, node, prefix, matching_words):
-        if node.is_word_end:
-            matching_words.append(prefix)
-        
-        for char, child_node in node.children.items():
-            self._dfs(child_node, prefix + char, matching_words)
-
-# Example usage
-trie = Trie()
-words = ["apple", "banana", "cherry", "date", "elderberry"]
-for word in words:
-    trie.insert(word)
-
-prefix = "a"
-result = trie.search_prefix(prefix)
-print(result)  # Output: ['apple', 'banana', 'date', 'elderberry']
-```
-
-### Explanation:
-
-1. **Trie Construction:**
-   - The `insert` method iterates over each character of a string and adds a new node to the Trie if necessary. It then marks the last node as the end of a word.
-
-2. **Prefix Matching:**
-   - The `search_prefix` method finds the last node that matches the given prefix. It then uses a Depth-First Search (DFS) to traverse the remaining nodes from this point and collect all matching words.
-
-3. **DFS:**
-   - The `_dfs` method recursively explores all branches starting from a given node. If a node is marked as the end of a word, it adds that word to the result list.
-
-### Why this approach is optimal:
-
-- **Efficiency:** This approach ensures that we only traverse through the Trie once for finding matching prefixes, leading to an overall time complexity of O(k), where k is the length of the prefix.
-- **Space:** The space complexity remains efficient because we do not store multiple copies of matching prefixes but instead traverse through them once during DFS.
-
-Overall, this implementation is both efficient and scalable for handling large lists of strings with various prefixes efficiently using Trie data structure.
-
-### Difficulty Rating
 ****
 
-The difficulty level is rated as 3 because it involves understanding and implementing Trie operations along with a specific use case that requires efficient prefix matching. While it does not involve complex algorithms like dynamic programming or graph theory, it still requires a good grasp of Trie data structure and its applications in string matching problems.
+### Problem Description: Merging Sorted Linked Lists
+
+Given two singly linked lists, both sorted in ascending order, merge them into a single sorted linked list. The resulting linked list should also be sorted in ascending order. You can modify the given linked lists as needed to merge them.
+
+#### Example Input/Output:
+
+**Input:**
+- First Linked List: `1 -> 2 -> 4 -> 5`  
+- Second Linked List: `3 -> 6 -> 7`
+
+**Output:**
+- Merged Linked List: `1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7`
+
+#### Constraints:
+- Both linked lists are singly linked lists.
+- Elements in both linked lists are unique and sorted in ascending order.
+- The result should be a new linked list.
+
+### Solution Implementation
+
+```python
+class ListNode:
+    def __init__(self, value=0, next=None):
+        self.val = value
+        self.next = next
+
+def merge_sorted_lists(list1, list2):
+    # Create a dummy node to simplify the merging process
+    dummy = ListNode()
+    current = dummy
+
+    # Initialize pointers for both lists
+    p1 = list1
+    p2 = list2
+
+    # Merge smaller elements first
+    while p1 and p2:
+        if p1.val < p2.val:
+            current.next = p1
+            p1 = p1.next
+        else:
+            current.next = p2
+            p2 = p2.next
+        current = current.next
+
+    # If there are remaining nodes in either list, append them
+    if p1:
+        current.next = p1
+    elif p2:
+        current.next = p2
+
+    # Return the merged list (excluding the dummy node)
+    return dummy.next
+
+# Example usage
+# Create nodes for the first linked list: 1 -> 2 -> 4 -> 5
+list1 = ListNode(1)
+list1.next = ListNode(2)
+list1.next.next = ListNode(4)
+list1.next.next.next = ListNode(5)
+
+# Create nodes for the second linked list: 3 -> 6 -> 7
+list2 = ListNode(3)
+list2.next = ListNode(6)
+list2.next.next = ListNode(7)
+
+# Merge the two linked lists
+merged_list = merge_sorted_lists(list1, list2)
+
+# Print the merged linked list (in reverse for clarity)
+while merged_list:
+    print(merged_list.val, end=' ')
+    merged_list = merged_list.next
+```
+
+### Analysis:
+
+- **Time Complexity:** O(n + m) where n and m are the lengths of the two input linked lists. This is because we traverse both lists once and merge them.
+- **Space Complexity:** O(1) because we only use a constant amount of extra space to store pointers and temporary nodes.
+
+This approach ensures that we handle each element from both lists in a single pass, resulting in optimal time complexity. The use of a dummy node simplifies edge cases like handling empty lists or ensuring proper termination of the merging process.
+
+### Difficulty Rating:
+The difficulty rating for this problem is 4 because it requires understanding how to merge two sorted linked lists efficiently while maintaining the sorted order. This involves managing pointers correctly and handling edge cases properly, which can be challenging but not excessively so when compared to more complex linked list problems.
