@@ -21,89 +21,105 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
 
-****
+### Problem Description
 
-### Problem Description: Merging Sorted Linked Lists
+**Problem: "Maximum Sum of Submatrices with Constraints"**
 
-Given two singly linked lists, both sorted in ascending order, merge them into a single sorted linked list. The resulting linked list should also be sorted in ascending order. You can modify the given linked lists as needed to merge them.
+Given a 2D array `matrix` of size `m x n` and an integer `k`, find the maximum sum of all possible **k x k** submatrices within the given matrix. However, there is a constraint that the sum of any two submatrices must not exceed a given limit `limit`.
 
-#### Example Input/Output:
+**Example Input/Output:**
 
 **Input:**
-- First Linked List: `1 -> 2 -> 4 -> 5`  
-- Second Linked List: `3 -> 6 -> 7`
-
+```plaintext
+matrix = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9]
+]
+k = 2
+limit = 10
+```
 **Output:**
-- Merged Linked List: `1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7`
-
-#### Constraints:
-- Both linked lists are singly linked lists.
-- Elements in both linked lists are unique and sorted in ascending order.
-- The result should be a new linked list.
-
-### Solution Implementation
-
-```python
-class ListNode:
-    def __init__(self, value=0, next=None):
-        self.val = value
-        self.next = next
-
-def merge_sorted_lists(list1, list2):
-    # Create a dummy node to simplify the merging process
-    dummy = ListNode()
-    current = dummy
-
-    # Initialize pointers for both lists
-    p1 = list1
-    p2 = list2
-
-    # Merge smaller elements first
-    while p1 and p2:
-        if p1.val < p2.val:
-            current.next = p1
-            p1 = p1.next
-        else:
-            current.next = p2
-            p2 = p2.next
-        current = current.next
-
-    # If there are remaining nodes in either list, append them
-    if p1:
-        current.next = p1
-    elif p2:
-        current.next = p2
-
-    # Return the merged list (excluding the dummy node)
-    return dummy.next
-
-# Example usage
-# Create nodes for the first linked list: 1 -> 2 -> 4 -> 5
-list1 = ListNode(1)
-list1.next = ListNode(2)
-list1.next.next = ListNode(4)
-list1.next.next.next = ListNode(5)
-
-# Create nodes for the second linked list: 3 -> 6 -> 7
-list2 = ListNode(3)
-list2.next = ListNode(6)
-list2.next.next = ListNode(7)
-
-# Merge the two linked lists
-merged_list = merge_sorted_lists(list1, list2)
-
-# Print the merged linked list (in reverse for clarity)
-while merged_list:
-    print(merged_list.val, end=' ')
-    merged_list = merged_list.next
+```
+Maximum sum of submatrices: 22
 ```
 
-### Analysis:
+### Constraints:
+1. The size of the submatrix (`k x k`) is fixed.
+2. The sum of any two submatrices must not exceed the given limit (`limit`).
+3. The goal is to maximize the sum of all possible submatrices.
 
-- **Time Complexity:** O(n + m) where n and m are the lengths of the two input linked lists. This is because we traverse both lists once and merge them.
-- **Space Complexity:** O(1) because we only use a constant amount of extra space to store pointers and temporary nodes.
+### Solution
 
-This approach ensures that we handle each element from both lists in a single pass, resulting in optimal time complexity. The use of a dummy node simplifies edge cases like handling empty lists or ensuring proper termination of the merging process.
+The problem involves dynamic programming and efficient matrix operations. We can approach this problem by first calculating all possible sums of `k x k` submatrices and then filtering out those that violate the constraint.
+
+1. **Calculate Sum of Submatrices:**
+   - Use a sliding window approach to calculate the sum of all possible `k x k` submatrices.
+
+2. **Filter Constraints:**
+   - Check if the sum of any two submatrices exceeds the given limit.
+
+Here is an optimal solution in Python:
+
+```python
+def max_sum_submatrices(matrix, k, limit):
+    m, n = len(matrix), len(matrix[0])
+    if k > min(m, n):
+        return 0
+    
+    # Prefix sums for each row
+    prefix_sums = [[0] * (n - k + 1) for _ in range(m)]
+    
+    # Calculate prefix sums for each row
+    for i in range(m):
+        for j in range(n - k + 1):
+            prefix_sums[i][j] = sum(matrix[i][j:j+k])
+    
+    # Initialize maximum sum
+    max_sum = float('-inf')
+    
+    # Iterate over all possible submatrices
+    for i in range(m):
+        for j in range(n - k + 1):
+            # Calculate sum of current submatrix
+            current_sum = prefix_sums[i][j]
+            
+            # Check if adding another submatrix would exceed limit
+            for x in range(i + 1, m):
+                for y in range(j + k + 1, n):
+                    if current_sum + prefix_sums[x][y] > limit:
+                        break
+                    max_sum = max(max_sum, current_sum + prefix_sums[x][y])
+                    
+                    # Update current sum for next iteration
+                    current_sum += current_sum
+                    
+                    # Adjust limits for next iteration
+                    if current_sum + prefix_sums[x][y] > limit:
+                        break
+                    
+    return max_sum
+
+# Example usage:
+matrix = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9]
+]
+k = 2
+limit = 10
+
+result = max_sum_submatrices(matrix, k, limit)
+print("Maximum sum of submatrices:", result)
+```
+
+### Analysis of Complexity:
+
+1. **Time Complexity:**
+   - The time complexity is dominated by the two nested loops that iterate over all possible submatrices and check constraints. This results in a time complexity of \(O(m * n * k)\).
+
+2. **Space Complexity:**
+   - The space complexity is \(O(m * (n-k+1))\) due to the prefix sums array.
 
 ### Difficulty Rating:
-The difficulty rating for this problem is 4 because it requires understanding how to merge two sorted linked lists efficiently while maintaining the sorted order. This involves managing pointers correctly and handling edge cases properly, which can be challenging but not excessively so when compared to more complex linked list problems.
+This problem requires efficient handling of matrix operations, dynamic programming, and careful constraint-checking. The solution provided optimizes both time and space complexity while ensuring that it handles the given constraints effectively.
