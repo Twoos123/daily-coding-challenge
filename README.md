@@ -19,107 +19,79 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Coding Challenge: Maximum Sum of Non-Overlapping Subarrays
 
-**Problem: "Maximum Sum of Submatrices with Constraints"**
-
-Given a 2D array `matrix` of size `m x n` and an integer `k`, find the maximum sum of all possible **k x k** submatrices within the given matrix. However, there is a constraint that the sum of any two submatrices must not exceed a given limit `limit`.
+**Problem Description:**
+Given an array `nums` of integers, find the maximum sum that can be obtained by selecting non-overlapping subarrays. A subarray is considered non-overlapping if it does not share any elements with previously selected subarrays.
 
 **Example Input/Output:**
+- **Input:** `nums = [1, 2, 3, 4, 5]`
+- **Output:** `15` (The maximum sum is obtained by selecting the subarrays `[1, 2, 3]` and `[4, 5]`)
 
-**Input:**
-```plaintext
-matrix = [
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9]
-]
-k = 2
-limit = 10
-```
-**Output:**
-```
-Maximum sum of submatrices: 22
-```
+**Constraints:**
+- The array `nums` will have at least one element.
+- The length of the array is `n`.
 
-### Constraints:
-1. The size of the submatrix (`k x k`) is fixed.
-2. The sum of any two submatrices must not exceed the given limit (`limit`).
-3. The goal is to maximize the sum of all possible submatrices.
-
-### Solution
-
-The problem involves dynamic programming and efficient matrix operations. We can approach this problem by first calculating all possible sums of `k x k` submatrices and then filtering out those that violate the constraint.
-
-1. **Calculate Sum of Submatrices:**
-   - Use a sliding window approach to calculate the sum of all possible `k x k` submatrices.
-
-2. **Filter Constraints:**
-   - Check if the sum of any two submatrices exceeds the given limit.
-
-Here is an optimal solution in Python:
-
-```python
-def max_sum_submatrices(matrix, k, limit):
-    m, n = len(matrix), len(matrix[0])
-    if k > min(m, n):
-        return 0
-    
-    # Prefix sums for each row
-    prefix_sums = [[0] * (n - k + 1) for _ in range(m)]
-    
-    # Calculate prefix sums for each row
-    for i in range(m):
-        for j in range(n - k + 1):
-            prefix_sums[i][j] = sum(matrix[i][j:j+k])
-    
-    # Initialize maximum sum
-    max_sum = float('-inf')
-    
-    # Iterate over all possible submatrices
-    for i in range(m):
-        for j in range(n - k + 1):
-            # Calculate sum of current submatrix
-            current_sum = prefix_sums[i][j]
-            
-            # Check if adding another submatrix would exceed limit
-            for x in range(i + 1, m):
-                for y in range(j + k + 1, n):
-                    if current_sum + prefix_sums[x][y] > limit:
-                        break
-                    max_sum = max(max_sum, current_sum + prefix_sums[x][y])
-                    
-                    # Update current sum for next iteration
-                    current_sum += current_sum
-                    
-                    # Adjust limits for next iteration
-                    if current_sum + prefix_sums[x][y] > limit:
-                        break
-                    
-    return max_sum
-
-# Example usage:
-matrix = [
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9]
-]
-k = 2
-limit = 10
-
-result = max_sum_submatrices(matrix, k, limit)
-print("Maximum sum of submatrices:", result)
-```
-
-### Analysis of Complexity:
+**Analysis of Complexity and Difficulty:**
 
 1. **Time Complexity:**
-   - The time complexity is dominated by the two nested loops that iterate over all possible submatrices and check constraints. This results in a time complexity of \(O(m * n * k)\).
+   - This problem can be solved using dynamic programming. The key insight is to maintain an array `dp` where `dp[i]` represents the maximum sum that can be obtained by selecting non-overlapping subarrays ending at index `i`.
+
+   ```python
+   dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+   ```
+
+   This formula works because we either continue from the previous best sum (`dp[i-1]`) or start a new subarray from the current element and add it to the previous best two-element subarray (`dp[i-2] + nums[i]`).
 
 2. **Space Complexity:**
-   - The space complexity is \(O(m * (n-k+1))\) due to the prefix sums array.
+   - We need an additional array of size `n` to store the dynamic programming values.
 
-### Difficulty Rating:
-This problem requires efficient handling of matrix operations, dynamic programming, and careful constraint-checking. The solution provided optimizes both time and space complexity while ensuring that it handles the given constraints effectively.
+3. **Difficulty Rating:**
+   - The problem involves understanding how to use dynamic programming with arrays to find the maximum sum of non-overlapping subarrays.
+   - The solution requires careful consideration of the transitions between states and is not trivial but can be approached systematically.
+
+Given these points, I would rate this challenge as follows:
+
+```
+```
+
+### Most Efficient Solution in Python
+
+```python
+def max_non_overlapping_sum(nums):
+    if not nums:
+        return 0
+    
+    n = len(nums)
+    
+    # Initialize dp array with zeros.
+    dp = [0] * n
+    
+    # The maximum sum ending at index i is either dp[i-1] or dp[i-2] + nums[i].
+    dp[0] = nums[0]
+    dp[1] = max(nums[0], nums[1])
+    
+    for i in range(2, n):
+        dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+    
+    return dp[-1]
+
+# Example usage:
+nums = [1, 2, 3, 4, 5]
+print(max_non_overlapping_sum(nums))  # Output: 15
+```
+
+**Explanation:**
+
+1. **Initialization:** We initialize the `dp` array with zeros and set `dp` and `dp[1]` based on the first two elements of the input array.
+2. **Dynamic Programming Loop:** We iterate from index `2` to `n`, updating each element in the `dp` array using the recurrence relation `dp[i] = max(dp[i-1], dp[i-2] + nums[i])`.
+3. **Return Value:** The maximum sum is stored in `dp[-1]` and returned.
+
+**Time and Space Complexity Analysis:**
+
+- **Time Complexity:** O(n) because we iterate through the array once.
+- **Space Complexity:** O(n) because we use an additional array of size n to store the dynamic programming values.
+
+This approach is optimal because it directly solves the problem by maintaining a running sum and considering all possible transitions between states efficiently. The space complexity is linear with respect to the input size, which is typical for such dynamic programming problems.
