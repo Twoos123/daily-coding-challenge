@@ -21,77 +21,128 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: Maximum Sum of Non-Overlapping Subarrays
+### Coding Challenge: "Detecting Cycles in Directed Graphs Using Topological Sort"
 
 **Problem Description:**
-Given an array `nums` of integers, find the maximum sum that can be obtained by selecting non-overlapping subarrays. A subarray is considered non-overlapping if it does not share any elements with previously selected subarrays.
+
+Given a directed graph, detect whether it contains a cycle using a topological sort. If the graph is acyclic, perform a topological sort to order the vertices in such a way that for every edge (u, v), vertex u comes before vertex v in the ordering.
 
 **Example Input/Output:**
-- **Input:** `nums = [1, 2, 3, 4, 5]`
-- **Output:** `15` (The maximum sum is obtained by selecting the subarrays `[1, 2, 3]` and `[4, 5]`)
+
+**Input:**
+```
+n = 5 (number of vertices)
+edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
+```
+
+**Output (if graph is acyclic):**
+```
+[0, 1, 2, 3, 4]
+```
+
+**Output (if graph contains a cycle):**
+```
+"Graph contains a cycle"
+```
 
 **Constraints:**
-- The array `nums` will have at least one element.
-- The length of the array is `n`.
 
-**Analysis of Complexity and Difficulty:**
+- The graph is represented using an adjacency list.
+- The number of vertices (n) is given.
+- Each edge is represented as a tuple (u, v).
+
+### Analysis
 
 1. **Time Complexity:**
-   - This problem can be solved using dynamic programming. The key insight is to maintain an array `dp` where `dp[i]` represents the maximum sum that can be obtained by selecting non-overlapping subarrays ending at index `i`.
-
-   ```python
-   dp[i] = max(dp[i-1], dp[i-2] + nums[i])
-   ```
-
-   This formula works because we either continue from the previous best sum (`dp[i-1]`) or start a new subarray from the current element and add it to the previous best two-element subarray (`dp[i-2] + nums[i]`).
+   - The algorithm involves two main steps: checking for cycles and performing a topological sort.
+   - Checking for cycles using Kahn's algorithm for topological sort has a time complexity of O(V + E), where V is the number of vertices and E is the number of edges.
+   - If the graph is acyclic, the topological sort itself also runs in O(V + E).
 
 2. **Space Complexity:**
-   - We need an additional array of size `n` to store the dynamic programming values.
+   - The space complexity primarily comes from storing visited nodes and the adjacency list. The worst-case scenario is O(V + E) for storing the adjacency list and O(V) for visited nodes.
 
-3. **Difficulty Rating:**
-   - The problem involves understanding how to use dynamic programming with arrays to find the maximum sum of non-overlapping subarrays.
-   - The solution requires careful consideration of the transitions between states and is not trivial but can be approached systematically.
+### Most Efficient Solution
 
-Given these points, I would rate this challenge as follows:
+#### Using Kahn's Algorithm for Topological Sort
 
-```
-```
-
-### Most Efficient Solution in Python
+Kahn's algorithm is efficient for detecting cycles and performing a topological sort. It works by selecting vertices with no incoming edges (in-degree 0), adding them to the result, and then updating the in-degrees of their neighbors.
 
 ```python
-def max_non_overlapping_sum(nums):
-    if not nums:
-        return 0
-    
-    n = len(nums)
-    
-    # Initialize dp array with zeros.
-    dp = [0] * n
-    
-    # The maximum sum ending at index i is either dp[i-1] or dp[i-2] + nums[i].
-    dp[0] = nums[0]
-    dp[1] = max(nums[0], nums[1])
-    
-    for i in range(2, n):
-        dp[i] = max(dp[i-1], dp[i-2] + nums[i])
-    
-    return dp[-1]
+from collections import defaultdict, deque
 
-# Example usage:
-nums = [1, 2, 3, 4, 5]
-print(max_non_overlapping_sum(nums))  # Output: 15
+def has_cycle(edges):
+    n = len(edges) + 1  # Number of vertices
+    graph = defaultdict(list)
+    
+    # Build the graph
+    for u, v in edges:
+        graph[u].append(v)
+
+    # Initialize in-degrees
+    in_degree = {i: 0 for i in range(n)}
+    
+    # Calculate in-degrees
+    for u, v in edges:
+        in_degree[v] += 1
+
+    # Initialize queue with nodes having in-degree 0
+    queue = deque([u for u in in_degree if in_degree[u] == 0])
+
+    # Perform topological sort
+    result = []
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+
+        for neighbor in graph[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+
+    # Check if all nodes were processed (acyclic)
+    return len(result) == n
+
+def topological_sort(edges):
+    if not has_cycle(edges):
+        return [i for i in range(len(edges) + 1)]
+    else:
+        return "Graph contains a cycle"
+
+# Example usage
+edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
+print(topological_sort(edges))  # Output: "Graph contains a cycle"
 ```
 
-**Explanation:**
+### Explanation of the Algorithm
 
-1. **Initialization:** We initialize the `dp` array with zeros and set `dp` and `dp[1]` based on the first two elements of the input array.
-2. **Dynamic Programming Loop:** We iterate from index `2` to `n`, updating each element in the `dp` array using the recurrence relation `dp[i] = max(dp[i-1], dp[i-2] + nums[i])`.
-3. **Return Value:** The maximum sum is stored in `dp[-1]` and returned.
+1. **Initialization:**
+   - Create an adjacency list representation of the graph.
+   - Initialize in-degrees for all vertices.
 
-**Time and Space Complexity Analysis:**
+2. **Building the Graph:**
+   - Populate the adjacency list based on the given edges.
 
-- **Time Complexity:** O(n) because we iterate through the array once.
-- **Space Complexity:** O(n) because we use an additional array of size n to store the dynamic programming values.
+3. **Calculating In-Degrees:**
+   - For each edge (u, v), increment `in_degree[v]`.
 
-This approach is optimal because it directly solves the problem by maintaining a running sum and considering all possible transitions between states efficiently. The space complexity is linear with respect to the input size, which is typical for such dynamic programming problems.
+4. **Queue Initialization:**
+   - Add vertices with `in_degree[u] == 0` to the queue.
+
+5. **Topological Sort:**
+   - While the queue is not empty:
+     - Dequeue a node and add it to the result.
+     - For each neighbor of the dequeued node, decrement its in-degree.
+     - If a neighbor’s in-degree becomes zero, add it to the queue.
+
+6. **Cycle Detection:**
+   - If all nodes are processed (all in-degrees become zero), return the sorted list.
+   - Otherwise, return "Graph contains a cycle."
+
+### Complexities
+
+**Time Complexity:**
+- O(V + E) for building the graph and calculating in-degrees.
+- O(V + E) for the topological sort.
+
+**Space Complexity:**
+- O(V + E) for storing the adjacency list and in
