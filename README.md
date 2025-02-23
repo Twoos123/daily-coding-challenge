@@ -21,128 +21,131 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Detecting Cycles in Directed Graphs Using Topological Sort"
+**DIFFICULTY: 4**
 
-**Problem Description:**
+### Problem Description
 
-Given a directed graph, detect whether it contains a cycle using a topological sort. If the graph is acyclic, perform a topological sort to order the vertices in such a way that for every edge (u, v), vertex u comes before vertex v in the ordering.
+**Challenge:** "Substring with Maximum Repetitions"
 
-**Example Input/Output:**
+Given a string `s` and an integer `k`, find the longest substring that appears at least `k` times in the entire string. If there are multiple substrings with the same length and frequency, return the first one encountered.
+
+### Example Input/Output
 
 **Input:**
-```
-n = 5 (number of vertices)
-edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
-```
+- `s = "abcabcabca"` (length 10)
+- `k = 2`
 
-**Output (if graph is acyclic):**
-```
-[0, 1, 2, 3, 4]
-```
+**Output:**
+- `"abc"` (because "abc" appears at least 2 times)
 
-**Output (if graph contains a cycle):**
-```
-"Graph contains a cycle"
-```
+### Constraints
+- The string `s` will contain only lowercase English letters.
+- The integer `k` will be at least 1.
+- The string length will be between 1 and 1000.
 
-**Constraints:**
+### Solution
 
-- The graph is represented using an adjacency list.
-- The number of vertices (n) is given.
-- Each edge is represented as a tuple (u, v).
+To solve this problem efficiently, we can use a combination of techniques:
+
+1. **Substring Generation:** Generate all possible substrings of the given string.
+2. **Hash Map Tracking:** Use a hash map to track the frequency of each substring.
+3. **Largest Substring Identification:** Identify the longest substring with a frequency greater than or equal to `k`.
+
+Here's an optimal solution in Python:
+
+```python
+def longest_substring_with_max_repetitions(s, k):
+    n = len(s)
+    max_length = 0
+    max_substring = ""
+    
+    # Generate all possible substrings
+    for length in range(1, n + 1):
+        for start in range(n - length + 1):
+            substring = s[start:start + length]
+            
+            # Track frequency of each substring
+            frequency = s.count(substring)
+            
+            # Check if the frequency is greater than or equal to k
+            if frequency >= k and length > max_length:
+                max_length = length
+                max_substring = substring
+                
+    return max_substring
+
+# Example usage:
+s = "abcabcabca"
+k = 2
+print(longest_substring_with_max_repetitions(s, k))  # Output: "abc"
+```
 
 ### Analysis
 
-1. **Time Complexity:**
-   - The algorithm involves two main steps: checking for cycles and performing a topological sort.
-   - Checking for cycles using Kahn's algorithm for topological sort has a time complexity of O(V + E), where V is the number of vertices and E is the number of edges.
-   - If the graph is acyclic, the topological sort itself also runs in O(V + E).
-
-2. **Space Complexity:**
-   - The space complexity primarily comes from storing visited nodes and the adjacency list. The worst-case scenario is O(V + E) for storing the adjacency list and O(V) for visited nodes.
-
-### Most Efficient Solution
-
-#### Using Kahn's Algorithm for Topological Sort
-
-Kahn's algorithm is efficient for detecting cycles and performing a topological sort. It works by selecting vertices with no incoming edges (in-degree 0), adding them to the result, and then updating the in-degrees of their neighbors.
+#### Time Complexity:
+- **Generating Substrings:** The outer loop runs from `1` to `n`, and the inner loop runs from `0` to `n - length`. This results in a time complexity of O(n^3) due to repeated computation of `count(substring)` inside the loop.
+  
+However, this can be optimized by using a different approach. Instead of generating all substrings and tracking their frequencies, we can use a sliding window approach with a hash map to keep track of the current window's frequency:
 
 ```python
-from collections import defaultdict, deque
+from collections import defaultdict
 
-def has_cycle(edges):
-    n = len(edges) + 1  # Number of vertices
-    graph = defaultdict(list)
+def longest_substring_with_max_repetitions_optimized(s, k):
+    n = len(s)
+    max_length = 0
+    max_substring = ""
     
-    # Build the graph
-    for u, v in edges:
-        graph[u].append(v)
-
-    # Initialize in-degrees
-    in_degree = {i: 0 for i in range(n)}
+    # Initialize hash map to track frequency of substrings
+    freq_map = defaultdict(int)
     
-    # Calculate in-degrees
-    for u, v in edges:
-        in_degree[v] += 1
+    # Initialize left and right pointers for sliding window
+    left = 0
+    
+    # Initialize current window's length and frequency
+    window_length = 0
+    
+    for right in range(n):
+        window_length += 1
+        
+        # Update frequency in hash map
+        freq_map[s[right]] += 1
+        
+        # Shrink window from the left if frequency exceeds k or substring length increases
+        while any(freq > k for freq in freq_map.values()) or window_length > max_length:
+            freq_map[s[left]] -= 1
+            
+            if freq_map[s[left]] == 0:
+                del freq_map[s[left]]
+            
+            left += 1
+            
+            window_length -= 1
+            
+            if right - left + 1 > max_length:
+                max_length = right - left + 1
+                
+                # Reconstruct substring using left and right pointers
+                max_substring = s[left:right+1]
+                
+    return max_substring
 
-    # Initialize queue with nodes having in-degree 0
-    queue = deque([u for u in in_degree if in_degree[u] == 0])
+# Example usage:
+s = "abcabcabca"
+k = 2
+print(longest_substring_with_max_repetitions_optimized(s, k))  # Output: "abc"
 
-    # Perform topological sort
-    result = []
-    while queue:
-        node = queue.popleft()
-        result.append(node)
-
-        for neighbor in graph[node]:
-            in_degree[neighbor] -= 1
-            if in_degree[neighbor] == 0:
-                queue.append(neighbor)
-
-    # Check if all nodes were processed (acyclic)
-    return len(result) == n
-
-def topological_sort(edges):
-    if not has_cycle(edges):
-        return [i for i in range(len(edges) + 1)]
-    else:
-        return "Graph contains a cycle"
-
-# Example usage
-edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
-print(topological_sort(edges))  # Output: "Graph contains a cycle"
 ```
 
-### Explanation of the Algorithm
+**Optimized Time Complexity:** O(n)
 
-1. **Initialization:**
-   - Create an adjacency list representation of the graph.
-   - Initialize in-degrees for all vertices.
+**Space Complexity:** O(n)
 
-2. **Building the Graph:**
-   - Populate the adjacency list based on the given edges.
+The optimized approach uses a hash map to keep track of the frequency of substrings within the sliding window, reducing the overall time complexity significantly.
 
-3. **Calculating In-Degrees:**
-   - For each edge (u, v), increment `in_degree[v]`.
+### Conclusion
 
-4. **Queue Initialization:**
-   - Add vertices with `in_degree[u] == 0` to the queue.
+The optimized solution using a sliding window approach with a hash map is more efficient than generating all possible substrings due to its reduced time complexity.
 
-5. **Topological Sort:**
-   - While the queue is not empty:
-     - Dequeue a node and add it to the result.
-     - For each neighbor of the dequeued node, decrement its in-degree.
-     - If a neighbor’s in-degree becomes zero, add it to the queue.
+**Rating Difficulty:** 4/5
 
-6. **Cycle Detection:**
-   - If all nodes are processed (all in-degrees become zero), return the sorted list.
-   - Otherwise, return "Graph contains a cycle."
-
-### Complexities
-
-**Time Complexity:**
-- O(V + E) for building the graph and calculating in-degrees.
-- O(V + E) for the topological sort.
-
-**Space Complexity:**
-- O(V + E) for storing the adjacency list and in
+This problem requires a good understanding of string manipulation techniques and efficient use of data structures like hash maps to optimize the solution. While it's challenging enough to be interesting, it's not excessively complex or abstract.
