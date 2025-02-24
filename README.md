@@ -21,131 +21,107 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-**DIFFICULTY: 4**
-
 ### Problem Description
 
-**Challenge:** "Substring with Maximum Repetitions"
+**Challenge: "Rotate Linked List"**
 
-Given a string `s` and an integer `k`, find the longest substring that appears at least `k` times in the entire string. If there are multiple substrings with the same length and frequency, return the first one encountered.
+Given a singly or doubly linked list, rotate the list by a specified number of positions such that the node at the end becomes the new head. For example, if you have a list `1 -> 2 -> 3 -> 4 -> nil` and you want to rotate it by 2 positions, the new list should be `3 -> 4 -> 1 -> 2 -> nil`.
 
 ### Example Input/Output
 
 **Input:**
-- `s = "abcabcabca"` (length 10)
-- `k = 2`
+- Singly Linked List: `1 -> 2 -> 3 -> 4 -> nil`
+- Rotation Positions: 2
 
 **Output:**
-- `"abc"` (because "abc" appears at least 2 times)
+- New List: `3 -> 4 -> 1 -> 2 -> nil`
 
 ### Constraints
-- The string `s` will contain only lowercase English letters.
-- The integer `k` will be at least 1.
-- The string length will be between 1 and 1000.
+- The rotation positions can be any integer value.
+- The linked list nodes contain an integer value and a reference to the next node (for singly linked list) or references to both next and previous nodes (for doubly linked list).
 
 ### Solution
 
-To solve this problem efficiently, we can use a combination of techniques:
+#### Singly Linked List
 
-1. **Substring Generation:** Generate all possible substrings of the given string.
-2. **Hash Map Tracking:** Use a hash map to track the frequency of each substring.
-3. **Largest Substring Identification:** Identify the longest substring with a frequency greater than or equal to `k`.
+To solve this problem efficiently, we can use a single pass through the list to achieve O(n) time complexity. However, to simplify the implementation and handle edge cases more elegantly, we can use two passes: one to find the end of the list and another to rotate the nodes.
 
-Here's an optimal solution in Python:
+Here is a Python implementation:
 
 ```python
-def longest_substring_with_max_repetitions(s, k):
-    n = len(s)
-    max_length = 0
-    max_substring = ""
+class ListNode:
+    def __init__(self, value=0, next=None):
+        self.val = value
+        self.next = next
+
+def rotate_linked_list(head, k):
+    if not head or not head.next:
+        return head
     
-    # Generate all possible substrings
-    for length in range(1, n + 1):
-        for start in range(n - length + 1):
-            substring = s[start:start + length]
-            
-            # Track frequency of each substring
-            frequency = s.count(substring)
-            
-            # Check if the frequency is greater than or equal to k
-            if frequency >= k and length > max_length:
-                max_length = length
-                max_substring = substring
-                
-    return max_substring
+    # Step 1: Find the length of the linked list.
+    length = 0
+    current = head
+    while current:
+        length += 1
+        current = current.next
+
+    # Step 2: Adjust k to be within 0 to length-1.
+    k %= length
+    
+    # Step 3: If k is 0, the list does not need to be rotated.
+    if k == 0:
+        return head
+
+    # Step 4: Find the new tail (kth node from current head).
+    new_tail = head
+    for _ in range(k - 1):
+        new_tail = new_tail.next
+
+    # Step 5: Store the new head.
+    new_head = new_tail.next
+
+    # Step 6: Connect the new tail with null.
+    new_tail.next = None
+
+    # Step 7: Connect the new head with original head.
+    current = head
+    while current.next:
+        current = current.next
+    current.next = new_head
+
+    return new_head
 
 # Example usage:
-s = "abcabcabca"
-k = 2
-print(longest_substring_with_max_repetitions(s, k))  # Output: "abc"
-```
+# Create a singly linked list: 1 -> 2 -> 3 -> 4 -> nil
+head = ListNode(1)
+head.next = ListNode(2)
+head.next.next = ListNode(3)
+head.next.next.next = ListNode(4)
 
-### Analysis
+# Rotate by 2 positions.
+new_head = rotate_linked_list(head, 2)
 
-#### Time Complexity:
-- **Generating Substrings:** The outer loop runs from `1` to `n`, and the inner loop runs from `0` to `n - length`. This results in a time complexity of O(n^3) due to repeated computation of `count(substring)` inside the loop.
-  
-However, this can be optimized by using a different approach. Instead of generating all substrings and tracking their frequencies, we can use a sliding window approach with a hash map to keep track of the current window's frequency:
-
-```python
-from collections import defaultdict
-
-def longest_substring_with_max_repetitions_optimized(s, k):
-    n = len(s)
-    max_length = 0
-    max_substring = ""
-    
-    # Initialize hash map to track frequency of substrings
-    freq_map = defaultdict(int)
-    
-    # Initialize left and right pointers for sliding window
-    left = 0
-    
-    # Initialize current window's length and frequency
-    window_length = 0
-    
-    for right in range(n):
-        window_length += 1
-        
-        # Update frequency in hash map
-        freq_map[s[right]] += 1
-        
-        # Shrink window from the left if frequency exceeds k or substring length increases
-        while any(freq > k for freq in freq_map.values()) or window_length > max_length:
-            freq_map[s[left]] -= 1
-            
-            if freq_map[s[left]] == 0:
-                del freq_map[s[left]]
-            
-            left += 1
-            
-            window_length -= 1
-            
-            if right - left + 1 > max_length:
-                max_length = right - left + 1
-                
-                # Reconstruct substring using left and right pointers
-                max_substring = s[left:right+1]
-                
-    return max_substring
-
-# Example usage:
-s = "abcabcabca"
-k = 2
-print(longest_substring_with_max_repetitions_optimized(s, k))  # Output: "abc"
+# Print the rotated list.
+while new_head:
+    print(new_head.val)
+    new_head = new_head.next
 
 ```
 
-**Optimized Time Complexity:** O(n)
+#### Analysis
 
-**Space Complexity:** O(n)
+- **Time Complexity:** O(n), where n is the number of nodes in the linked list. We need to traverse through the list once to find its length and another time to connect nodes.
+- **Space Complexity:** O(1), as we only use a few extra variables to keep track of the new head and tail.
 
-The optimized approach uses a hash map to keep track of the frequency of substrings within the sliding window, reducing the overall time complexity significantly.
+This approach is optimal because it minimizes the number of passes through the list while ensuring that all edge cases are handled correctly.
 
-### Conclusion
+### Explanation
 
-The optimized solution using a sliding window approach with a hash map is more efficient than generating all possible substrings due to its reduced time complexity.
+1. **Find Length:** We start by finding the length of the linked list. This gives us an understanding of how many nodes we need to traverse.
+2. **Adjust k:** We then adjust `k` to be within 0 to `length-1`. This ensures that even if `k` is greater than the length of the list, we can still find a valid rotation position.
+3. **Find New Tail:** We find the node that will become the new tail of our rotated list by moving `k-1` steps from the current head.
+4. **Store New Head:** We store the node after `new_tail` as our new head.
+5. **Disconnect Old Tail:** We disconnect `new_tail` from its next node by setting its next pointer to `None`.
+6. **Connect New Head:** We then connect our new tail (`new_head`) with our original head's last node (`current`).
 
-**Rating Difficulty:** 4/5
-
-This problem requires a good understanding of string manipulation techniques and efficient use of data structures like hash maps to optimize the solution. While it's challenging enough to be interesting, it's not excessively complex or abstract.
+This solution ensures that we perform operations in constant space while achieving linear time complexity.
