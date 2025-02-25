@@ -23,105 +23,100 @@ Difficulty: ⭐⭐⭐ (3/5)
 
 ### Problem Description
 
-**Challenge: "Rotate Linked List"**
+**Problem: Reconstruct a Binary Search Tree from a Sorted Array**
 
-Given a singly or doubly linked list, rotate the list by a specified number of positions such that the node at the end becomes the new head. For example, if you have a list `1 -> 2 -> 3 -> 4 -> nil` and you want to rotate it by 2 positions, the new list should be `3 -> 4 -> 1 -> 2 -> nil`.
+Given a sorted array of integers, reconstruct a binary search tree where the values of the nodes follow the order specified by the array. The resulting tree should be as balanced as possible.
 
 ### Example Input/Output
 
-**Input:**
-- Singly Linked List: `1 -> 2 -> 3 -> 4 -> nil`
-- Rotation Positions: 2
+**Input:** `[1, 2, 3, 4, 5, 6, 7]`
 
-**Output:**
-- New List: `3 -> 4 -> 1 -> 2 -> nil`
+**Output:** A balanced binary search tree where the values are in the order `[1, 2, 3, 4, 5, 6, 7]`.
 
 ### Constraints
-- The rotation positions can be any integer value.
-- The linked list nodes contain an integer value and a reference to the next node (for singly linked list) or references to both next and previous nodes (for doubly linked list).
+
+- The input array is sorted in ascending order.
+- The array contains `n` distinct integers.
+- The resulting binary search tree should be as balanced as possible.
 
 ### Solution
 
-#### Singly Linked List
-
-To solve this problem efficiently, we can use a single pass through the list to achieve O(n) time complexity. However, to simplify the implementation and handle edge cases more elegantly, we can use two passes: one to find the end of the list and another to rotate the nodes.
-
-Here is a Python implementation:
+To construct a balanced binary search tree from a sorted array, we can use the approach described below. This approach ensures that the tree is as balanced as possible and maintains the order specified by the array.
 
 ```python
-class ListNode:
-    def __init__(self, value=0, next=None):
-        self.val = value
-        self.next = next
+class TreeNode:
+    def __init__(self, value=0, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
 
-def rotate_linked_list(head, k):
-    if not head or not head.next:
-        return head
+def sortedArrayToBST(nums):
+    if not nums:
+        return None
     
-    # Step 1: Find the length of the linked list.
-    length = 0
-    current = head
-    while current:
-        length += 1
-        current = current.next
-
-    # Step 2: Adjust k to be within 0 to length-1.
-    k %= length
+    # Find the middle index to ensure the tree is balanced
+    mid = len(nums) // 2
     
-    # Step 3: If k is 0, the list does not need to be rotated.
-    if k == 0:
-        return head
-
-    # Step 4: Find the new tail (kth node from current head).
-    new_tail = head
-    for _ in range(k - 1):
-        new_tail = new_tail.next
-
-    # Step 5: Store the new head.
-    new_head = new_tail.next
-
-    # Step 6: Connect the new tail with null.
-    new_tail.next = None
-
-    # Step 7: Connect the new head with original head.
-    current = head
-    while current.next:
-        current = current.next
-    current.next = new_head
-
-    return new_head
+    # Create the root node with the middle value
+    root = TreeNode(nums[mid])
+    
+    # Recursively construct the left and right subtrees with the left and right halves
+    # of the array, respectively.
+    
+    # The left subtree should include all values less than the root's value.
+    # The right subtree should include all values greater than the root's value.
+    
+    root.left = sortedArrayToBST(nums[:mid])
+    
+    root.right = sortedArrayToBST(nums[mid+1:])
+    
+    return root
 
 # Example usage:
-# Create a singly linked list: 1 -> 2 -> 3 -> 4 -> nil
-head = ListNode(1)
-head.next = ListNode(2)
-head.next.next = ListNode(3)
-head.next.next.next = ListNode(4)
+nums = [1, 2, 3, 4, 5, 6, 7]
+root = sortedArrayToBST(nums)
 
-# Rotate by 2 positions.
-new_head = rotate_linked_list(head, 2)
+# Perform inorder traversal to verify that values are in sorted order.
+def inorderTraversal(root):
+    if root:
+        inorderTraversal(root.left)
+        print(root.value, end=' ')
+        inorderTraversal(root.right)
 
-# Print the rotated list.
-while new_head:
-    print(new_head.val)
-    new_head = new_head.next
-
+inorderTraversal(root)
 ```
 
-#### Analysis
+### Detailed Explanation of the Algorithm
 
-- **Time Complexity:** O(n), where n is the number of nodes in the linked list. We need to traverse through the list once to find its length and another time to connect nodes.
-- **Space Complexity:** O(1), as we only use a few extra variables to keep track of the new head and tail.
+1. **Base Case:**
+   - If `nums` is empty, return `None`.
 
-This approach is optimal because it minimizes the number of passes through the list while ensuring that all edge cases are handled correctly.
+2. **Choosings the Root Node:**
+   - Find the middle index of `nums` to ensure that the tree is balanced.
+   - Create a new `TreeNode` with the value at this middle index as the root.
 
-### Explanation
+3. **Construct Left and Right Subtrees:**
+   - Recursively call `sortedArrayToBST` on the left half (`nums[:mid]`) to construct the left subtree.
+   - Recursively call `sortedArrayToBST` on the right half (`nums[mid+1:]`) to construct the right subtree.
 
-1. **Find Length:** We start by finding the length of the linked list. This gives us an understanding of how many nodes we need to traverse.
-2. **Adjust k:** We then adjust `k` to be within 0 to `length-1`. This ensures that even if `k` is greater than the length of the list, we can still find a valid rotation position.
-3. **Find New Tail:** We find the node that will become the new tail of our rotated list by moving `k-1` steps from the current head.
-4. **Store New Head:** We store the node after `new_tail` as our new head.
-5. **Disconnect Old Tail:** We disconnect `new_tail` from its next node by setting its next pointer to `None`.
-6. **Connect New Head:** We then connect our new tail (`new_head`) with our original head's last node (`current`).
+4. **Assigning Left and Right Subtrees:**
+   - Set `root.left` to the constructed left subtree.
+   - Set `root.right` to the constructed right subtree.
 
-This solution ensures that we perform operations in constant space while achieving linear time complexity.
+5. **Return Result:**
+   - Return the constructed binary search tree root.
+
+### Analysis of Complexity
+
+#### Time Complexity:
+The time complexity is O(n), where n is the number of elements in `nums`. This is because each element in `nums` is visited once during the construction process.
+
+#### Space Complexity:
+The space complexity is O(n), where n is the number of elements in `nums`. This is because in the worst case (a skewed tree), we might need to store all nodes in our call stack.
+
+### Optimality
+This approach ensures that we construct a balanced binary search tree, which is essential for maintaining efficient search, insertion, and deletion operations. The use of recursion allows us to easily handle arrays of any size while ensuring that no additional memory storage beyond what's needed for recursion is used.
+
+---
+
+### Difficulty Rating: This problem requires understanding both the properties of balanced binary search trees and how recursion can be used to construct such trees efficiently. The solution involves finding the middle element of the array and recursively constructing left and right subtrees, making it moderately challenging but still accessible for those familiar with basic tree operations and recursion techniques.
