@@ -19,104 +19,137 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem Description
+****
 
-**Problem: Reconstruct a Binary Search Tree from a Sorted Array**
+### Challenge: "Reversing a Queue Using Two Stacks"
 
-Given a sorted array of integers, reconstruct a binary search tree where the values of the nodes follow the order specified by the array. The resulting tree should be as balanced as possible.
+#### Problem Description
 
-### Example Input/Output
+Given a queue, implement a function that reverses the order of elements in the queue using two stacks. The queue is represented as a linked list, and the function should modify the original queue.
 
-**Input:** `[1, 2, 3, 4, 5, 6, 7]`
+#### Example Input/Output
 
-**Output:** A balanced binary search tree where the values are in the order `[1, 2, 3, 4, 5, 6, 7]`.
-
-### Constraints
-
-- The input array is sorted in ascending order.
-- The array contains `n` distinct integers.
-- The resulting binary search tree should be as balanced as possible.
-
-### Solution
-
-To construct a balanced binary search tree from a sorted array, we can use the approach described below. This approach ensures that the tree is as balanced as possible and maintains the order specified by the array.
-
-```python
-class TreeNode:
-    def __init__(self, value=0, left=None, right=None):
-        self.value = value
-        self.left = left
-        self.right = right
-
-def sortedArrayToBST(nums):
-    if not nums:
-        return None
-    
-    # Find the middle index to ensure the tree is balanced
-    mid = len(nums) // 2
-    
-    # Create the root node with the middle value
-    root = TreeNode(nums[mid])
-    
-    # Recursively construct the left and right subtrees with the left and right halves
-    # of the array, respectively.
-    
-    # The left subtree should include all values less than the root's value.
-    # The right subtree should include all values greater than the root's value.
-    
-    root.left = sortedArrayToBST(nums[:mid])
-    
-    root.right = sortedArrayToBST(nums[mid+1:])
-    
-    return root
-
-# Example usage:
-nums = [1, 2, 3, 4, 5, 6, 7]
-root = sortedArrayToBST(nums)
-
-# Perform inorder traversal to verify that values are in sorted order.
-def inorderTraversal(root):
-    if root:
-        inorderTraversal(root.left)
-        print(root.value, end=' ')
-        inorderTraversal(root.right)
-
-inorderTraversal(root)
+**Input:**
+```
+Queue: ["A", "B", "C", "D"]
 ```
 
-### Detailed Explanation of the Algorithm
+**Output:**
+```
+Reversed Queue: ["D", "C", "B", "A"]
+```
 
-1. **Base Case:**
-   - If `nums` is empty, return `None`.
+#### Constraints
 
-2. **Choosings the Root Node:**
-   - Find the middle index of `nums` to ensure that the tree is balanced.
-   - Create a new `TreeNode` with the value at this middle index as the root.
+- The queue is initially empty or contains elements.
+- Only one pass through the queue is allowed.
+- The use of two stacks is mandatory.
+- The original queue should be modified.
 
-3. **Construct Left and Right Subtrees:**
-   - Recursively call `sortedArrayToBST` on the left half (`nums[:mid]`) to construct the left subtree.
-   - Recursively call `sortedArrayToBST` on the right half (`nums[mid+1:]`) to construct the right subtree.
+#### Solution
 
-4. **Assigning Left and Right Subtrees:**
-   - Set `root.left` to the constructed left subtree.
-   - Set `root.right` to the constructed right subtree.
+To reverse a queue using two stacks efficiently, we follow these steps:
 
-5. **Return Result:**
-   - Return the constructed binary search tree root.
+1. **Push all elements from the queue onto the first stack.**
+2. **Pop all elements from the first stack and push them onto the second stack.**
+3. **Clear the first stack and enqueue all elements from the second stack back into the original queue.**
 
-### Analysis of Complexity
+Here's the implementation in Python:
 
-#### Time Complexity:
-The time complexity is O(n), where n is the number of elements in `nums`. This is because each element in `nums` is visited once during the construction process.
+```python
+from collections import deque
 
-#### Space Complexity:
-The space complexity is O(n), where n is the number of elements in `nums`. This is because in the worst case (a skewed tree), we might need to store all nodes in our call stack.
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
 
-### Optimality
-This approach ensures that we construct a balanced binary search tree, which is essential for maintaining efficient search, insertion, and deletion operations. The use of recursion allows us to easily handle arrays of any size while ensuring that no additional memory storage beyond what's needed for recursion is used.
+class Queue:
+    def __init__(self):
+        self.head = None
 
----
+    def enqueue(self, value):
+        node = Node(value)
+        if not self.head:
+            self.head = node
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = node
 
-### Difficulty Rating: This problem requires understanding both the properties of balanced binary search trees and how recursion can be used to construct such trees efficiently. The solution involves finding the middle element of the array and recursively constructing left and right subtrees, making it moderately challenging but still accessible for those familiar with basic tree operations and recursion techniques.
+    def dequeue(self):
+        if not self.head:
+            return None
+        value = self.head.value
+        self.head = self.head.next
+        return value
+
+def reverse_queue(queue):
+    # Stack 1 to hold elements from the queue
+    stack1 = []
+    
+    # Push all elements from the queue onto stack1
+    while queue.head:
+        stack1.append(queue.dequeue())
+    
+    # Stack 2 to hold reversed elements
+    stack2 = []
+    
+    # Pop all elements from stack1 and push them onto stack2
+    while stack1:
+        stack2.append(stack1.pop())
+    
+    # Clear stack1 (not necessary but for clarity)
+    while stack1:
+        stack1.pop()
+    
+    # Enqueue all elements from stack2 back into the original queue
+    while stack2:
+        queue.enqueue(stack2.pop())
+
+# Example usage:
+queue = Queue()
+for char in "ABCD":
+    queue.enqueue(char)
+
+print("Original Queue:", end=' ')
+current = queue.head
+while current:
+    print(current.value, end=' ')
+    current = current.next
+
+reverse_queue(queue)
+
+print("\nReversed Queue:", end=' ')
+current = queue.head
+while current:
+    print(current.value, end=' ')
+    current = current.next
+
+```
+
+### Complexity Analysis
+
+- **Time Complexity:**
+  - Pushing all elements from the queue onto `stack1`: O(n) where n is the number of elements in the queue.
+  - Popping all elements from `stack1` and pushing them onto `stack2`: O(n) because each pop operation from `stack1` and push operation onto `stack2` takes constant time.
+  - Enqueueing all elements from `stack2` back into the original queue: O(n) because each enqueue operation takes constant time.
+  
+  Therefore, the overall time complexity is O(n).
+
+- **Space Complexity:**
+  - Two stacks are used, each with a maximum size of n. Therefore, the space complexity is O(n).
+
+This approach is optimal because it ensures that we use two stacks to reverse the queue without modifying other parts of the algorithm or using additional data structures beyond what is required by the problem statement. The space complexity is linear due to the use of two stacks, which is unavoidable in this context given that we need to reverse the order of elements.
+
+### Difficulty Rating: 4
+
+The difficulty rating is 4 because:
+- The problem requires understanding how to manipulate data structures efficiently.
+- The use of two stacks adds complexity compared to simpler problems involving single stacks or queues.
+- The constraint of modifying only the original queue adds another layer of complexity.
+
+However, the solution provided is straightforward and follows logical steps, making it manageable with a good understanding of stacks and queues.
