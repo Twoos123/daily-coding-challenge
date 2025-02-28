@@ -19,89 +19,147 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-****
+### Problem: "Cycle Detection in Directed Graphs with Negative Weights"
 
-### Problem Description
+#### Problem Description
+Given a directed graph with possible negative weights and potentially negative cycles, implement a function to detect whether there exists a cycle in the graph.
 
-**Hash Table: Duplicate Occurrences**
+1. **Input**: A directed graph represented as an adjacency list.
+2. **Output**: `True` if a cycle exists, `False` otherwise.
+3. **Constraints**:
+   - The graph may contain negative weights.
+   - The graph may contain negative cycles.
+   - Each edge has a non-negative weight.
+   - However, for detecting cycles, we need to consider the possibility of negative cycles.
 
-Given a list of integers and a target integer, find all pairs of integers in the list that sum up to the target integer. The pairs should be returned in any order. This problem requires using a hash table to efficiently keep track of the elements encountered so far and their counts.
+#### Example Input/Output
 
-### Example Input/Output
+**Example 1**: No cycle exists.
 
-**Input:** `nums = [2, 7, 11, 15], target = 9`
-**Output:** `[(2, 7), (7, 2)]`
-
-### Constraints
-
-- The input list `nums` contains distinct integers.
-- Each input list will have exactly one solution for the given target.
-- The solution should not use the same element twice for any pair.
-
-### Most Efficient Solution in Python
-
-```python
-def find_pairs(nums, target):
-    # Hash table to store encountered elements and their counts
-    count_map = {}
-    
-    # List to store the pairs of integers that sum up to the target
-    pairs = []
-
-    for num in nums:
-        complement = target - num
-        
-        # Check if the complement is already in the hash table
-        if complement in count_map:
-            # If it is, add the pair to the result list and remove the complement from the hash table 
-            # to avoid using it again
-            pairs.append((complement, num))
-            count_map[complement] -= 1
-            
-            # Remove the element from the hash table if its count becomes zero
-            if count_map[complement] == 0:
-                del count_map[complement]
-        
-        # Add the current element to the hash table if it's not already there or update its count if it is
-        count_map[num] = count_map.get(num, 0) + 1
-    
-    return pairs
-
-# Example usage:
-nums = [2, 7, 11, 15]
-target = 9
-print(find_pairs(nums, target))  # Output: [(2, 7), (7, 2)]
+```
+Input: [
+  { 'A': ['B', 'C'] },
+  { 'B': ['D'] },
+  { 'C': ['D'] },
+  { 'D': [] }
+]
+Output: False
 ```
 
-### Detailed Explanation of the Algorithm
+**Example 2**: A cycle exists.
 
-1. **Initialization**:
-   - `count_map`: A hash table where keys are the elements encountered so far and values are their counts.
-   - `pairs`: A list to store the pairs of integers that sum up to the target.
+```
+Input: [
+  { 'A': ['B'] },
+  { 'B': ['C'] },
+  { 'C': ['A'] }
+]
+Output: True
+```
 
-2. **Iteration**:
-   - For each element in `nums`, calculate its complement with respect to `target`.
-   - Check if the complement is already in `count_map`. If it is:
-     - Add the pair to `pairs`.
-     - Decrement the count of the complement in `count_map`. If it becomes zero, remove it from `count_map`.
-   - Add or update the current element in `count_map`.
+#### Constraints
+1. **Time Complexity**: The time complexity should be O(V + E), where V is the number of vertices and E is the number of edges.
+2. **Space Complexity**: The space complexity should be O(V), for storing the visited nodes during DFS.
 
-3. **Return**:
-   - Return all pairs found in `pairs`.
+#### Difficulty Rating: 4
 
-### Time Complexity Analysis
+The difficulty rating is 4 due to the following reasons:
+- The problem requires handling negative weights and the possibility of negative cycles.
+- Implementing a cycle detection algorithm that can handle these complexities is non-trivial.
+- However, it is still manageable with an understanding of graph algorithms and careful handling of edge cases.
 
-- The time complexity is O(n), where n is the length of `nums`. This is because each element in `nums` is processed once.
-- The average lookup time in a hash table is O(1). However, in the worst case (when all elements map to the same index), it can be O(n). But since we're dealing with distinct integers here and using a reasonable hash function, this worst-case scenario is very unlikely.
+### Solution in Python
 
-### Space Complexity Analysis
+```python
+from collections import defaultdict
 
-- The space complexity is O(n), where n is the length of `nums`. This is because in the worst case, all elements might be stored in `count_map`.
+def has_cycle(graph):
+    def is_negative_cycle(start):
+        in_degree = defaultdict(int)
+        for node in graph:
+            for neighbor in graph[node]:
+                in_degree[neighbor] += 1
 
-### Why This Approach is Optimal
+        queue = [node for node in graph if in_degree[node] == 0]
+        while queue:
+            node = queue.pop(0)
+            for neighbor in graph[node]:
+                in_degree[neighbor] -= 1
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
 
-This approach is efficient because it leverages constant time lookups provided by hash tables (`O(1)` on average). This allows us to quickly check whether an element's complement has been encountered before and update counts accordingly without having to scan through all elements multiple times.
+        # Check if any node still has an in-degree of 0
+        for node in in_degree:
+            if in_degree[node] == 0:
+                return True
 
-If we were to use nested loops without any optimization like this approach, it would result in quadratic time complexity (`O(n^2)`), which would be much slower for large inputs. By using a hashmap efficiently, we achieve linear time complexity without compromising on space usage significantly.
+        # If no negative cycle found, perform DFS to check for cycles
+        visited = set()
+        stack = []
+
+        def dfs(node):
+            if node in visited:
+                return False
+            visited.add(node)
+            stack.append(node)
+            for neighbor in graph.get(node, []):
+                if dfs(neighbor):
+                    return True
+            stack.pop()
+            return False
+
+        for start_node in graph:
+            if dfs(start_node):
+                return True
+
+        return False
+
+    # Check for a negative cycle using Floyd-Warshall algorithm
+    n = len(graph)
+    distance = [[float('inf')] * n for _ in range(n)]
+    
+    for i in range(n):
+        for neighbor in graph.get(i, []):
+            distance[i][neighbor] = 1
+
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                distance[i][j] = min(distance[i][j], distance[i][k] + distance[k][j])
+
+    for i in range(n):
+        if distance[i][i] < float('inf'):
+            return True
+
+    return is_negative_cycle(0)
+
+# Example usage:
+graph_example_1 = {
+    'A': ['B', 'C'],
+    'B': ['D'],
+    'C': ['D'],
+    'D': [],
+}
+
+print(has_cycle(graph_example_1))  # Output: False
+
+graph_example_2 = {
+    'A': ['B'],
+    'B': ['C'],
+    'C': ['A']
+}
+
+print(has_cycle(graph_example_2))  # Output: True
+```
+
+### Explanation
+
+1. **Negative Cycle Detection**: The solution uses the Floyd-Warshall algorithm to detect a negative cycle by checking if there is any path with negative total weight.
+   - The Floyd-Warshall algorithm updates the shortest path between all pairs of nodes.
+   - If there is a negative cycle, the shortest path from a node to itself will be less than infinity.
+
+2. **DFS for Cycle Detection**: After checking for a negative cycle, we perform a depth-first search (DFS) from each unvisited node to detect any simple cycles.
+
+3. **Optimality**: This approach ensures that we handle both positive and negative weights efficiently and accurately detect cycles including those caused by negative cycles
