@@ -21,145 +21,107 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem: "Cycle Detection in Directed Graphs with Negative Weights"
+### Problem Description
+**Challenge: Autocomplete with Trie**
 
-#### Problem Description
-Given a directed graph with possible negative weights and potentially negative cycles, implement a function to detect whether there exists a cycle in the graph.
+Implement an autocomplete system using a Trie data structure. Given a list of words and a search string, return the top 5 most relevant words starting with the search string. The relevance is determined by the frequency of each word in the list.
 
-1. **Input**: A directed graph represented as an adjacency list.
-2. **Output**: `True` if a cycle exists, `False` otherwise.
-3. **Constraints**:
-   - The graph may contain negative weights.
-   - The graph may contain negative cycles.
-   - Each edge has a non-negative weight.
-   - However, for detecting cycles, we need to consider the possibility of negative cycles.
+### Example Input/Output
 
-#### Example Input/Output
+**Input:**
+- `words` = ["dog", "cat", "apple", "banana", "cherry"]
+- `search_string` = "ca"
 
-**Example 1**: No cycle exists.
+**Output:**
+- `["cat"]`
 
-```
-Input: [
-  { 'A': ['B', 'C'] },
-  { 'B': ['D'] },
-  { 'C': ['D'] },
-  { 'D': [] }
-]
-Output: False
-```
+### Constraints:
+- The list of words is not empty.
+- The search string is at least one character long.
+- The frequency of each word in the list should be considered for relevance.
 
-**Example 2**: A cycle exists.
-
-```
-Input: [
-  { 'A': ['B'] },
-  { 'B': ['C'] },
-  { 'C': ['A'] }
-]
-Output: True
-```
-
-#### Constraints
-1. **Time Complexity**: The time complexity should be O(V + E), where V is the number of vertices and E is the number of edges.
-2. **Space Complexity**: The space complexity should be O(V), for storing the visited nodes during DFS.
-
-#### Difficulty Rating: 4
-
-The difficulty rating is 4 due to the following reasons:
-- The problem requires handling negative weights and the possibility of negative cycles.
-- Implementing a cycle detection algorithm that can handle these complexities is non-trivial.
-- However, it is still manageable with an understanding of graph algorithms and careful handling of edge cases.
-
-### Solution in Python
+### Most Efficient Solution in Python
 
 ```python
-from collections import defaultdict
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_word_end = False
+        self.word_frequency = 0
 
-def has_cycle(graph):
-    def is_negative_cycle(start):
-        in_degree = defaultdict(int)
-        for node in graph:
-            for neighbor in graph[node]:
-                in_degree[neighbor] += 1
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-        queue = [node for node in graph if in_degree[node] == 0]
-        while queue:
-            node = queue.pop(0)
-            for neighbor in graph[node]:
-                in_degree[neighbor] -= 1
-                if in_degree[neighbor] == 0:
-                    queue.append(neighbor)
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_word_end = True
+        node.word_frequency += 1
 
-        # Check if any node still has an in-degree of 0
-        for node in in_degree:
-            if in_degree[node] == 0:
-                return True
+    def search(self, search_string):
+        node = self.root
+        for char in search_string:
+            if char not in node.children:
+                return []
+            node = node.children[char]
+        
+        # If search_string is a prefix of some words, traverse down from node 
+        return self._dfs(node, search_string)
 
-        # If no negative cycle found, perform DFS to check for cycles
-        visited = set()
-        stack = []
+    def _dfs(self, node, prefix):
+        result = []
+        if node.is_word_end:
+            result.append((prefix, node.word_frequency))
+        
+        for char, child_node in node.children.items():
+            result.extend(self._dfs(child_node, prefix + char))
+        
+        return sorted(result, key=lambda x: x[1], reverse=True)[:5]
 
-        def dfs(node):
-            if node in visited:
-                return False
-            visited.add(node)
-            stack.append(node)
-            for neighbor in graph.get(node, []):
-                if dfs(neighbor):
-                    return True
-            stack.pop()
-            return False
+# Usage example:
+trie = Trie()
+words = ["dog", "cat", "apple", "banana", "cherry"]
+for word in words:
+    trie.insert(word)
 
-        for start_node in graph:
-            if dfs(start_node):
-                return True
-
-        return False
-
-    # Check for a negative cycle using Floyd-Warshall algorithm
-    n = len(graph)
-    distance = [[float('inf')] * n for _ in range(n)]
-    
-    for i in range(n):
-        for neighbor in graph.get(i, []):
-            distance[i][neighbor] = 1
-
-    for k in range(n):
-        for i in range(n):
-            for j in range(n):
-                distance[i][j] = min(distance[i][j], distance[i][k] + distance[k][j])
-
-    for i in range(n):
-        if distance[i][i] < float('inf'):
-            return True
-
-    return is_negative_cycle(0)
-
-# Example usage:
-graph_example_1 = {
-    'A': ['B', 'C'],
-    'B': ['D'],
-    'C': ['D'],
-    'D': [],
-}
-
-print(has_cycle(graph_example_1))  # Output: False
-
-graph_example_2 = {
-    'A': ['B'],
-    'B': ['C'],
-    'C': ['A']
-}
-
-print(has_cycle(graph_example_2))  # Output: True
+search_string = "ca"
+result = trie.search(search_string)
+print(result)  # Output: [("cat", 1)]
 ```
 
-### Explanation
+### Detailed Explanation of the Algorithm
 
-1. **Negative Cycle Detection**: The solution uses the Floyd-Warshall algorithm to detect a negative cycle by checking if there is any path with negative total weight.
-   - The Floyd-Warshall algorithm updates the shortest path between all pairs of nodes.
-   - If there is a negative cycle, the shortest path from a node to itself will be less than infinity.
+1. **Trie Construction**:
+   - The `TrieNode` class initializes each node with a dictionary `children` to store child nodes and a boolean flag `is_word_end` to mark the end of a word. Additionally, a `word_frequency` attribute is added to store the frequency of each word.
+   - The `insert` method iterates through each character of the word and creates new nodes as needed. It also increments the frequency count for each word.
 
-2. **DFS for Cycle Detection**: After checking for a negative cycle, we perform a depth-first search (DFS) from each unvisited node to detect any simple cycles.
+2. **Search and Autocomplete**:
+   - The `search` method starts from the root node and traverses down based on the characters of the search string. If any character does not exist in the current node's children, it returns an empty list.
+   - If all characters match (i.e., it's a prefix), it calls `_dfs` to perform a depth-first search from this node.
+   - `_dfs` method recursively traverses down and collects all words ending with this prefix along with their frequencies. It then sorts these results by frequency in descending order and returns the top 5 most relevant words.
 
-3. **Optimality**: This approach ensures that we handle both positive and negative weights efficiently and accurately detect cycles including those caused by negative cycles
+### Time and Space Complexity Analysis
+
+- **Time Complexity**:
+  - Building the Trie: O(N * avgL), where N is the number of words and avgL is the average length of words [2].
+  - Searching for a prefix: O(k), where k is the length of the search string [2].
+  - Depth-first search for top 5 most relevant words: O(k * V), where V is the number of nodes visited (in this case, at most 26^k for English alphabet), thus O(k * k^k) which simplifies to O(k^k+1) due to constant number of operations per node.
+
+Since k^k+1 grows very fast but in practice we are looking at small values of k (typically up to 16 for typical English words), this remains manageable.
+
+- **Space Complexity**:
+  - Memory required to store each node in the Trie: O(S), where S is the sum of all patterns' lengths [4].
+  - Additional memory for storing frequencies in each node: O(N * S).
+
+### Why This Approach is Optimal
+
+This approach is optimal because:
+
+- It efficiently constructs the Trie using O(N * avgL) time.
+- The search operation is efficiently performed in O(k) time.
+- The depth-first search for finding top 5 relevant words has a reasonable time complexity due to its practical nature.
+- It uses minimal additional space by storing frequencies directly within each node
