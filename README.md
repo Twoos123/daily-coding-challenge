@@ -21,107 +21,73 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
-**Challenge: Autocomplete with Trie**
+### Hash Table Challenge: "Duplicate Value Finder"
 
-Implement an autocomplete system using a Trie data structure. Given a list of words and a search string, return the top 5 most relevant words starting with the search string. The relevance is determined by the frequency of each word in the list.
+#### Problem Description
+You are given an array of integers, and you need to find all duplicate values using a hash table. The hash table should be used to efficiently keep track of the elements in the array and their counts. The challenge requires you to return a list of unique element values that appear more than once in the array.
 
-### Example Input/Output
+#### Example Input/Output
+- **Input**: `[1, 2, 2, 3, 4, 4, 5, 6, 6]`
+- **Output**: `[2, 4, 6]`
 
-**Input:**
-- `words` = ["dog", "cat", "apple", "banana", "cherry"]
-- `search_string` = "ca"
+#### Constraints
+- The array will contain only positive integers.
+- The array will have at least one duplicate value.
 
-**Output:**
-- `["cat"]`
-
-### Constraints:
-- The list of words is not empty.
-- The search string is at least one character long.
-- The frequency of each word in the list should be considered for relevance.
-
-### Most Efficient Solution in Python
+### Most Efficient Solution
 
 ```python
-class TrieNode:
-    def __init__(self):
-        self.children = {}
-        self.is_word_end = False
-        self.word_frequency = 0
+def find_duplicates(nums):
+    # Create a hash table to store counts of elements
+    count_table = {}
+    
+    # Initialize an empty list to store duplicate values
+    duplicates = []
+    
+    # Iterate over each element in the array
+    for num in nums:
+        # If the element is already in the hash table, increment its count
+        if num in count_table:
+            count_table[num] += 1
+            
+            # If this is the second occurrence, add to the list of duplicates
+            if count_table[num] == 2:
+                duplicates.append(num)
+        else:
+            # If not, initialize its count to 1
+            count_table[num] = 1
+    
+    return duplicates
 
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-        node.is_word_end = True
-        node.word_frequency += 1
-
-    def search(self, search_string):
-        node = self.root
-        for char in search_string:
-            if char not in node.children:
-                return []
-            node = node.children[char]
-        
-        # If search_string is a prefix of some words, traverse down from node 
-        return self._dfs(node, search_string)
-
-    def _dfs(self, node, prefix):
-        result = []
-        if node.is_word_end:
-            result.append((prefix, node.word_frequency))
-        
-        for char, child_node in node.children.items():
-            result.extend(self._dfs(child_node, prefix + char))
-        
-        return sorted(result, key=lambda x: x[1], reverse=True)[:5]
-
-# Usage example:
-trie = Trie()
-words = ["dog", "cat", "apple", "banana", "cherry"]
-for word in words:
-    trie.insert(word)
-
-search_string = "ca"
-result = trie.search(search_string)
-print(result)  # Output: [("cat", 1)]
+# Example usage:
+nums = [1, 2, 2, 3, 4, 4, 5, 6, 6]
+print(find_duplicates(nums))  # Output: [2, 4, 6]
 ```
 
-### Detailed Explanation of the Algorithm
+### Detailed Explanation
+1. **Hash Table Initialization**:
+   - We initialize an empty hash table `count_table` to keep track of element counts.
 
-1. **Trie Construction**:
-   - The `TrieNode` class initializes each node with a dictionary `children` to store child nodes and a boolean flag `is_word_end` to mark the end of a word. Additionally, a `word_frequency` attribute is added to store the frequency of each word.
-   - The `insert` method iterates through each character of the word and creates new nodes as needed. It also increments the frequency count for each word.
+2. **Iterate Through Array**:
+   - We iterate through each element in the input array.
+   - For each element, we check if it is already in the hash table.
 
-2. **Search and Autocomplete**:
-   - The `search` method starts from the root node and traverses down based on the characters of the search string. If any character does not exist in the current node's children, it returns an empty list.
-   - If all characters match (i.e., it's a prefix), it calls `_dfs` to perform a depth-first search from this node.
-   - `_dfs` method recursively traverses down and collects all words ending with this prefix along with their frequencies. It then sorts these results by frequency in descending order and returns the top 5 most relevant words.
+3. **Update Counts and Check Duplicates**:
+   - If the element is already in the hash table, we increment its count.
+   - If this is the second occurrence (i.e., `count == 2`), we add it to our list of duplicates.
 
-### Time and Space Complexity Analysis
+4. **Return Duplicates List**:
+   - At the end of the iteration, we return the list of unique element values that appear more than once.
 
-- **Time Complexity**:
-  - Building the Trie: O(N * avgL), where N is the number of words and avgL is the average length of words [2].
-  - Searching for a prefix: O(k), where k is the length of the search string [2].
-  - Depth-first search for top 5 most relevant words: O(k * V), where V is the number of nodes visited (in this case, at most 26^k for English alphabet), thus O(k * k^k) which simplifies to O(k^k+1) due to constant number of operations per node.
+### Complexity Analysis
+- **Time Complexity**: O(n)
+  - Each element is processed once, leading to a linear time complexity.
+  
+- **Space Complexity**: O(n)
+  - In the worst case, every element could be a duplicate and could be stored in our hash table with its count.
 
-Since k^k+1 grows very fast but in practice we are looking at small values of k (typically up to 16 for typical English words), this remains manageable.
+This approach is optimal because it leverages the efficient lookup and update abilities of a hash table. It ensures that we only iterate through the array once, making it efficient in terms of both time and space complexity.
 
-- **Space Complexity**:
-  - Memory required to store each node in the Trie: O(S), where S is the sum of all patterns' lengths [4].
-  - Additional memory for storing frequencies in each node: O(N * S).
+### Difficulty Rating: 3
 
-### Why This Approach is Optimal
-
-This approach is optimal because:
-
-- It efficiently constructs the Trie using O(N * avgL) time.
-- The search operation is efficiently performed in O(k) time.
-- The depth-first search for finding top 5 relevant words has a reasonable time complexity due to its practical nature.
-- It uses minimal additional space by storing frequencies directly within each node
+The difficulty rating is 3 because while it involves implementing a hash table and handling duplicate values efficiently, it does not require advanced techniques like collision resolution or secondary hash functions. It is still a straightforward application of hash tables but requires understanding basic hash table operations and handling edge cases like duplicates.
