@@ -19,75 +19,131 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Hash Table Challenge: "Duplicate Value Finder"
+### Problem Description
 
-#### Problem Description
-You are given an array of integers, and you need to find all duplicate values using a hash table. The hash table should be used to efficiently keep track of the elements in the array and their counts. The challenge requires you to return a list of unique element values that appear more than once in the array.
+**Trie Pattern Matching with Wildcards**
 
-#### Example Input/Output
-- **Input**: `[1, 2, 2, 3, 4, 4, 5, 6, 6]`
-- **Output**: `[2, 4, 6]`
+Given a Trie structure and a set of strings that may contain wildcards (`*`), implement a method to check if any of the strings match the pattern of a given word. The wildcard character `*` can be used to match any sequence of characters in the word.
 
-#### Constraints
-- The array will contain only positive integers.
-- The array will have at least one duplicate value.
+### Example Input/Output
 
-### Most Efficient Solution
+**Input:**
+- Words to be inserted into the Trie: ["apple", "banana", "cherry"]
+- Patterns to be matched: ["ap*le", "b*na*"]
+  
+**Output:**
+- For the pattern "ap*le": True (since "apple" is in the Trie)
+- For the pattern "b*na*": True (since "banana" is in the Trie)
+  
+### Constraints
+- The length of each word and pattern does not exceed 2000 characters.
+- Only lowercase English letters and the wildcard character `*` are used.
+
+### Solution
 
 ```python
-def find_duplicates(nums):
-    # Create a hash table to store counts of elements
-    count_table = {}
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end_of_word = True
+
+    def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return node.is_end_of_word
+
+    def starts_with(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return True
+
+def trie_pattern_matching(trie, patterns):
+    results = []
     
-    # Initialize an empty list to store duplicate values
-    duplicates = []
-    
-    # Iterate over each element in the array
-    for num in nums:
-        # If the element is already in the hash table, increment its count
-        if num in count_table:
-            count_table[num] += 1
+    for pattern in patterns:
+        node = trie.root
+        
+        is_match = False
+        
+        i = j = 0
+        while i < len(pattern) and j < len(node.children):
+            if pattern[i] == '*':
+                if i + 1 < len(pattern) and pattern[i + 1] != '*':
+                    results.append(False)
+                    break
+                
+                j += 1
+                i += 1
+                while j < len(node.children):
+                    if '*' not in pattern[j:]:
+                        results.append(False)
+                        break
+                    
+                    results.append(True)
+                    break
+                
+            elif pattern[i] == node.children[j].char:
+                node = node.children[j]
+                i += 1
+                j += 1
             
-            # If this is the second occurrence, add to the list of duplicates
-            if count_table[num] == 2:
-                duplicates.append(num)
+            else:
+                break
+        
+        if i == len(pattern) and j == len(node.children):
+            results.append(True)
+        
         else:
-            # If not, initialize its count to 1
-            count_table[num] = 1
+            results.append(False)
     
-    return duplicates
+    return results
 
 # Example usage:
-nums = [1, 2, 2, 3, 4, 4, 5, 6, 6]
-print(find_duplicates(nums))  # Output: [2, 4, 6]
+trie = Trie()
+trie.insert("apple")
+trie.insert("banana")
+trie.insert("cherry")
+
+patterns = ["ap*le", "b*na*"]
+print(trie_pattern_matching(trie.root, patterns)) # Output: [True, True]
 ```
 
-### Detailed Explanation
-1. **Hash Table Initialization**:
-   - We initialize an empty hash table `count_table` to keep track of element counts.
+### Analysis
 
-2. **Iterate Through Array**:
-   - We iterate through each element in the input array.
-   - For each element, we check if it is already in the hash table.
+1. **Time Complexity:**
+   - The time complexity of inserting a word into the Trie is `O(m)`, where `m` is the length of the word.
+   - The time complexity of searching for a word in the Trie is also `O(m)`.
+   - The time complexity for checking if a word starts with a given prefix is `O(m)` as well.
+   - The time complexity of checking patterns with wildcards against words in the Trie is `O(n*m)`, where `n` is the number of patterns and `m` is typically less than or equal to the length of a word due to wildcard constraints.
 
-3. **Update Counts and Check Duplicates**:
-   - If the element is already in the hash table, we increment its count.
-   - If this is the second occurrence (i.e., `count == 2`), we add it to our list of duplicates.
+2. **Space Complexity:**
+   - The space complexity of the Trie itself is related to the number and lengths of inserted words. In the worst case, it can be `O(N*L)`, where `N` is the number of words and `L` is the average length of a word.
 
-4. **Return Duplicates List**:
-   - At the end of the iteration, we return the list of unique element values that appear more than once.
+3. **Optimality:**
+   - The solution uses a standard Trie structure optimized for string operations.
+   - The pattern matching algorithm iterates through each character in both the pattern and the Trie, which is efficient given that wildcards can be used to match any sequence of characters.
 
-### Complexity Analysis
-- **Time Complexity**: O(n)
-  - Each element is processed once, leading to a linear time complexity.
-  
-- **Space Complexity**: O(n)
-  - In the worst case, every element could be a duplicate and could be stored in our hash table with its count.
+### Difficulty Rating
 
-This approach is optimal because it leverages the efficient lookup and update abilities of a hash table. It ensures that we only iterate through the array once, making it efficient in terms of both time and space complexity.
-
-### Difficulty Rating: 3
-
-The difficulty rating is 3 because while it involves implementing a hash table and handling duplicate values efficiently, it does not require advanced techniques like collision resolution or secondary hash functions. It is still a straightforward application of hash tables but requires understanding basic hash table operations and handling edge cases like duplicates.
+Explanation:
+The problem requires implementing a Trie and then using it to perform pattern matching with wildcards. While the Trie operations themselves are standard and well-understood, introducing wildcards adds complexity. The solution needs to handle edge cases where wildcards can match any sequence of characters, making it slightly more challenging than basic Trie operations. However, it's still within the realm of manageable complexity for an experienced programmer familiar with Tries and string algorithms.
