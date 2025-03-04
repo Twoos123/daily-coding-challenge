@@ -19,131 +19,69 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
 ### Problem Description
 
-**Trie Pattern Matching with Wildcards**
+**Challenge: Reverse Vowels in a String**
 
-Given a Trie structure and a set of strings that may contain wildcards (`*`), implement a method to check if any of the strings match the pattern of a given word. The wildcard character `*` can be used to match any sequence of characters in the word.
+Given a string containing only lowercase letters and spaces, reverse only the vowels in the string. For example, if the input string is "hello", the output should be "holle".
 
 ### Example Input/Output
 
-**Input:**
-- Words to be inserted into the Trie: ["apple", "banana", "cherry"]
-- Patterns to be matched: ["ap*le", "b*na*"]
-  
-**Output:**
-- For the pattern "ap*le": True (since "apple" is in the Trie)
-- For the pattern "b*na*": True (since "banana" is in the Trie)
-  
+- **Input:** "hello"
+- **Output:** "holle"
+
+- **Input:** "world"
+- **Output:** "world"
+
 ### Constraints
-- The length of each word and pattern does not exceed 2000 characters.
-- Only lowercase English letters and the wildcard character `*` are used.
+
+- The input string contains only lowercase letters and spaces.
+- The task is to reverse only the vowels in the string.
 
 ### Solution
 
+To solve this problem efficiently, we use a two-pointer technique. One pointer will track the position of the vowels to be reversed, and the other will traverse through the string to find vowels and swap them with the vowel at the first pointer's position.
+
 ```python
-class TrieNode:
-    def __init__(self):
-        self.children = {}
-        self.is_end_of_word = False
+def reverse_vowels(s):
+    vowels = 'aeiou'
+    left, right = 0, len(s) - 1
 
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-        node.is_end_of_word = True
-
-    def search(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                return False
-            node = node.children[char]
-        return node.is_end_of_word
-
-    def starts_with(self, prefix):
-        node = self.root
-        for char in prefix:
-            if char not in node.children:
-                return False
-            node = node.children[char]
-        return True
-
-def trie_pattern_matching(trie, patterns):
-    results = []
+    # Convert the string to a list for easier manipulation (since strings are immutable in Python)
+    s_list = list(s)
     
-    for pattern in patterns:
-        node = trie.root
+    while left < right:
+        # Find a vowel from the left and move it to the right position if it's not already there
+        while s_list[left] not in vowels:
+            left += 1
         
-        is_match = False
+        # Find a vowel from the right and move it to the left position if it's not already there
+        while s_list[right] not in vowels:
+            right -= 1
         
-        i = j = 0
-        while i < len(pattern) and j < len(node.children):
-            if pattern[i] == '*':
-                if i + 1 < len(pattern) and pattern[i + 1] != '*':
-                    results.append(False)
-                    break
-                
-                j += 1
-                i += 1
-                while j < len(node.children):
-                    if '*' not in pattern[j:]:
-                        results.append(False)
-                        break
-                    
-                    results.append(True)
-                    break
-                
-            elif pattern[i] == node.children[j].char:
-                node = node.children[j]
-                i += 1
-                j += 1
-            
-            else:
-                break
+        # Swap the vowels found on both sides
+        s_list[left], s_list[right] = s_list[right], s_list[left]
         
-        if i == len(pattern) and j == len(node.children):
-            results.append(True)
-        
-        else:
-            results.append(False)
+        # Move both pointers after swapping
+        left += 1
+        right -= 1
     
-    return results
+    # Convert the list back to a string and return
+    return ''.join(s_list)
 
-# Example usage:
-trie = Trie()
-trie.insert("apple")
-trie.insert("banana")
-trie.insert("cherry")
-
-patterns = ["ap*le", "b*na*"]
-print(trie_pattern_matching(trie.root, patterns)) # Output: [True, True]
+print(reverse_vowels("hello"))  # Output: "holle"
 ```
 
 ### Analysis
 
-1. **Time Complexity:**
-   - The time complexity of inserting a word into the Trie is `O(m)`, where `m` is the length of the word.
-   - The time complexity of searching for a word in the Trie is also `O(m)`.
-   - The time complexity for checking if a word starts with a given prefix is `O(m)` as well.
-   - The time complexity of checking patterns with wildcards against words in the Trie is `O(n*m)`, where `n` is the number of patterns and `m` is typically less than or equal to the length of a word due to wildcard constraints.
+- **Time Complexity:** The time complexity of this solution is O(n), where n is the length of the string. This is because we are traversing through the string twice at most (once for each pointer).
 
-2. **Space Complexity:**
-   - The space complexity of the Trie itself is related to the number and lengths of inserted words. In the worst case, it can be `O(N*L)`, where `N` is the number of words and `L` is the average length of a word.
+- **Space Complexity:** The space complexity is O(n) as well because we convert the string into a list for manipulation.
 
-3. **Optimality:**
-   - The solution uses a standard Trie structure optimized for string operations.
-   - The pattern matching algorithm iterates through each character in both the pattern and the Trie, which is efficient given that wildcards can be used to match any sequence of characters.
+This approach is optimal because it uses a simple and efficient technique that only requires two passes through the string. The use of a set for vowels could potentially make it more efficient if we were dealing with a large set of characters, but since 'aeiou' is a small set, using a string is sufficient and straightforward.
 
 ### Difficulty Rating
 
-Explanation:
-The problem requires implementing a Trie and then using it to perform pattern matching with wildcards. While the Trie operations themselves are standard and well-understood, introducing wildcards adds complexity. The solution needs to handle edge cases where wildcards can match any sequence of characters, making it slightly more challenging than basic Trie operations. However, it's still within the realm of manageable complexity for an experienced programmer familiar with Tries and string algorithms.
+The difficulty level for this problem would be rated as a 3 out of 5. It requires understanding and applying basic string manipulation techniques along with proper use of data structures like lists in Python. However, it's not overly complex or requiring advanced algorithms like some other string manipulation problems might.
