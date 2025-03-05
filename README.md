@@ -19,69 +19,74 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem Description
+### Problem Description: **Array Partitioning for Maximum Product**
 
-**Challenge: Reverse Vowels in a String**
-
-Given a string containing only lowercase letters and spaces, reverse only the vowels in the string. For example, if the input string is "hello", the output should be "holle".
+Given an array `arr` of integers, partition the array into two parts such that the product of the elements in the first part is maximized. The elements in the first part can be chosen such that their product is maximized while ensuring that the remaining elements in the second part are also non-zero.
 
 ### Example Input/Output
 
-- **Input:** "hello"
-- **Output:** "holle"
-
-- **Input:** "world"
-- **Output:** "world"
+- **Input:** `[1, 2, 3, 4, 5]`
+- **Output:** `[5, 4, 3], [1, 2]`
+  - The product of elements in the first part is `5 * 4 * 3 = 60`, which is maximized.
+  - The remaining elements `1` and `2` form the second part.
 
 ### Constraints
-
-- The input string contains only lowercase letters and spaces.
-- The task is to reverse only the vowels in the string.
+- The array may contain zeros.
+- The solution must ensure that the product in the first part is maximized and all elements in the second part are non-zero.
 
 ### Solution
 
-To solve this problem efficiently, we use a two-pointer technique. One pointer will track the position of the vowels to be reversed, and the other will traverse through the string to find vowels and swap them with the vowel at the first pointer's position.
-
 ```python
-def reverse_vowels(s):
-    vowels = 'aeiou'
-    left, right = 0, len(s) - 1
+def maximize_product_partition(arr):
+    if not arr or sum(arr) == 0:
+        return [], []
 
-    # Convert the string to a list for easier manipulation (since strings are immutable in Python)
-    s_list = list(s)
-    
-    while left < right:
-        # Find a vowel from the left and move it to the right position if it's not already there
-        while s_list[left] not in vowels:
-            left += 1
-        
-        # Find a vowel from the right and move it to the left position if it's not already there
-        while s_list[right] not in vowels:
-            right -= 1
-        
-        # Swap the vowels found on both sides
-        s_list[left], s_list[right] = s_list[right], s_list[left]
-        
-        # Move both pointers after swapping
-        left += 1
-        right -= 1
-    
-    # Convert the list back to a string and return
-    return ''.join(s_list)
+    n = len(arr)
+    dp = [[0] * (n + 1) for _ in range(n + 1)]
 
-print(reverse_vowels("hello"))  # Output: "holle"
+    for i in range(1, n + 1):
+        for j in range(i, n + 1):
+            if i == j:
+                dp[i][j] = arr[i - 1]
+            else:
+                dp[i][j] = max(dp[i - 1][j], arr[i - 1] * dp[i - 1][j - 1])
+
+    max_product = dp[n][n]
+    
+    # Reconstruct the partition
+    i, j = n, n
+    first_part = []
+    while i > 0 and j > 0:
+        if dp[i][j] == dp[i - 1][j]:
+            i -= 1
+        else:
+            first_part.append(arr[j - 1])
+            j -= 2
+            
+    return first_part[::-1], arr[:i] or arr[:j]
+
+# Example usage:
+arr = [1, 2, 3, 4, 5]
+first_part, second_part = maximize_product_partition(arr)
+print(f"First part: {first_part}, Second part: {second_part}")
 ```
 
-### Analysis
+### Analysis:
 
-- **Time Complexity:** The time complexity of this solution is O(n), where n is the length of the string. This is because we are traversing through the string twice at most (once for each pointer).
+#### Time Complexity:
+The time complexity of this solution is **O(n^2)** because we are using a dynamic programming table `dp` which is filled in a nested loop structure.
 
-- **Space Complexity:** The space complexity is O(n) as well because we convert the string into a list for manipulation.
+#### Space Complexity:
+The space complexity is **O(n^2)** as well because we need to store the `dp` table which has dimensions `(n + 1) x (n + 1)`.
 
-This approach is optimal because it uses a simple and efficient technique that only requires two passes through the string. The use of a set for vowels could potentially make it more efficient if we were dealing with a large set of characters, but since 'aeiou' is a small set, using a string is sufficient and straightforward.
+#### Difficulty Rating:
+Given the complexity analysis:
+- **Time Complexity:** O(n^2)
+- **Space Complexity:** O(n^2)
+- **Implementation Difficulty:** This problem requires understanding how to use dynamic programming with arrays to solve a partitioning problem efficiently. It involves reconstructing the optimal partition based on the computed maximum product, which adds to its difficulty level.
 
-### Difficulty Rating
+****
 
-The difficulty level for this problem would be rated as a 3 out of 5. It requires understanding and applying basic string manipulation techniques along with proper use of data structures like lists in Python. However, it's not overly complex or requiring advanced algorithms like some other string manipulation problems might.
+This rating reflects that while it's not extremely challenging like some hard LeetCode problems, it requires a good grasp of dynamic programming techniques and array manipulation to optimize the solution effectively.
