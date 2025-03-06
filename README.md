@@ -19,74 +19,129 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description: **Array Partitioning for Maximum Product**
+### Problem Description
 
-Given an array `arr` of integers, partition the array into two parts such that the product of the elements in the first part is maximized. The elements in the first part can be chosen such that their product is maximized while ensuring that the remaining elements in the second part are also non-zero.
+**Challenge: "Island Counter with DFS and Topological Sort"**
+
+**Objective:**
+Given an undirected graph representing islands and rivers, use Depth-First Search (DFS) to count the number of islands and then perform a Topological Sort to arrange the islands in a linear order based on their finishing times.
+
+**Input:**
+- An adjacency list representation of the undirected graph.
+- Functionality to add new rivers (edges) between islands (vertices).
+
+**Output:**
+- The number of islands initially present in the graph.
+- A linear order of islands based on their finishing times from a DFS traversal.
+
+### Constraints
+- The graph is undirected.
+- The number of vertices (islands) is in the range [1, 1000].
+- The number of edges (rivers) is in the range [1, 10000].
 
 ### Example Input/Output
 
-- **Input:** `[1, 2, 3, 4, 5]`
-- **Output:** `[5, 4, 3], [1, 2]`
-  - The product of elements in the first part is `5 * 4 * 3 = 60`, which is maximized.
-  - The remaining elements `1` and `2` form the second part.
+**Input Graph:**
+```
+adj_list = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['F'],
+    'F': ['C', 'E']
+}
+```
 
-### Constraints
-- The array may contain zeros.
-- The solution must ensure that the product in the first part is maximized and all elements in the second part are non-zero.
+**Initial Output:**
+```
+Number of islands: 6
+
+Linear order based on finishing times:
+['A', 'B', 'C', 'D', 'E', 'F']
+```
+
+### Constraints Analysis
+
+1. **Time Complexity:**
+   - **Island Counting (DFS):** \(O(V + E)\), where \(V\) is the number of vertices and \(E\) is the number of edges.
+   - **Topological Sort:** \(O(V + E)\) for a general case but can be optimized to \(O(V + E)\) if we use Kahn's algorithm or DFS-based approach which is suitable here.
+
+2. **Space Complexity:**
+   - **DFS:** \(O(V + E)\) for storing recursion stack or queue used during DFS.
+   - **Topological Sort:** \(O(V + E)\) for storing visited nodes and adjacency list.
 
 ### Solution
 
+#### Island Counter with DFS
 ```python
-def maximize_product_partition(arr):
-    if not arr or sum(arr) == 0:
-        return [], []
+def count_islands(graph):
+    visited = set()
+    island_count = 0
 
-    n = len(arr)
-    dp = [[0] * (n + 1) for _ in range(n + 1)]
+    def dfs(node):
+        visited.add(node)
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                dfs(neighbor)
 
-    for i in range(1, n + 1):
-        for j in range(i, n + 1):
-            if i == j:
-                dp[i][j] = arr[i - 1]
-            else:
-                dp[i][j] = max(dp[i - 1][j], arr[i - 1] * dp[i - 1][j - 1])
-
-    max_product = dp[n][n]
+    for node in graph:
+        if node not in visited:
+            island_count += 1
+            dfs(node)
     
-    # Reconstruct the partition
-    i, j = n, n
-    first_part = []
-    while i > 0 and j > 0:
-        if dp[i][j] == dp[i - 1][j]:
-            i -= 1
-        else:
-            first_part.append(arr[j - 1])
-            j -= 2
-            
-    return first_part[::-1], arr[:i] or arr[:j]
-
-# Example usage:
-arr = [1, 2, 3, 4, 5]
-first_part, second_part = maximize_product_partition(arr)
-print(f"First part: {first_part}, Second part: {second_part}")
+    return island_count
 ```
 
-### Analysis:
+#### Topological Sort using DFS
+```python
+def topological_sort(graph):
+    visited = set()
+    ordering = []
 
-#### Time Complexity:
-The time complexity of this solution is **O(n^2)** because we are using a dynamic programming table `dp` which is filled in a nested loop structure.
+    def dfs(node):
+        visited.add(node)
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                dfs(neighbor)
+        ordering.append(node)
 
-#### Space Complexity:
-The space complexity is **O(n^2)** as well because we need to store the `dp` table which has dimensions `(n + 1) x (n + 1)`.
+    for node in graph:
+        if node not in visited:
+            dfs(node)
+    
+    return ordering[::-1]  # Reversing the list to get correct ordering
 
-#### Difficulty Rating:
-Given the complexity analysis:
-- **Time Complexity:** O(n^2)
-- **Space Complexity:** O(n^2)
-- **Implementation Difficulty:** This problem requires understanding how to use dynamic programming with arrays to solve a partitioning problem efficiently. It involves reconstructing the optimal partition based on the computed maximum product, which adds to its difficulty level.
+# Example usage:
+adj_list = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['F'],
+    'F': ['C', 'E']
+}
 
+print("Number of islands:", count_islands(adj_list))
+print("Linear order based on finishing times:", topological_sort(adj_list))
+```
+
+### Complexity Analysis
+
+#### Island Counting (DFS)
+- **Time Complexity:** \(O(V + E)\)
+- **Space Complexity:** \(O(V + E)\)
+
+#### Topological Sort using DFS
+- **Time Complexity:** \(O(V + E)\)
+- **Space Complexity:** \(O(V + E)\)
+
+#### Combined Complexity
+Since both operations are performed sequentially, the overall time complexity remains \(O(V + E)\). The space complexity remains \(O(V + E)\) due to the storage required for visited sets and recursion stack during DFS.
+
+### Difficulty Rating
 ****
 
-This rating reflects that while it's not extremely challenging like some hard LeetCode problems, it requires a good grasp of dynamic programming techniques and array manipulation to optimize the solution effectively.
+This challenge requires a good understanding of both DFS and Topological Sort concepts. While the island counting part is straightforward, performing a topological sort adds an additional layer of complexity that makes it suitable for intermediate-level problems. The combined operations and handling of both counting and ordering make it moderately challenging, hence rated as 3 out of 5.
