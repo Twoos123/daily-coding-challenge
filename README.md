@@ -21,127 +21,85 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Coding Challenge: Reversing a Queue Using Stacks
 
-**Challenge: "Island Counter with DFS and Topological Sort"**
+**Problem Description:**
+Given a queue, reverse the order of its elements using a stack. Implement this process in such a way that it is efficient in both time and space complexity.
 
-**Objective:**
-Given an undirected graph representing islands and rivers, use Depth-First Search (DFS) to count the number of islands and then perform a Topological Sort to arrange the islands in a linear order based on their finishing times.
-
-**Input:**
-- An adjacency list representation of the undirected graph.
-- Functionality to add new rivers (edges) between islands (vertices).
-
-**Output:**
-- The number of islands initially present in the graph.
-- A linear order of islands based on their finishing times from a DFS traversal.
-
-### Constraints
-- The graph is undirected.
-- The number of vertices (islands) is in the range [1, 1000].
-- The number of edges (rivers) is in the range [1, 10000].
-
-### Example Input/Output
-
-**Input Graph:**
-```
-adj_list = {
-    'A': ['B', 'C'],
-    'B': ['A', 'D'],
-    'C': ['A', 'F'],
-    'D': ['B'],
-    'E': ['F'],
-    'F': ['C', 'E']
-}
-```
-
-**Initial Output:**
-```
-Number of islands: 6
-
-Linear order based on finishing times:
-['A', 'B', 'C', 'D', 'E', 'F']
-```
-
-### Constraints Analysis
-
-1. **Time Complexity:**
-   - **Island Counting (DFS):** \(O(V + E)\), where \(V\) is the number of vertices and \(E\) is the number of edges.
-   - **Topological Sort:** \(O(V + E)\) for a general case but can be optimized to \(O(V + E)\) if we use Kahn's algorithm or DFS-based approach which is suitable here.
-
-2. **Space Complexity:**
-   - **DFS:** \(O(V + E)\) for storing recursion stack or queue used during DFS.
-   - **Topological Sort:** \(O(V + E)\) for storing visited nodes and adjacency list.
-
-### Solution
-
-#### Island Counter with DFS
+**Example Input/Output:**
+Input:
 ```python
-def count_islands(graph):
-    visited = set()
-    island_count = 0
-
-    def dfs(node):
-        visited.add(node)
-        for neighbor in graph[node]:
-            if neighbor not in visited:
-                dfs(neighbor)
-
-    for node in graph:
-        if node not in visited:
-            island_count += 1
-            dfs(node)
-    
-    return island_count
+queue = [1, 2, 3, 4, 5]
+```
+Output:
+```python
+reversed_queue = [5, 4, 3, 2, 1]
 ```
 
-#### Topological Sort using DFS
+**Constraints:**
+- The input queue is represented as an array or list.
+- The `enqueue` and `dequeue` operations on the queue are provided.
+- The solution should not use any additional data structures other than a stack.
+
+**Solution:**
+
 ```python
-def topological_sort(graph):
-    visited = set()
-    ordering = []
+class Queue:
+    def __init__(self):
+        self.items = []
 
-    def dfs(node):
-        visited.add(node)
-        for neighbor in graph[node]:
-            if neighbor not in visited:
-                dfs(neighbor)
-        ordering.append(node)
+    def enqueue(self, item):
+        self.items.append(item)
 
-    for node in graph:
-        if node not in visited:
-            dfs(node)
+    def dequeue(self):
+        if not self.is_empty():
+            return self.items.pop(0)
+        else:
+            return None
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+def reverse_queue(queue):
+    stack = []
+    while not queue.is_empty():
+        stack.append(queue.dequeue())
     
-    return ordering[::-1]  # Reversing the list to get correct ordering
+    while stack:
+        queue.enqueue(stack.pop())
 
 # Example usage:
-adj_list = {
-    'A': ['B', 'C'],
-    'B': ['A', 'D'],
-    'C': ['A', 'F'],
-    'D': ['B'],
-    'E': ['F'],
-    'F': ['C', 'E']
-}
+q = Queue()
+q.enqueue(1)
+q.enqueue(2)
+q.enqueue(3)
+q.enqueue(4)
+q.enqueue(5)
 
-print("Number of islands:", count_islands(adj_list))
-print("Linear order based on finishing times:", topological_sort(adj_list))
+print("Original Queue:", q.items) # Output: [1, 2, 3, 4, 5]
+
+reverse_queue(q)
+
+print("Reversed Queue:", q.items) # Output: [5, 4, 3, 2, 1]
 ```
 
-### Complexity Analysis
+**Detailed Explanation of the Algorithm:**
+1. **Initialize the Stack:** Start by creating an empty stack.
+2. **Pop Elements from Queue:** While the input queue is not empty, pop each element from the front of the queue and push it onto the stack.
+3. **Reconstruct Queue:** Once all elements are popped from the queue and stacked in reverse order, start popping elements from the stack and enqueuing them back into the original queue.
+4. **Repeat Until Empty:** Continue popping and enqueuing until all elements are back in their reversed order.
 
-#### Island Counting (DFS)
-- **Time Complexity:** \(O(V + E)\)
-- **Space Complexity:** \(O(V + E)\)
+**Analysis of Time Complexity:**
+- The `while` loop that pops elements from the queue and pushes them onto the stack runs in O(n) time where n is the number of elements in the queue.
+- The second `while` loop that pops elements from the stack and enqueues them back into the queue runs in O(n) time as well.
+- Therefore, the overall time complexity is O(n) + O(n) = O(2n), which simplifies to O(n).
 
-#### Topological Sort using DFS
-- **Time Complexity:** \(O(V + E)\)
-- **Space Complexity:** \(O(V + E)\)
+**Analysis of Space Complexity:**
+- The space used by our solution is primarily due to the stack which holds n elements temporarily.
+- Therefore, the space complexity is O(n).
 
-#### Combined Complexity
-Since both operations are performed sequentially, the overall time complexity remains \(O(V + E)\). The space complexity remains \(O(V + E)\) due to the storage required for visited sets and recursion stack during DFS.
+**Optimality Explanation:**
+This approach is optimal because it leverages both stacks and queues efficiently without using any additional data structures beyond what is specified. The use of a stack allows us to efficiently reverse the order of elements, and then reconstructing it back into a queue ensures that we maintain constant time operations for both enqueue and dequeue operations on the original queue.
 
 ### Difficulty Rating
-****
-
-This challenge requires a good understanding of both DFS and Topological Sort concepts. While the island counting part is straightforward, performing a topological sort adds an additional layer of complexity that makes it suitable for intermediate-level problems. The combined operations and handling of both counting and ordering make it moderately challenging, hence rated as 3 out of 5.
+This challenge requires understanding how to manipulate data structures like stacks and queues efficiently and effectively. The solution involves understanding how to temporarily reverse the order of elements using a stack and then reconstructing it back into its original form. The time and space complexities are both linear (O(n)), making it a challenging yet manageable problem for someone familiar with basic data structures.
