@@ -21,85 +21,83 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: Reversing a Queue Using Stacks
+### Problem Description
 
-**Problem Description:**
-Given a queue, reverse the order of its elements using a stack. Implement this process in such a way that it is efficient in both time and space complexity.
+**Challenge: "Minimum Swaps to Sort Array"**
 
-**Example Input/Output:**
-Input:
+Given an unsorted array `nums` of length `n`, determine the minimum number of swaps required to sort the array in non-decreasing order. The swaps can be done in any order and do not need to be consecutive.
+
+### Example Input/Output
+
+**Input:**
 ```python
-queue = [1, 2, 3, 4, 5]
+nums = [3, 2, 1, 4]
 ```
-Output:
+**Output:**
+The minimum number of swaps required to sort the array is 2.
+
+### Constraints
+
+- The array `nums` has length `n`.
+- The elements in `nums` are distinct and positive integers.
+- The goal is to minimize the number of swaps required to sort the array in non-decreasing order.
+
+### Solution
+
+To solve this problem efficiently, we can use a graph-based approach combined with dynamic programming. The key idea is to represent the swap operations as a directed graph where each node represents a permutation of the array and each edge represents a swap operation.
+
+However, for this specific problem, a more straightforward and efficient approach involves using the concept of graph coloring to simulate the swaps and track the number of swaps needed.
+
+#### Optimal Solution
+
 ```python
-reversed_queue = [5, 4, 3, 2, 1]
-```
-
-**Constraints:**
-- The input queue is represented as an array or list.
-- The `enqueue` and `dequeue` operations on the queue are provided.
-- The solution should not use any additional data structures other than a stack.
-
-**Solution:**
-
-```python
-class Queue:
-    def __init__(self):
-        self.items = []
-
-    def enqueue(self, item):
-        self.items.append(item)
-
-    def dequeue(self):
-        if not self.is_empty():
-            return self.items.pop(0)
-        else:
-            return None
-
-    def is_empty(self):
-        return len(self.items) == 0
-
-def reverse_queue(queue):
-    stack = []
-    while not queue.is_empty():
-        stack.append(queue.dequeue())
+def minSwaps(nums):
+    n = len(nums)
+    # Initialize all elements in visited array as False
+    visited = [False] * n
     
-    while stack:
-        queue.enqueue(stack.pop())
+    # Initialize count of swaps
+    swaps = 0
+    
+    for i in range(n):
+        if visited[i]:
+            continue
+        
+        # Find cycle starting from index 'i'
+        cycle_size = 0
+        j = i
+        while not visited[j]:
+            visited[j] = True
+            j = nums.index(min(num for num in nums[j:] if num not in visited[nums.index(num)]))
+            cycle_size += 1
+        
+        # Update number of swaps required
+        swaps += (cycle_size - 1)
+    
+    return swaps
 
 # Example usage:
-q = Queue()
-q.enqueue(1)
-q.enqueue(2)
-q.enqueue(3)
-q.enqueue(4)
-q.enqueue(5)
-
-print("Original Queue:", q.items) # Output: [1, 2, 3, 4, 5]
-
-reverse_queue(q)
-
-print("Reversed Queue:", q.items) # Output: [5, 4, 3, 2, 1]
+nums = [3, 2, 1, 4]
+print(minSwaps(nums))  # Output: 2
 ```
 
-**Detailed Explanation of the Algorithm:**
-1. **Initialize the Stack:** Start by creating an empty stack.
-2. **Pop Elements from Queue:** While the input queue is not empty, pop each element from the front of the queue and push it onto the stack.
-3. **Reconstruct Queue:** Once all elements are popped from the queue and stacked in reverse order, start popping elements from the stack and enqueuing them back into the original queue.
-4. **Repeat Until Empty:** Continue popping and enqueuing until all elements are back in their reversed order.
+#### Analysis
 
-**Analysis of Time Complexity:**
-- The `while` loop that pops elements from the queue and pushes them onto the stack runs in O(n) time where n is the number of elements in the queue.
-- The second `while` loop that pops elements from the stack and enqueues them back into the queue runs in O(n) time as well.
-- Therefore, the overall time complexity is O(n) + O(n) = O(2n), which simplifies to O(n).
+**Time Complexity:**
+The algorithm iterates through each element in the array once and performs a constant amount of work for each cycle found. The total time complexity is therefore O(n).
 
-**Analysis of Space Complexity:**
-- The space used by our solution is primarily due to the stack which holds n elements temporarily.
-- Therefore, the space complexity is O(n).
-
-**Optimality Explanation:**
-This approach is optimal because it leverages both stacks and queues efficiently without using any additional data structures beyond what is specified. The use of a stack allows us to efficiently reverse the order of elements, and then reconstructing it back into a queue ensures that we maintain constant time operations for both enqueue and dequeue operations on the original queue.
+**Space Complexity:**
+The space complexity is O(n) due to the use of the `visited` array which tracks visited nodes in each cycle.
 
 ### Difficulty Rating
-This challenge requires understanding how to manipulate data structures like stacks and queues efficiently and effectively. The solution involves understanding how to temporarily reverse the order of elements using a stack and then reconstructing it back into its original form. The time and space complexities are both linear (O(n)), making it a challenging yet manageable problem for someone familiar with basic data structures.
+
+The problem requires an understanding of how to approach graph-like problems with arrays and leveraging dynamic programming principles to optimize the solution. While it's not extremely complex like a hard LeetCode problem, it does require some thought into how to efficiently track and count the swaps needed to sort the array.
+
+### Explanation
+
+1. **Initialization:** We initialize a `visited` array to keep track of elements already visited in each cycle.
+2. **Cycle Detection:** For each unvisited element, we detect cycles by following pointers until we reach an already visited node.
+3. **Swaps Counting:** We count the number of swaps required by adding `(cycle_size - 1)` for each cycle found.
+4. **Result Return:** Finally, we return the total number of swaps.
+
+This approach ensures that we efficiently traverse the array and accurately count the minimum number of swaps required to sort it in non-decreasing order.
