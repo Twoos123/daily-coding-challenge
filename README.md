@@ -19,85 +19,107 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem Description
+### Challenge: "In-Order Sum of Unique Binary Search Trees"
 
-**Challenge: "Minimum Swaps to Sort Array"**
+**Problem Description:**
+Given an integer `n`, generate all structurally unique binary search trees (BSTs) that can be constructed with `n` uniquely valued nodes. For each unique BST, calculate the sum of all nodes in the BST and find the maximum in-order sum among these unique BSTs.
 
-Given an unsorted array `nums` of length `n`, determine the minimum number of swaps required to sort the array in non-decreasing order. The swaps can be done in any order and do not need to be consecutive.
+**Example Input/Output:**
+- **Input:** `n = 3`
+- **Output:** Maximum in-order sum of unique BSTs
 
-### Example Input/Output
-
-**Input:**
-```python
-nums = [3, 2, 1, 4]
-```
-**Output:**
-The minimum number of swaps required to sort the array is 2.
-
-### Constraints
-
-- The array `nums` has length `n`.
-- The elements in `nums` are distinct and positive integers.
-- The goal is to minimize the number of swaps required to sort the array in non-decreasing order.
+**Constraints:**
+- The binary search tree must be constructed with `n` unique node values.
+- The in-order sum is calculated by summing all nodes in each unique BST.
+- The maximum in-order sum should be determined from all generated unique BSTs.
 
 ### Solution
 
-To solve this problem efficiently, we can use a graph-based approach combined with dynamic programming. The key idea is to represent the swap operations as a directed graph where each node represents a permutation of the array and each edge represents a swap operation.
+To solve this problem, we need to generate all unique BSTs and then calculate their in-order sums. The maximum in-order sum will be our final answer.
 
-However, for this specific problem, a more straightforward and efficient approach involves using the concept of graph coloring to simulate the swaps and track the number of swaps needed.
+1. **Generate Unique BSTs:**
+   - The number of unique BSTs for `n` nodes is given by the `n`th Catalan number, `C_n`.
+   - We can use recursion to generate these trees by considering each node as a potential root and attaching all possible left and right subtrees.
 
-#### Optimal Solution
+2. **Calculate In-Order Sum of Each BST:**
+   - For each generated BST, perform an in-order traversal to sum all nodes.
+   - The in-order traversal visits nodes in ascending order (left -> root -> right), making it efficient for calculating sums.
+
+3. **Find Maximum In-Order Sum:**
+   - Compare the in-order sums of all generated BSTs to find the maximum sum.
+
+### Implementation in Python
 
 ```python
-def minSwaps(nums):
-    n = len(nums)
-    # Initialize all elements in visited array as False
-    visited = [False] * n
-    
-    # Initialize count of swaps
-    swaps = 0
-    
-    for i in range(n):
-        if visited[i]:
-            continue
-        
-        # Find cycle starting from index 'i'
-        cycle_size = 0
-        j = i
-        while not visited[j]:
-            visited[j] = True
-            j = nums.index(min(num for num in nums[j:] if num not in visited[nums.index(num)]))
-            cycle_size += 1
-        
-        # Update number of swaps required
-        swaps += (cycle_size - 1)
-    
-    return swaps
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
 
-# Example usage:
-nums = [3, 2, 1, 4]
-print(minSwaps(nums))  # Output: 2
+def generate_trees(n, left=0, right=n):
+    if left > right: return [None]
+    if left == right: return [TreeNode(left)]
+    
+    all_trees = []
+    
+    for i in range(left, right + 1):
+        left_trees = generate_trees(n, left, i - 1)
+        right_trees = generate_trees(n, i + 1, right)
+        
+        for left_tree in left_trees:
+            for right_tree in right_trees:
+                root = TreeNode(i)
+                root.left = left_tree
+                root.right = right_tree
+                all_trees.append(root)
+                
+    return all_trees
+
+def in_order_sum(root):
+    if root is None: return 0
+    return root.val + in_order_sum(root.left) + in_order_sum(root.right)
+
+def max_in_order_sum(n):
+    all_bsts = generate_trees(n)
+    
+    max_sum = float('-inf')
+    
+    for bst in all_bsts:
+        total_sum = in_order_sum(bst)
+        
+        if total_sum > max_sum:
+            max_sum = total_sum
+            
+    return max_sum
+
+# Example usage
+n = 3
+print(max_in_order_sum(n))
 ```
 
-#### Analysis
+### Analysis of Complexity
 
-**Time Complexity:**
-The algorithm iterates through each element in the array once and performs a constant amount of work for each cycle found. The total time complexity is therefore O(n).
+1. **Time Complexity:**
+   - Generating all unique BSTs involves recursive calls with a branching factor proportional to `n`. The number of such calls is related to the `n`th Catalan number, `C_n`, which makes the overall time complexity approximately `O(n * C_n)`.
+   - Calculating the in-order sum for each BST involves traversing the tree, which takes `O(n)` time where `n` is the number of nodes in the BST.
+   - Comparing in-order sums across all generated BSTs involves iterating through each BST once, adding another `O(C_n)` term for checking sums.
 
-**Space Complexity:**
-The space complexity is O(n) due to the use of the `visited` array which tracks visited nodes in each cycle.
+Thus, the overall time complexity is approximately `O(n * C_n)`, where `C_n` is the `n`th Catalan number.
+
+2. **Space Complexity:**
+   - The space required for storing all generated unique BSTs is proportional to the number of unique BSTs, which is approximately `O(n * C_n)`.
+   - The recursion stack space used during generation will be proportional to the height of the recursion tree, typically around `O(n)` in the worst case scenario.
 
 ### Difficulty Rating
 
-The problem requires an understanding of how to approach graph-like problems with arrays and leveraging dynamic programming principles to optimize the solution. While it's not extremely complex like a hard LeetCode problem, it does require some thought into how to efficiently track and count the swaps needed to sort the array.
+This problem requires generating unique BSTs, calculating their in-order sums, and finding the maximum among them. Given its emphasis on both tree construction and traversal with a complex condition (maximum in-order sum), it falls under a moderate to challenging category due to its recursive nature and the need to handle a large number of unique trees.
 
-### Explanation
+Given these factors:
 
-1. **Initialization:** We initialize a `visited` array to keep track of elements already visited in each cycle.
-2. **Cycle Detection:** For each unvisited element, we detect cycles by following pointers until we reach an already visited node.
-3. **Swaps Counting:** We count the number of swaps required by adding `(cycle_size - 1)` for each cycle found.
-4. **Result Return:** Finally, we return the total number of swaps.
+```plaintext
+```
 
-This approach ensures that we efficiently traverse the array and accurately count the minimum number of swaps required to sort it in non-decreasing order.
+This problem is rated a 4 out of 5 in terms of difficulty. It involves intricate tree generation and traversal, along with sum calculations and comparisons across multiple unique trees. The recursive nature and handling of Catalan numbers add complexity, making it a challenging
