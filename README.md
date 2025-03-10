@@ -19,107 +19,83 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: "In-Order Sum of Unique Binary Search Trees"
+### Coding Challenge: Hash Table - Duplicate Character Filter
 
 **Problem Description:**
-Given an integer `n`, generate all structurally unique binary search trees (BSTs) that can be constructed with `n` uniquely valued nodes. For each unique BST, calculate the sum of all nodes in the BST and find the maximum in-order sum among these unique BSTs.
+Given a string `s`, filter out the characters that appear more than once in the string. Use a hash table to efficiently keep track of character frequencies and return a new string containing only the unique characters.
 
 **Example Input/Output:**
-- **Input:** `n = 3`
-- **Output:** Maximum in-order sum of unique BSTs
+- **Input:** `s = "abacdef"`
+- **Output:** `"abcdef"`
 
 **Constraints:**
-- The binary search tree must be constructed with `n` unique node values.
-- The in-order sum is calculated by summing all nodes in each unique BST.
-- The maximum in-order sum should be determined from all generated unique BSTs.
+- The input string `s` will contain only lowercase English letters.
+- The length of `s` will be between 1 and 1000 characters.
 
-### Solution
-
-To solve this problem, we need to generate all unique BSTs and then calculate their in-order sums. The maximum in-order sum will be our final answer.
-
-1. **Generate Unique BSTs:**
-   - The number of unique BSTs for `n` nodes is given by the `n`th Catalan number, `C_n`.
-   - We can use recursion to generate these trees by considering each node as a potential root and attaching all possible left and right subtrees.
-
-2. **Calculate In-Order Sum of Each BST:**
-   - For each generated BST, perform an in-order traversal to sum all nodes.
-   - The in-order traversal visits nodes in ascending order (left -> root -> right), making it efficient for calculating sums.
-
-3. **Find Maximum In-Order Sum:**
-   - Compare the in-order sums of all generated BSTs to find the maximum sum.
-
-### Implementation in Python
+### Most Efficient Solution in Python
 
 ```python
-class TreeNode:
-    def __init__(self, x):
-        self.val = x
-        self.left = None
-        self.right = None
-
-def generate_trees(n, left=0, right=n):
-    if left > right: return [None]
-    if left == right: return [TreeNode(left)]
+def filter_unique_chars(s):
+    # Create a hash table to store character frequencies
+    char_freq = {}
     
-    all_trees = []
+    # Count the frequency of each character in the string
+    for char in s:
+        if char in char_freq:
+            char_freq[char] += 1
+        else:
+            char_freq[char] = 1
     
-    for i in range(left, right + 1):
-        left_trees = generate_trees(n, left, i - 1)
-        right_trees = generate_trees(n, i + 1, right)
-        
-        for left_tree in left_trees:
-            for right_tree in right_trees:
-                root = TreeNode(i)
-                root.left = left_tree
-                root.right = right_tree
-                all_trees.append(root)
-                
-    return all_trees
-
-def in_order_sum(root):
-    if root is None: return 0
-    return root.val + in_order_sum(root.left) + in_order_sum(root.right)
-
-def max_in_order_sum(n):
-    all_bsts = generate_trees(n)
+    # Initialize an empty string to store unique characters
+    unique_chars = ""
     
-    max_sum = float('-inf')
+    # Iterate through the original string and add unique characters to the result
+    for char in s:
+        if char_freq[char] == 1:
+            unique_chars += char
     
-    for bst in all_bsts:
-        total_sum = in_order_sum(bst)
-        
-        if total_sum > max_sum:
-            max_sum = total_sum
-            
-    return max_sum
+    return unique_chars
 
-# Example usage
-n = 3
-print(max_in_order_sum(n))
+# Example usage:
+s = "abacdef"
+print(filter_unique_chars(s))  # Output: "abcdef"
 ```
 
-### Analysis of Complexity
+### Algorithm Explanation
 
-1. **Time Complexity:**
-   - Generating all unique BSTs involves recursive calls with a branching factor proportional to `n`. The number of such calls is related to the `n`th Catalan number, `C_n`, which makes the overall time complexity approximately `O(n * C_n)`.
-   - Calculating the in-order sum for each BST involves traversing the tree, which takes `O(n)` time where `n` is the number of nodes in the BST.
-   - Comparing in-order sums across all generated BSTs involves iterating through each BST once, adding another `O(C_n)` term for checking sums.
+1. **Initialization:**
+   - Create an empty dictionary `char_freq` to store the frequency of each character in the string.
 
-Thus, the overall time complexity is approximately `O(n * C_n)`, where `C_n` is the `n`th Catalan number.
+2. **Frequency Counting:**
+   - Iterate through each character in the string `s`.
+   - If the character is already in `char_freq`, increment its count by 1.
+   - If it's not, set its count to 1.
 
-2. **Space Complexity:**
-   - The space required for storing all generated unique BSTs is proportional to the number of unique BSTs, which is approximately `O(n * C_n)`.
-   - The recursion stack space used during generation will be proportional to the height of the recursion tree, typically around `O(n)` in the worst case scenario.
+3. **Unique Characters Extraction:**
+   - Initialize an empty string `unique_chars` to store the unique characters.
+   - Iterate through each character in the original string again.
+   - If the frequency of a character is 1 (i.e., it appears only once), append it to `unique_chars`.
+
+4. **Return Result:**
+   - Return the string containing only the unique characters.
+
+### Complexity Analysis
+
+- **Time Complexity:** O(n)
+  - The frequency counting step iterates through the string once, resulting in O(n).
+  - The extraction step also iterates through the string once, but this is inherently part of the problem and doesn't add additional complexity.
+  - Therefore, the overall time complexity remains O(n).
+
+- **Space Complexity:** O(n)
+  - The dictionary used to store character frequencies can potentially store up to n entries (where n is the length of the string).
+  - Therefore, the space complexity is also O(n).
 
 ### Difficulty Rating
 
-This problem requires generating unique BSTs, calculating their in-order sums, and finding the maximum among them. Given its emphasis on both tree construction and traversal with a complex condition (maximum in-order sum), it falls under a moderate to challenging category due to its recursive nature and the need to handle a large number of unique trees.
+This problem is moderately complex because it requires using a hash table (dictionary in Python) for efficient frequency counting and then extracting unique characters from the string. However, given the straightforward implementation and lack of complex collision resolution techniques, it is still relatively beginner-friendly.
 
-Given these factors:
+**Difficulty Rating: 3**
 
-```plaintext
-```
-
-This problem is rated a 4 out of 5 in terms of difficulty. It involves intricate tree generation and traversal, along with sum calculations and comparisons across multiple unique trees. The recursive nature and handling of Catalan numbers add complexity, making it a challenging
+This problem should be accessible for someone with basic knowledge of data structures and algorithms, including hash tables. The solution provided is both efficient (O(n) time and space) and easy to understand.
