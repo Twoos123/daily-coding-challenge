@@ -21,114 +21,54 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-****
+### Coding Challenge: "Duplicate Detection in a Stream of Characters"
 
-## Problem Description
+#### Problem Description
+Given a stream of characters, implement a hash table to detect and remove duplicate characters while maintaining the order of their first occurrence. The challenge requires you to provide an efficient solution with optimal time and space complexity.
 
-### Challenge: Trie Prefix Suffix Count
+#### Example Input/Output
+**Input:** `stream = ['a', 'b', 'a', 'c', 'd', 'b', 'c']`
+**Output:** `['a', 'b', 'a', 'c', 'd', 'b', 'c']` (since the stream already contains all unique characters)
 
-Given a set of strings, implement a Trie-based solution to count the number of unique prefixes and suffixes for each string. The task requires efficiently traversing the Trie to identify and count all possible prefixes and suffixes of the strings.
+**Input:** `stream = ['a', 'b', 'c', 'a', 'b', 'c']`
+**Output:** `['a', 'b', 'c']` (removing duplicates while maintaining order)
 
-### Constraints
-- The input is a list of strings.
-- The output should be a dictionary where each key is a string and the value is a dictionary containing counts for unique prefixes and suffixes.
-- The solution should maintain optimal time and space complexity.
+#### Constraints
+- The stream of characters will contain only lowercase letters (a-z).
+- The maximum length of the stream is 26 characters (since there are 26 lowercase letters).
 
-## Example Input/Output
-
-Input:
-```python
-strings = ["abc", "bca", "cba", "xyz"]
-```
-
-Output:
-```python
-{
-    'abc': {
-        'prefixes': 3,
-        'suffixes': 3
-    },
-    'bca': {
-        'prefixes': 3,
-        'suffixes': 3
-    },
-    'cba': {
-        'prefixes': 3,
-        'suffixes': 3
-    },
-    'xyz': {
-        'prefixes': 1,
-        'suffixes': 1
-    }
-}
-```
-
-## Solution
-
-### Optimal Approach
-
-To solve this problem efficiently, we will use a Trie data structure and extend it to count unique prefixes and suffixes.
-
-#### Trie Implementation with Prefix and Suffix Counting
+#### Solution
 
 ```python
-class TrieNode:
+class DuplicateDetector:
     def __init__(self):
-        self.children = {}
-        self.is_end_of_word = False
-        self.prefix_count = 0
-        self.suffix_count = 0
+        # Initialize an empty hash table
+        self.char_table = {}
 
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
+    def add(self, char):
+        # If the character is not in the table, add it and return True
+        if char not in self.char_table:
+            self.char_table[char] = True
+            return True
+        
+        # If the character is already in the table, do nothing and return False
+        return False
 
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-            node.prefix_count += 1  # Increment prefix count for each character
-            if char == word[-1]:  # If it's the last character in the word
-                node.suffix_count += 1  # Increment suffix count for each word
+# Example usage:
+detector = DuplicateDetector()
+stream = ['a', 'b', 'a', 'c', 'd', 'b', 'c']
+result = []
+for char in stream:
+    if detector.add(char):
+        result.append(char)
 
-    def count_unique_prefixes_and_suffixes(self, words):
-        result = {}
-        for word in words:
-            self.insert(word)
-            result[word] = {
-                'prefixes': self.root.prefix_count,  # Store the prefix count from the root node
-                'suffixes': self.root.suffix_count  # Store the suffix count from the root node
-            }
-            # Reset counts for next word to avoid overcounting
-            for char in word:
-                self.root.children[char].prefix_count -= 1
-                if char == word[-1]:
-                    self.root.children[char].suffix_count -= 1
-        return result
-
-# Example usage
-trie = Trie()
-strings = ["abc", "bca", "cba", "xyz"]
-print(trie.count_unique_prefixes_and_suffixes(strings))
+print(result)  # Output: ['a', 'b', 'c', 'd']
 ```
 
-### Analysis
+#### Analysis
+- **Time Complexity:** The average time complexity for adding an element to the hash table is O(1), as we use a dictionary which provides constant time complexity for lookups.
+- **Space Complexity:** The space complexity is O(n), where n is the number of unique characters in the stream, because each unique character is stored in the hash table.
 
-#### Time Complexity:
-- **Insertion:** The time complexity of inserting a string into the Trie is O(m), where m is the length of the string.
-- **Counting Unique Prefixes and Suffixes:** The time complexity of computing unique prefixes and suffixes for all strings is also O(n*m), where n is the number of strings.
+#### Difficulty Rating: **3**
 
-#### Space Complexity:
-- The space complexity is O(n*m) as we need to store all the nodes of the Trie for all strings.
-
-### Explanation
-The solution uses a Trie to efficiently store and count unique prefixes and suffixes. It iterates over each character in each word, incrementing both prefix and suffix counts appropriately. By resetting counts after processing each word, we ensure accurate counts without overcounting.
-
-This approach maintains optimal time complexity by leveraging Trie's efficient string operations and constant-time access properties.
-
-### Trade-offs:
-The approach requires additional space to store prefix and suffix counts at each node but ensures accurate results. The trade-off lies in the need for extra memory to store these counts, but this is balanced by the efficiency of using Trie for prefix and suffix operations.
-
-By using a Trie, we achieve O(m) time complexity for insertion and O(m) time complexity for counting unique prefixes and suffixes, making this approach highly efficient for this problem.
+This problem requires implementing a hash table to efficiently detect and remove duplicates while maintaining order. The solution leverages the constant time complexity of hash tables to achieve optimal performance. However, it does not involve complex collision resolution techniques or advanced optimizations, making it a moderately challenging problem that is accessible with basic understanding of hash tables and dictionaries in Python.
