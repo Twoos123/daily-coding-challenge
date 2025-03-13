@@ -21,54 +21,95 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Duplicate Detection in a Stream of Characters"
+**DIFFICULTY: 4**
 
-#### Problem Description
-Given a stream of characters, implement a hash table to detect and remove duplicate characters while maintaining the order of their first occurrence. The challenge requires you to provide an efficient solution with optimal time and space complexity.
+## Problem Description
 
-#### Example Input/Output
-**Input:** `stream = ['a', 'b', 'a', 'c', 'd', 'b', 'c']`
-**Output:** `['a', 'b', 'a', 'c', 'd', 'b', 'c']` (since the stream already contains all unique characters)
+**Validating a Balanced Binary Search Tree**
 
-**Input:** `stream = ['a', 'b', 'c', 'a', 'b', 'c']`
-**Output:** `['a', 'b', 'c']` (removing duplicates while maintaining order)
+Given a binary tree, determine if it is a valid binary search tree (BST). A valid BST has the following properties:
+1. The left subtree of a node contains only nodes with keys less than the node's key.
+2. The right subtree of a node contains only nodes with keys greater than the node's key.
+3. For any node, all elements in the left subtree must be less than the node, and all elements in the right subtree must be greater than the node.
 
-#### Constraints
-- The stream of characters will contain only lowercase letters (a-z).
-- The maximum length of the stream is 26 characters (since there are 26 lowercase letters).
+### Example Input/Output
 
-#### Solution
-
+**Input**
 ```python
-class DuplicateDetector:
-    def __init__(self):
-        # Initialize an empty hash table
-        self.char_table = {}
-
-    def add(self, char):
-        # If the character is not in the table, add it and return True
-        if char not in self.char_table:
-            self.char_table[char] = True
-            return True
-        
-        # If the character is already in the table, do nothing and return False
-        return False
-
-# Example usage:
-detector = DuplicateDetector()
-stream = ['a', 'b', 'a', 'c', 'd', 'b', 'c']
-result = []
-for char in stream:
-    if detector.add(char):
-        result.append(char)
-
-print(result)  # Output: ['a', 'b', 'c', 'd']
+   4
+ /   \
+2     5
+  / \   \
+ /   \   \
+1     3   6
 ```
 
-#### Analysis
-- **Time Complexity:** The average time complexity for adding an element to the hash table is O(1), as we use a dictionary which provides constant time complexity for lookups.
-- **Space Complexity:** The space complexity is O(n), where n is the number of unique characters in the stream, because each unique character is stored in the hash table.
+**Output**
+- True: The given binary tree is a valid BST.
+- False: The given binary tree is not a valid BST.
 
-#### Difficulty Rating: **3**
+### Constraints
 
-This problem requires implementing a hash table to efficiently detect and remove duplicates while maintaining order. The solution leverages the constant time complexity of hash tables to achieve optimal performance. However, it does not involve complex collision resolution techniques or advanced optimizations, making it a moderately challenging problem that is accessible with basic understanding of hash tables and dictionaries in Python.
+- The binary tree is not necessarily balanced.
+- The tree can be empty.
+
+## Constraints Analysis
+
+The problem requires checking if a given binary tree satisfies the properties of a BST. This involves traversing the tree and ensuring that all nodes adhere to the BST properties.
+
+## Solution Explanation
+
+The most efficient approach to solve this problem is to use an in-order traversal and check if the result is a sorted sequence. This method leverages the inherent property that an in-order traversal of a valid BST will yield a sorted sequence of node values.
+
+### Implementation
+
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def isValidBST(root):
+    def inOrderTraversal(node, lower=float('-inf'), upper=float('inf')):
+        if not node:
+            return True
+        
+        # Check if current node's value is out of range [lower, upper]
+        if node.val <= lower or node.val >= upper:
+            return False
+        
+        # Recursively check left and right subtrees with updated ranges
+        return (inOrderTraversal(node.left, lower, node.val) and 
+                inOrderTraversal(node.right, node.val, upper))
+    
+    return inOrderTraversal(root)
+
+# Example usage:
+# Constructing the given BST
+#      4
+#     / \
+#    2   5
+#   / \   \
+#  1   3   6
+
+root = TreeNode(4)
+root.left = TreeNode(2)
+root.right = TreeNode(5)
+root.left.left = TreeNode(1)
+root.left.right = TreeNode(3)
+root.right.right = TreeNode(6)
+
+print(isValidBST(root)) # Output: True
+```
+
+### Time and Space Complexity Analysis
+
+- **Time Complexity**: The time complexity of this solution is O(N), where N is the number of nodes in the binary tree. This is because we potentially visit each node once during the in-order traversal.
+- **Space Complexity**: The space complexity is O(H), where H is the height of the tree. This is because in the worst case scenario (a skewed tree), we might use O(N) space for recursive call stack.
+
+## Why This Approach is Optimal
+
+Using an in-order traversal ensures that we check each subtree's validity relative to its parent node's value, making it straightforward to verify if all nodes satisfy BST properties. This method does not require balancing or maintaining additional data structures, making it efficient both in terms of time and space complexity.
+
+This challenge requires understanding and implementing a technique for validating whether a given binary tree adheres to BST constraints, which involves traversing and checking node values against sorted sequences. The difficulty level is rated at **4** due to its requirement for understanding traversal methods and ensuring property checks across all nodes in a non-balanced tree context.
