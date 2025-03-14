@@ -21,95 +21,65 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-**DIFFICULTY: 4**
+### Challenge: Design a Stack-based Token Parser for Balanced Brackets
 
-## Problem Description
+#### Problem Description
+Given a string of round, curly, and square brackets, write a function that parses the string to check whether the brackets are balanced. The function should utilize a stack data structure to efficiently manage the opening and closing brackets.
 
-**Validating a Balanced Binary Search Tree**
+**Example Input/Output:**
+- **Input**: `(a + b) * (c + d)`
+- **Output**: True (Balanced)
+- **Input**: `((a + b) * (c + d))`
+- **Output**: False (Not Balanced)
 
-Given a binary tree, determine if it is a valid binary search tree (BST). A valid BST has the following properties:
-1. The left subtree of a node contains only nodes with keys less than the node's key.
-2. The right subtree of a node contains only nodes with keys greater than the node's key.
-3. For any node, all elements in the left subtree must be less than the node, and all elements in the right subtree must be greater than the node.
+#### Constraints
+- The input string contains only round, curly, and square brackets.
+- The function should return `True` if the brackets are balanced and `False` otherwise.
 
-### Example Input/Output
-
-**Input**
+#### Solution
 ```python
-   4
- /   \
-2     5
-  / \   \
- /   \   \
-1     3   6
-```
-
-**Output**
-- True: The given binary tree is a valid BST.
-- False: The given binary tree is not a valid BST.
-
-### Constraints
-
-- The binary tree is not necessarily balanced.
-- The tree can be empty.
-
-## Constraints Analysis
-
-The problem requires checking if a given binary tree satisfies the properties of a BST. This involves traversing the tree and ensuring that all nodes adhere to the BST properties.
-
-## Solution Explanation
-
-The most efficient approach to solve this problem is to use an in-order traversal and check if the result is a sorted sequence. This method leverages the inherent property that an in-order traversal of a valid BST will yield a sorted sequence of node values.
-
-### Implementation
-
-```python
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
-def isValidBST(root):
-    def inOrderTraversal(node, lower=float('-inf'), upper=float('inf')):
-        if not node:
-            return True
-        
-        # Check if current node's value is out of range [lower, upper]
-        if node.val <= lower or node.val >= upper:
-            return False
-        
-        # Recursively check left and right subtrees with updated ranges
-        return (inOrderTraversal(node.left, lower, node.val) and 
-                inOrderTraversal(node.right, node.val, upper))
+def is_brackets_balanced(s: str) -> bool:
+    # Create a dictionary mapping closing brackets to their corresponding opening brackets
+    bracket_map = {')': '(', '}': '{', ']': '['}
     
-    return inOrderTraversal(root)
+    # Create a stack to store the opening brackets
+    stack = []
 
-# Example usage:
-# Constructing the given BST
-#      4
-#     / \
-#    2   5
-#   / \   \
-#  1   3   6
+    # Iterate through the string
+    for char in s:
+        # If the character is an opening bracket, push it onto the stack
+        if char in bracket_map.values():
+            stack.append(char)
+        # If the character is a closing bracket, check if the stack is empty or its top element does not match with the current closing bracket
+        elif char in bracket_map.keys():
+            if not stack or stack.pop() != bracket_map[char]:
+                return False
+    
+    # If the stack is empty after processing the entire string, the brackets are balanced
+    return not stack
 
-root = TreeNode(4)
-root.left = TreeNode(2)
-root.right = TreeNode(5)
-root.left.left = TreeNode(1)
-root.left.right = TreeNode(3)
-root.right.right = TreeNode(6)
-
-print(isValidBST(root)) # Output: True
+# Example usage
+print(is_brackets_balanced('(a + b) * (c + d)'))  # True
+print(is_brackets_balanced('((a + b) * (c + d))'))  # False
 ```
 
-### Time and Space Complexity Analysis
+#### Analysis of Complexity and Difficulty Rating
+**Time Complexity:** 
+The time complexity of this solution is O(n), where n is the length of the input string. This is because we are iterating through the string once and performing constant time operations for each character.
 
-- **Time Complexity**: The time complexity of this solution is O(N), where N is the number of nodes in the binary tree. This is because we potentially visit each node once during the in-order traversal.
-- **Space Complexity**: The space complexity is O(H), where H is the height of the tree. This is because in the worst case scenario (a skewed tree), we might use O(N) space for recursive call stack.
+**Space Complexity:** 
+The space complexity is O(n) as well. The maximum size of the stack will be equal to the number of opening brackets in the string, which can be at most n.
 
-## Why This Approach is Optimal
+**Difficulty Rating:** 
+Difficulty: 1.5
 
-Using an in-order traversal ensures that we check each subtree's validity relative to its parent node's value, making it straightforward to verify if all nodes satisfy BST properties. This method does not require balancing or maintaining additional data structures, making it efficient both in terms of time and space complexity.
+This problem is a straightforward application of a stack data structure to solve a classic problem. The use of a dictionary to map closing brackets to their corresponding opening brackets simplifies the logic, making it easy to understand and implement. The constant time operations for pushing and popping from the stack ensure that the solution is both efficient and clear.
 
-This challenge requires understanding and implementing a technique for validating whether a given binary tree adheres to BST constraints, which involves traversing and checking node values against sorted sequences. The difficulty level is rated at **4** due to its requirement for understanding traversal methods and ensuring property checks across all nodes in a non-balanced tree context.
+### Explanation of the Algorithm
+1. **Initialization:** Create a dictionary `bracket_map` that maps closing brackets to their corresponding opening brackets.
+2. **Iteration:** Iterate through each character in the input string.
+3. **Opening Bracket:** If the character is an opening bracket, push it onto the stack.
+4. **Closing Bracket:** If the character is a closing bracket, check if the stack is empty or its top element does not match with the current closing bracket. If either condition is true, return False.
+5. **Post-Iteration Check:** After processing the entire string, check if the stack is empty. If it is, then all brackets were properly matched and return True; otherwise, return False.
+
+This approach ensures that we correctly identify whether the brackets in any given string are balanced by maintaining a stack that mirrors the nesting of opening and closing brackets.
