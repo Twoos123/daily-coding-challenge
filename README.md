@@ -21,65 +21,111 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: Design a Stack-based Token Parser for Balanced Brackets
+### DIFFICULTY: 4
 
-#### Problem Description
-Given a string of round, curly, and square brackets, write a function that parses the string to check whether the brackets are balanced. The function should utilize a stack data structure to efficiently manage the opening and closing brackets.
+**Problem Description:**
+**"Minimum Window Substring with Maximum Vowels"**
+
+Given two strings `s` and `t`, find the minimum window substring of `s` that contains all vowels at least once and has the maximum vowel count among all possible substrings of `s`. If no such substring exists, return an empty string.
 
 **Example Input/Output:**
-- **Input**: `(a + b) * (c + d)`
-- **Output**: True (Balanced)
-- **Input**: `((a + b) * (c + d))`
-- **Output**: False (Not Balanced)
+- Input: `s = "aeiou", t = "aa"`
+  - Output: `"a"`, because it contains all vowels and has a maximum vowel count.
+- Input: `s = "abc", t = "aeiou"`
+  - Output: `""`, because there is no substring of `s` containing all vowels.
 
-#### Constraints
-- The input string contains only round, curly, and square brackets.
-- The function should return `True` if the brackets are balanced and `False` otherwise.
+**Constraints:**
+- Both strings `s` and `t` are composed of lowercase English letters.
+- The length of `s` is between 1 and 10000.
+- The length of `t` is between 1 and 26 (all possible vowels).
 
-#### Solution
+### Optimal Solution
+
+To solve this problem efficiently, we need to use a combination of techniques including maintaining a sliding window, tracking vowel counts, and using a set for quick lookups.
+
+**Algorithm Explanation:**
+
+1. **Initialize Data Structures:**
+   - Use a set `vowels` to store all vowels.
+   - Initialize counters for the window: `count_vowels` to track the number of unique vowels in the current window, and `max_count` to keep track of the maximum vowel count found so far.
+   - Initialize variables for the minimum window: `min_window_start`, `min_window_end`, and `min_window_length`.
+
+2. **Extend the Sliding Window:**
+   - Iterate through the string `s` and extend the sliding window to the right.
+   - For each character in `s`, check if it is a vowel by looking up in `vowels`. If it is, increment `count_vowels`.
+   - Update `max_count` if the current window contains more vowels than any previous window.
+
+3. **Shrink the Sliding Window:**
+   - If the current window contains more vowels than any previous window, update `min_window_start`, `min_window_end`, and `min_window_length`.
+   - Continue to shrink the window from the left by removing the leftmost character from consideration. If this character was a vowel, decrement `count_vowels`.
+
+4. **Return Result:**
+   - After processing all characters in `s`, check if any valid substring was found. If yes, return it; otherwise return an empty string.
+
 ```python
-def is_brackets_balanced(s: str) -> bool:
-    # Create a dictionary mapping closing brackets to their corresponding opening brackets
-    bracket_map = {')': '(', '}': '{', ']': '['}
+def min_window_substring(s, t):
+    # Initialize set of vowels
+    vowels = set('aeiou')
     
-    # Create a stack to store the opening brackets
-    stack = []
-
-    # Iterate through the string
-    for char in s:
-        # If the character is an opening bracket, push it onto the stack
-        if char in bracket_map.values():
-            stack.append(char)
-        # If the character is a closing bracket, check if the stack is empty or its top element does not match with the current closing bracket
-        elif char in bracket_map.keys():
-            if not stack or stack.pop() != bracket_map[char]:
-                return False
+    # Initialize counters and variables
+    count_vowels = 0
+    max_count = 0
+    min_window_start = 0
+    min_window_end = 0
+    min_window_length = float('inf')
     
-    # If the stack is empty after processing the entire string, the brackets are balanced
-    return not stack
+    # Initialize result substring
+    result = ""
+    
+    # Iterate through string s
+    for end in range(len(s)):
+        # Check if current character is a vowel
+        if s[end] in vowels:
+            count_vowels += 1
+        
+        # Update max count if current window has more unique vowels
+        if count_vowels == len(t):
+            while True:
+                start = min_window_start
+                
+                # Check if current window has all unique vowels
+                if any(s[start + i] != t[i] for i in range(len(t))):
+                    break
+                
+                # Update minimum window length & indices if needed
+                if end - start + 1 < min_window_length:
+                    min_window_length = end - start + 1
+                    min_window_start = start
+                    min_window_end = end
+                
+                # Shrink window by moving left pointer to right
+                if s[start] in vowels:
+                    count_vowels -= 1
+                
+                min_window_start += 1
+                
+            # Update max count & result if necessary 
+            if end - min_window_start + 1 < min_window_length:
+                min_window_length = end - min_window_start + 1
+                
+            result = s[min_window_start:min_window_end+1]
+            
+            # Reset counters & variables for next window 
+            min_window_start += 1
+            
+            # Reset counters after finding valid substring 
+            if not (any(s[end+i] != t[i] for i in range(len(t)))):
+                break
+                
+    
+   return result
 
-# Example usage
-print(is_brackets_balanced('(a + b) * (c + d)'))  # True
-print(is_brackets_balanced('((a + b) * (c + d))'))  # False
+
+# Example usage 
+print(min_window_substring("aeiou", "aa")) # Output should be 'a'
+print(min_window_substring("abc", "aeiou")) # Output should be ''
 ```
 
-#### Analysis of Complexity and Difficulty Rating
-**Time Complexity:** 
-The time complexity of this solution is O(n), where n is the length of the input string. This is because we are iterating through the string once and performing constant time operations for each character.
+### Complexity Analysis:
 
-**Space Complexity:** 
-The space complexity is O(n) as well. The maximum size of the stack will be equal to the number of opening brackets in the string, which can be at most n.
-
-**Difficulty Rating:** 
-Difficulty: 1.5
-
-This problem is a straightforward application of a stack data structure to solve a classic problem. The use of a dictionary to map closing brackets to their corresponding opening brackets simplifies the logic, making it easy to understand and implement. The constant time operations for pushing and popping from the stack ensure that the solution is both efficient and clear.
-
-### Explanation of the Algorithm
-1. **Initialization:** Create a dictionary `bracket_map` that maps closing brackets to their corresponding opening brackets.
-2. **Iteration:** Iterate through each character in the input string.
-3. **Opening Bracket:** If the character is an opening bracket, push it onto the stack.
-4. **Closing Bracket:** If the character is a closing bracket, check if the stack is empty or its top element does not match with the current closing bracket. If either condition is true, return False.
-5. **Post-Iteration Check:** After processing the entire string, check if the stack is empty. If it is, then all brackets were properly matched and return True; otherwise, return False.
-
-This approach ensures that we correctly identify whether the brackets in any given string are balanced by maintaining a stack that mirrors the nesting of opening and closing brackets.
+- **Time Complexity:** O(n * m), where n is the length of string s and m is
