@@ -21,111 +21,59 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### DIFFICULTY: 4
+### Challenge: Optimal Subarray with Zero Sum
 
 **Problem Description:**
-**"Minimum Window Substring with Maximum Vowels"**
-
-Given two strings `s` and `t`, find the minimum window substring of `s` that contains all vowels at least once and has the maximum vowel count among all possible substrings of `s`. If no such substring exists, return an empty string.
+Given an array `nums` of integers, find the optimal subarray with zero sum. The optimal subarray is defined as the longest contiguous subarray that sums up to zero. If there are multiple such subarrays, return the one with the maximum length.
 
 **Example Input/Output:**
-- Input: `s = "aeiou", t = "aa"`
-  - Output: `"a"`, because it contains all vowels and has a maximum vowel count.
-- Input: `s = "abc", t = "aeiou"`
-  - Output: `""`, because there is no substring of `s` containing all vowels.
+- **Input:** `nums = [1, 2, -3, 3, -2, 2]`
+  - **Output:** `[3, -2, 2]` (because `[3, -2, 2]` is the longest contiguous subarray with zero sum)
 
 **Constraints:**
-- Both strings `s` and `t` are composed of lowercase English letters.
-- The length of `s` is between 1 and 10000.
-- The length of `t` is between 1 and 26 (all possible vowels).
+- The array `nums` will not be empty.
+- The array `nums` will only contain integers.
 
-### Optimal Solution
-
-To solve this problem efficiently, we need to use a combination of techniques including maintaining a sliding window, tracking vowel counts, and using a set for quick lookups.
-
-**Algorithm Explanation:**
-
-1. **Initialize Data Structures:**
-   - Use a set `vowels` to store all vowels.
-   - Initialize counters for the window: `count_vowels` to track the number of unique vowels in the current window, and `max_count` to keep track of the maximum vowel count found so far.
-   - Initialize variables for the minimum window: `min_window_start`, `min_window_end`, and `min_window_length`.
-
-2. **Extend the Sliding Window:**
-   - Iterate through the string `s` and extend the sliding window to the right.
-   - For each character in `s`, check if it is a vowel by looking up in `vowels`. If it is, increment `count_vowels`.
-   - Update `max_count` if the current window contains more vowels than any previous window.
-
-3. **Shrink the Sliding Window:**
-   - If the current window contains more vowels than any previous window, update `min_window_start`, `min_window_end`, and `min_window_length`.
-   - Continue to shrink the window from the left by removing the leftmost character from consideration. If this character was a vowel, decrement `count_vowels`.
-
-4. **Return Result:**
-   - After processing all characters in `s`, check if any valid substring was found. If yes, return it; otherwise return an empty string.
+**Solution in Python:**
 
 ```python
-def min_window_substring(s, t):
-    # Initialize set of vowels
-    vowels = set('aeiou')
+def optimal_subarray_zero_sum(nums):
+    n = len(nums)
+    prefix_sum = {0: -1}  # Initialize with sum=0 at index=-1
+    max_length = 0
+    max_start = 0
+    max_end = 0
     
-    # Initialize counters and variables
-    count_vowels = 0
-    max_count = 0
-    min_window_start = 0
-    min_window_end = 0
-    min_window_length = float('inf')
+    current_sum = 0
     
-    # Initialize result substring
-    result = ""
-    
-    # Iterate through string s
-    for end in range(len(s)):
-        # Check if current character is a vowel
-        if s[end] in vowels:
-            count_vowels += 1
+    for i in range(n):
+        current_sum += nums[i]
         
-        # Update max count if current window has more unique vowels
-        if count_vowels == len(t):
-            while True:
-                start = min_window_start
-                
-                # Check if current window has all unique vowels
-                if any(s[start + i] != t[i] for i in range(len(t))):
-                    break
-                
-                # Update minimum window length & indices if needed
-                if end - start + 1 < min_window_length:
-                    min_window_length = end - start + 1
-                    min_window_start = start
-                    min_window_end = end
-                
-                # Shrink window by moving left pointer to right
-                if s[start] in vowels:
-                    count_vowels -= 1
-                
-                min_window_start += 1
-                
-            # Update max count & result if necessary 
-            if end - min_window_start + 1 < min_window_length:
-                min_window_length = end - min_window_start + 1
-                
-            result = s[min_window_start:min_window_end+1]
-            
-            # Reset counters & variables for next window 
-            min_window_start += 1
-            
-            # Reset counters after finding valid substring 
-            if not (any(s[end+i] != t[i] for i in range(len(t)))):
-                break
-                
+        if current_sum in prefix_sum:
+            if i - prefix_sum[current_sum] > max_length:
+                max_length = i - prefix_sum[current_sum]
+                max_start = prefix_sum[current_sum] + 1
+                max_end = i
+        
+        prefix_sum[current_sum] = i
     
-   return result
+    return nums[max_start:max_end+1]
 
-
-# Example usage 
-print(min_window_substring("aeiou", "aa")) # Output should be 'a'
-print(min_window_substring("abc", "aeiou")) # Output should be ''
+# Example usage:
+nums = [1, 2, -3, 3, -2, 2]
+print(optimal_subarray_zero_sum(nums))  # Output: [3, -2, 2]
 ```
 
-### Complexity Analysis:
+### Analysis of Complexity:
+- **Time Complexity:** The solution uses a dictionary to store the prefix sums and their indices. Each element in the array is processed once to update the `prefix_sum` dictionary. Therefore, the time complexity is O(n), where n is the length of the array.
+- **Space Complexity:** The space complexity is also O(n) because in the worst case, we might store all elements in the `prefix_sum` dictionary.
 
-- **Time Complexity:** O(n * m), where n is the length of string s and m is
+### Explanation:
+1. **Prefix Sum Approach:** The key idea here is to use a prefix sum array (or dictionary) to store the cumulative sum of elements from the start of the array up to each index.
+2. **Hash Table:** By using a hash table (dictionary) to store these cumulative sums, we can efficiently look up previous sums that are equal to our current cumulative sum.
+3. **Optimal Subarray Identification:** Whenever we encounter a sum that has been seen before, we check if the current window (from the last occurrence of that sum to our current position) is longer than our current maximum length. If it is, we update our maximum length and the corresponding start and end indices.
+
+This approach ensures that we find the longest contiguous subarray with zero sum in linear time and uses linear space.
+
+### Difficulty Rating:
+This challenge requires understanding how to efficiently use dynamic programming with arrays by leveraging prefix sums and hash tables for quick lookups, making it a moderate difficulty problem. The solution is straightforward but requires careful handling of edge cases and optimal subarray identification.
