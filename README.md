@@ -21,59 +21,79 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: Optimal Subarray with Zero Sum
+### Problem: **Word Chain Segmentation**
 
 **Problem Description:**
-Given an array `nums` of integers, find the optimal subarray with zero sum. The optimal subarray is defined as the longest contiguous subarray that sums up to zero. If there are multiple such subarrays, return the one with the maximum length.
+Given a list of words and a target word, find all possible word chains that can be formed by concatenating words from the list such that the final concatenated string matches the target word. Each word in the chain must be distinct, and no word can be used more than once within a single chain.
 
 **Example Input/Output:**
-- **Input:** `nums = [1, 2, -3, 3, -2, 2]`
-  - **Output:** `[3, -2, 2]` (because `[3, -2, 2]` is the longest contiguous subarray with zero sum)
+- Input: `words = ["cat", "dog", "tac", "god", "good"], target = "dog"`
+- Output: `[["cat", "dog"]], [["tac", "god"]]`
+- Input: `words = ["apple", "banana", "cherry", "date", "elderberry"], target = "date"`
+- Output: `[["apple", "date"]]`
 
 **Constraints:**
-- The array `nums` will not be empty.
-- The array `nums` will only contain integers.
+- Each word in `words` is at most 10 characters long.
+- The target word is also at most 10 characters long.
+- All words are valid English words.
+- The list of words can contain duplicates, but each instance of a word must be treated as distinct.
 
-**Solution in Python:**
+### Efficiency Analysis & Difficulty Rating
+
+#### Complexity Analysis:
+- **Time Complexity:** The time complexity for this problem can be quite high if not optimized correctly. A naive approach would involve generating all permutations of words and checking each permutation against the target string. This would result in an exponential time complexity (O(n)) where n is the number of words.
+  
+However, we can optimize this using a more intelligent approach:
+
+1. **Dynamic Programming with Memoization:** We can use dynamic programming with memoization to keep track of the valid word chains. For each word in `words`, we check if it matches the remaining part of the target word. If it does, we add it to our result list and recursively generate chains for the remaining target string.
+
+This approach ensures we avoid redundant computations and significantly reduces the time complexity to linear (O(n*m)) where n is the number of words and m is the average length of words.
+
+2. **Space Complexity:** The space complexity would be linear (O(n+m)) due to the recursion stack and memoization table.
+
+#### Difficulty Rating:
+- **Difficulty Rating: 4**
+  - The problem requires a good understanding of string manipulation techniques and dynamic programming principles. While it's not extremely challenging, it demands careful planning and optimization to achieve an efficient solution.
+
+### Optimal Solution
 
 ```python
-def optimal_subarray_zero_sum(nums):
-    n = len(nums)
-    prefix_sum = {0: -1}  # Initialize with sum=0 at index=-1
-    max_length = 0
-    max_start = 0
-    max_end = 0
-    
-    current_sum = 0
-    
-    for i in range(n):
-        current_sum += nums[i]
+def word_chain_segmentation(words, target):
+    def dfs(current_chain, remaining_target):
+        if not remaining_target:  # If remaining target is empty, return current chain
+            result.append(current_chain[:])
+            return
         
-        if current_sum in prefix_sum:
-            if i - prefix_sum[current_sum] > max_length:
-                max_length = i - prefix_sum[current_sum]
-                max_start = prefix_sum[current_sum] + 1
-                max_end = i
-        
-        prefix_sum[current_sum] = i
+        for word in words:
+            if not remaining_target.startswith(word):  # Check if word matches starting part of remaining target
+                continue
+            
+            current_chain.append(word)
+            dfs(current_chain, remaining_target[len(word):])  # Recursively generate chains for remaining target
+            
+            current_chain.pop()  # Backtrack by removing last added word
     
-    return nums[max_start:max_end+1]
+    result = []
+    
+    dfs([], target)
+    
+    return result
 
 # Example usage:
-nums = [1, 2, -3, 3, -2, 2]
-print(optimal_subarray_zero_sum(nums))  # Output: [3, -2, 2]
+words = ["cat", "dog", "tac", "god", "good"]
+target = "dog"
+print(word_chain_segmentation(words, target))  # Output: [["cat", "dog"], ["tac", "god"]]
 ```
 
-### Analysis of Complexity:
-- **Time Complexity:** The solution uses a dictionary to store the prefix sums and their indices. Each element in the array is processed once to update the `prefix_sum` dictionary. Therefore, the time complexity is O(n), where n is the length of the array.
-- **Space Complexity:** The space complexity is also O(n) because in the worst case, we might store all elements in the `prefix_sum` dictionary.
-
 ### Explanation:
-1. **Prefix Sum Approach:** The key idea here is to use a prefix sum array (or dictionary) to store the cumulative sum of elements from the start of the array up to each index.
-2. **Hash Table:** By using a hash table (dictionary) to store these cumulative sums, we can efficiently look up previous sums that are equal to our current cumulative sum.
-3. **Optimal Subarray Identification:** Whenever we encounter a sum that has been seen before, we check if the current window (from the last occurrence of that sum to our current position) is longer than our current maximum length. If it is, we update our maximum length and the corresponding start and end indices.
+1. **Function `word_chain_segmentation`:**
+   - It initializes an empty list `result` to store all valid word chains.
+   - It defines a helper function `dfs` which performs depth-first search.
 
-This approach ensures that we find the longest contiguous subarray with zero sum in linear time and uses linear space.
+2. **Helper Function `dfs`:**
+   - It takes two parameters: `current_chain` which represents the current chain of words found so far and `remaining_target` which is the part of the target string that has not been matched yet.
+   - If `remaining_target` is empty, it means we've found a valid chain and adds it to `result`.
+   - It iterates over each word in `words`. If any word matches the starting part of `remaining_target`, it recursively calls itself with updated parameters (`current_chain` appended with this word and `remaining_target` updated by removing this word).
+   - After the recursive call returns (which might have added more chains), it backtracks by removing the last added word from `current_chain`.
 
-### Difficulty Rating:
-This challenge requires understanding how to efficiently use dynamic programming with arrays by leveraging prefix sums and hash tables for quick lookups, making it a moderate difficulty problem. The solution is straightforward but requires careful handling of edge cases and optimal subarray identification.
+This approach ensures that we explore all possible valid chains efficiently while avoiding redundant computations due to memoization-like behavior provided by recursive function calls.
