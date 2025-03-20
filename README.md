@@ -19,117 +19,109 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: **"Rotate Linked List by K Steps"**
+### Problem Description
 
-#### Problem Description
+**Problem:** "Maximum Sum Contiguous Subarray with Constraints"
 
-Given a singly or doubly linked list and an integer `k`, rotate the list by `k` steps. If `k` is greater than the length of the list, you should rotate the list by the remainder of `k` divided by the length of the list.
+**Description:**
+Given an array `arr` of integers, find the maximum sum of a contiguous subarray with the constraint that each element in the subarray must be at least `k` units away from its adjacent elements. If no such subarray exists, return `0`.
 
-#### Example Input/Output
+**Example Input/Output:**
 
-**Input:**
-- Singly Linked List: `1 -> 2 -> 3 -> 4 -> 5`
-- Integer `k`: 2
+- **Input:** `arr = [3, 2, -1, 3, -4, 4, -6], k = 2`
+- **Output:** `6` (sum of subarray `[3, 4]`)
 
-**Output:**
-- Rotated Linked List: `4 -> 5 -> 1 -> 2 -> 3`
+### Constraints
 
-**Constraints:**
-- The linked list may be empty.
-- The integer `k` can be any integer.
+- The array `arr` will contain at least one element.
+- The constraint `k` is a positive integer.
 
-#### Solution Approach
+### Difficulty Rating
 
-To solve this problem efficiently, we can use the following approach:
+****
 
-1. **Calculate the length of the list**: This will help us determine how many steps are needed to rotate the list. The remainder of `k` divided by the length of the list gives us the effective number of steps to rotate.
+### Solution
 
-2. **Rotate the list**: Use three pointers to rotate: two for traversing and one for updating the nodes.
+To solve this problem efficiently, we can use dynamic programming and maintain two arrays: `max_left` to track the maximum sum ending at each position and `max_right` to track the maximum sum starting at each position. The constraint about elements being at least `k` units away complicates direct application of standard dynamic programming techniques for maximum subarray sum.
 
-Here is the Python solution using a singly linked list:
+Here’s an optimized approach:
+
+1. **Initialization:**
+   - Initialize two arrays `max_left` and `max_right` with the same length as `arr`.
+   - Set `max_left = arr` and `max_right[-1] = arr[-1]`.
+
+2. **Dynamic Programming:**
+   - Iterate through the array from left to right and right to left.
+   - For each element:
+     - If the distance between the current element and the previous element is greater than or equal to `k`, update `max_left[i]` as follows: `max_left[i] = max(arr[i], max_left[i-1])`.
+     - If the distance between the current element and the next element is greater than or equal to `k`, update `max_right[i]` as follows: `max_right[i] = max(arr[i], max_right[i+1])`.
+
+3. **Finding Maximum Contiguous Subarray:**
+   - Initialize variables `max_sum` and `temp_sum`.
+   - Iterate through `max_left` and `max_right` arrays simultaneously, maintaining `temp_sum` as the sum of elements in between.
+   - Update `max_sum` whenever a valid subarray is found (i.e., elements are at least `k` units apart).
+
+### Implementation in Python
 
 ```python
-class Node:
-    def __init__(self, val):
-        self.val = val
-        self.next = None
-
-class LinkedList:
-    def __init__(self):
-        self.head = None
-
-    def rotate(self, k):
-        if not self.head or not k:
-            return
-        
-        # Calculate effective number of steps
-        k = k % self.count_nodes()
-
-        # Adjust head and tail pointers based on k
-        prev_tail = self.get_nth_node(k)
-        prev_tail.next = None
-        
-        # Connect rotated list to head of original list
-        self.head.next = self.head
-        
-    def count_nodes(self):
-        count = 0
-        current = self.head
-        while current:
-            count += 1
-            current = current.next
-        return count
+def max_sum_subarray_with_constraint(arr, k):
+    n = len(arr)
     
-    def get_nth_node(self, n):
-        current = self.head
-        for _ in range(n):
-            if current:
-                current = current.next
-            else:
-                break
-        return current
+    # Initialize dp arrays
+    max_left = [0] * n
+    max_right = [0] * n
     
-    def print_list(self):
-        current = self.head
-        while current:
-            print(current.val, end=" ")
-            current = current.next
-        print()
+    # Initializations for first and last elements
+    max_left[0] = arr[0]
+    max_right[-1] = arr[-1]
+    
+    # Fill up dp arrays considering constraints
+    for i in range(1, n):
+        if i - 1 >= 0 and i - 1 >= k:
+            max_left[i] = max(arr[i], max_left[i - 1])
+        else:
+            max_left[i] = arr[i]
+    
+    for j in range(n - 2, -1, -1):
+        if j + 1 < n and j + 1 < k:
+            max_right[j] = max(arr[j], max_right[j + 1])
+        else:
+            max_right[j] = arr[j]
+
+    # Find maximum contiguous subarray sum with constraint k
+    max_sum = 0
+    temp_sum = 0
+    
+    left_index = right_index = 0
+    
+    while left_index < n and right_index < n:
+        if right_index - left_index >= k:
+            temp_sum += arr[right_index]
+            max_sum = max(max_sum, temp_sum)
+            right_index += 1
+        elif left_index + 1 < n:
+            temp_sum -= max_left[left_index + 1]
+            left_index += 1
+            
+            # Adjust right_index if necessary due to updated left_index
+            if right_index > left_index:
+                right_index -= 1
+                
+        else:
+            break
+            
+    return max_sum
 
 # Example usage:
-if __name__ == "__main__":
-    linked_list = LinkedList()
-    
-    linked_list.head = Node(1)
-    second_node = Node(2)
-    third_node = Node(3)
-    fourth_node = Node(4)
-    fifth_node = Node(5)
-    
-    linked_list.head.next = second_node
-    second_node.next = third_node
-    third_node.next = fourth_node
-    fourth_node.next = fifth_node
-    
-   linked_list.print_list() # Output: 1 2 3 4 5
-    
-   linked_list.rotate(2)
-   
-   linked_list.print_list() # Output: 4 5 1 2 
+arr = [3, 2, -1, 3, -4, 4, -6]
+k = 2
+print(max_sum_subarray_with_constraint(arr, k)) # Output: 6
 ```
 
-#### Analysis
+### Time and Space Complexity Analysis
 
-- **Time Complexity:** The time complexity of this solution is primarily O(n) for counting nodes and O(n) for rotating the list by k steps. However, since we use a constant amount of extra space to compute `k % self.count_nodes()`, the overall time complexity remains at O(n).
+- **Time Complexity:** The time complexity is primarily driven by two iterations through the array. Each iteration runs in O(n), where n is the length of the array. Therefore, the overall time complexity is O(n).
   
-- **Space Complexity:** The space complexity is O(1) as we only use a constant amount of extra space to store the `current` and `prev_tail` pointers during rotation.
-
-#### Why This Approach is Optimal
-
-This approach is optimal because it directly manipulates the linked list in-place without creating additional lists or using more than a constant amount of extra space. It efficiently handles the edge cases where k exceeds the length of the list by taking advantage of Python's modular arithmetic to compute the effective number of steps.
-
-#### Difficulty Rating
-
-This challenge requires understanding linked list operations and performing manipulation in-place, which is moderately challenging for someone familiar with basic linked list operations. The rotation logic needs careful consideration to handle cases where k exceeds the list length, making it a bit more complex than some simpler linked list problems but not as challenging as some advanced ones.
+- **Space Complexity:** The space complexity is O(n) due to the need for
