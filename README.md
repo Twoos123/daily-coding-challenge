@@ -19,109 +19,80 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
-
-### Problem Description
-
-**Problem:** "Maximum Sum Contiguous Subarray with Constraints"
-
-**Description:**
-Given an array `arr` of integers, find the maximum sum of a contiguous subarray with the constraint that each element in the subarray must be at least `k` units away from its adjacent elements. If no such subarray exists, return `0`.
-
-**Example Input/Output:**
-
-- **Input:** `arr = [3, 2, -1, 3, -4, 4, -6], k = 2`
-- **Output:** `6` (sum of subarray `[3, 4]`)
-
-### Constraints
-
-- The array `arr` will contain at least one element.
-- The constraint `k` is a positive integer.
-
-### Difficulty Rating
+Difficulty: ⭐⭐⭐ (3/5)
 
 ****
 
+### Problem Description
+
+**Challenge:**
+**Max Heap Construction with Repeated Elements**
+
+Given an array of integers where elements can be repeated, construct a max heap from the array. The heap should satisfy the max heap property: the value of each node must be greater than or equal to the values of its children.
+
+**Constraints:**
+- The array contains only integers.
+- Repeated elements are allowed.
+- The input array is unsorted.
+- The max heap should be constructed efficiently.
+
+### Example Input/Output
+
+**Input:** `[45, 50, 35, 30, 20, 15]`
+**Output:** `[50, 45, 35, 30, 20, 15]`
+
 ### Solution
 
-To solve this problem efficiently, we can use dynamic programming and maintain two arrays: `max_left` to track the maximum sum ending at each position and `max_right` to track the maximum sum starting at each position. The constraint about elements being at least `k` units away complicates direct application of standard dynamic programming techniques for maximum subarray sum.
+To solve this problem efficiently, we will use the `heapq` module in Python, which provides an implementation of the heap queue algorithm, also known as the priority queue algorithm. However, since we need a max heap, we'll need to invert the values when inserting them into the min heap provided by `heapq`.
 
-Here’s an optimized approach:
-
-1. **Initialization:**
-   - Initialize two arrays `max_left` and `max_right` with the same length as `arr`.
-   - Set `max_left = arr` and `max_right[-1] = arr[-1]`.
-
-2. **Dynamic Programming:**
-   - Iterate through the array from left to right and right to left.
-   - For each element:
-     - If the distance between the current element and the previous element is greater than or equal to `k`, update `max_left[i]` as follows: `max_left[i] = max(arr[i], max_left[i-1])`.
-     - If the distance between the current element and the next element is greater than or equal to `k`, update `max_right[i]` as follows: `max_right[i] = max(arr[i], max_right[i+1])`.
-
-3. **Finding Maximum Contiguous Subarray:**
-   - Initialize variables `max_sum` and `temp_sum`.
-   - Iterate through `max_left` and `max_right` arrays simultaneously, maintaining `temp_sum` as the sum of elements in between.
-   - Update `max_sum` whenever a valid subarray is found (i.e., elements are at least `k` units apart).
-
-### Implementation in Python
+Here is the most efficient solution in Python:
 
 ```python
-def max_sum_subarray_with_constraint(arr, k):
-    n = len(arr)
-    
-    # Initialize dp arrays
-    max_left = [0] * n
-    max_right = [0] * n
-    
-    # Initializations for first and last elements
-    max_left[0] = arr[0]
-    max_right[-1] = arr[-1]
-    
-    # Fill up dp arrays considering constraints
-    for i in range(1, n):
-        if i - 1 >= 0 and i - 1 >= k:
-            max_left[i] = max(arr[i], max_left[i - 1])
-        else:
-            max_left[i] = arr[i]
-    
-    for j in range(n - 2, -1, -1):
-        if j + 1 < n and j + 1 < k:
-            max_right[j] = max(arr[j], max_right[j + 1])
-        else:
-            max_right[j] = arr[j]
+import heapq
 
-    # Find maximum contiguous subarray sum with constraint k
-    max_sum = 0
-    temp_sum = 0
+def construct_max_heap(arr):
+    # Create a min heap and invert values
+    min_heap = []
+    for num in arr:
+        heapq.heappush(min_heap, -num)  # Invert values for max heap property
     
-    left_index = right_index = 0
+    # Convert min heap to max heap by reversing the list
+    max_heap = []
+    while min_heap:
+        max_heap.append(-heapq.heappop(min_heap))
     
-    while left_index < n and right_index < n:
-        if right_index - left_index >= k:
-            temp_sum += arr[right_index]
-            max_sum = max(max_sum, temp_sum)
-            right_index += 1
-        elif left_index + 1 < n:
-            temp_sum -= max_left[left_index + 1]
-            left_index += 1
-            
-            # Adjust right_index if necessary due to updated left_index
-            if right_index > left_index:
-                right_index -= 1
-                
-        else:
-            break
-            
-    return max_sum
+    return max_heap
 
-# Example usage:
-arr = [3, 2, -1, 3, -4, 4, -6]
-k = 2
-print(max_sum_subarray_with_constraint(arr, k)) # Output: 6
+# Example usage
+arr = [45, 50, 35, 30, 20, 15]
+result = construct_max_heap(arr)
+print(result)  # Output: [50, 45, 35, 30, 20, 15]
 ```
 
-### Time and Space Complexity Analysis
+### Explanation
 
-- **Time Complexity:** The time complexity is primarily driven by two iterations through the array. Each iteration runs in O(n), where n is the length of the array. Therefore, the overall time complexity is O(n).
-  
-- **Space Complexity:** The space complexity is O(n) due to the need for
+1. **Initialization:** The function `construct_max_heap` takes an array `arr` as input.
+2. **Invert Values:** We use `heapq.heappush(min_heap, -num)` to push each number into a min heap. By inverting the values with a negative sign, we effectively create a max heap because Python's `heapq` module implements a min heap.
+3. **Conversion:** After all elements are inserted, we pop each element from the min heap and append it to the `max_heap` list with its original value (inverted back).
+4. **Return Result:** The function returns `max_heap`, which is now a list representing a max heap where each element is greater than or equal to its children.
+
+### Time Complexity Analysis
+
+- **Insertion:** Pushing elements into the min heap occurs in O(log n) time complexity due to the underlying binary heap property of `heapq`.
+- **Conversion:** Popping all elements from the min heap and adding them to `max_heap` also takes O(n log n) time because each pop operation is log(n) and we do it n times.
+Therefore, the overall time complexity is O(n log n).
+
+### Space Complexity Analysis
+
+- **Space Complexity:** The space required to store both the `min_heap` and `max_heap` is proportional to n.
+Thus, the space complexity is O(n).
+
+### Trade-offs
+
+- **Efficiency vs Space:** The approach uses additional space for storing both heaps but ensures that we maintain the correct order and properties of a max heap efficiently.
+- **Alternative Approach:** A more space-efficient approach could involve directly building a max heap from scratch using Python's list methods and heapify operations, but this would be less straightforward and less efficient in terms of time complexity.
+
+This method leverages Python's built-in functionality for min heaps (`heapq`) efficiently and effectively transforms it into a max heap by inverting values during insertion.
+
+**Analysis Rating:**
+Given the use of built-in modules and efficient algorithms, this problem is rated as moderately challenging (difficulty level 3). The solution involves straightforward usage of Python's `heapq` module while ensuring that we understand how to transform a min heap into a max heap using inversion of values.
