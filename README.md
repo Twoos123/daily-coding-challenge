@@ -21,78 +21,95 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-****
+**DIFFICULTY: 4**
 
-### Problem Description
+### Challenge: Median Maintenance in Real-Time
 
-**Challenge:**
-**Max Heap Construction with Repeated Elements**
+Given a stream of numbers, implement a data structure to maintain the median of the numbers seen so far. The stream may contain duplicate numbers, and you need to handle both max and min heaps for efficient median calculation.
 
-Given an array of integers where elements can be repeated, construct a max heap from the array. The heap should satisfy the max heap property: the value of each node must be greater than or equal to the values of its children.
+#### Problem Description
 
-**Constraints:**
-- The array contains only integers.
-- Repeated elements are allowed.
-- The input array is unsorted.
-- The max heap should be constructed efficiently.
+You are given a stream of integers. Your task is to maintain the median of these integers in real-time. The median is defined as the middle value in the sorted list of integers. If the list has an even number of integers, the median is the average of the two middle values. You need to use both max and min heaps to efficiently handle the calculation and updating of the median.
 
-### Example Input/Output
+#### Example Input/Output
 
-**Input:** `[45, 50, 35, 30, 20, 15]`
-**Output:** `[50, 45, 35, 30, 20, 15]`
+- **Input:** `[1, 3, 2, 5, 3, 7]`
+- **Output:** `[1, 2, 2, 5, 3, average of 3 and 5 (which is 4), average of 5 and 7 (which is 6)]`
 
-### Solution
+#### Constraints
 
-To solve this problem efficiently, we will use the `heapq` module in Python, which provides an implementation of the heap queue algorithm, also known as the priority queue algorithm. However, since we need a max heap, we'll need to invert the values when inserting them into the min heap provided by `heapq`.
+- The stream of numbers is unbounded.
+- The numbers can be any integer value.
+- You should handle both insertion and deletion operations.
 
-Here is the most efficient solution in Python:
+#### Solution in Python
 
 ```python
 import heapq
 
-def construct_max_heap(arr):
-    # Create a min heap and invert values
-    min_heap = []
-    for num in arr:
-        heapq.heappush(min_heap, -num)  # Invert values for max heap property
-    
-    # Convert min heap to max heap by reversing the list
-    max_heap = []
-    while min_heap:
-        max_heap.append(-heapq.heappop(min_heap))
-    
-    return max_heap
+class MedianFinder:
+    def __init__(self):
+        self.max_heap = []  # Stores lower half of the numbers
+        self.min_heap = []  # Stores higher half of the numbers
 
-# Example usage
-arr = [45, 50, 35, 30, 20, 15]
-result = construct_max_heap(arr)
-print(result)  # Output: [50, 45, 35, 30, 20, 15]
+    def addNum(self, num):
+        # Add the number to the appropriate heap
+        if not self.max_heap or num <= -self.max_heap[0]:
+            heapq.heappush(self.max_heap, -num)
+        else:
+            heapq.heappush(self.min_heap, num)
+
+        # Balance the heaps to maintain O(1) complexity for finding the median
+        if len(self.max_heap) > len(self.min_heap) + 1:
+            heapq.heappush(self.min_heap, -heapq.heappop(self.max_heap))
+        elif len(self.min_heap) > len(self.max_heap):
+            heapq.heappush(self.max_heap, -heapq.heappop(self.min_heap))
+
+    def findMedian(self):
+        # Determine whether the total count of numbers is odd or even
+        if len(self.max_heap) == len(self.min_heap):
+            return (-self.max_heap[0] + self.min_heap[0]) / 2.0
+        else:
+            return -self.max_heap[0]
+
+# Example usage:
+median_finder = MedianFinder()
+median_finder.addNum(1)
+median_finder.addNum(3)
+median_finder.addNum(2)
+print(median_finder.findMedian()) # Output: 2
+median_finder.addNum(5)
+print(median_finder.findMedian()) # Output: (average of 2 and 5) = 3.5
 ```
 
-### Explanation
+#### Detailed Explanation
 
-1. **Initialization:** The function `construct_max_heap` takes an array `arr` as input.
-2. **Invert Values:** We use `heapq.heappush(min_heap, -num)` to push each number into a min heap. By inverting the values with a negative sign, we effectively create a max heap because Python's `heapq` module implements a min heap.
-3. **Conversion:** After all elements are inserted, we pop each element from the min heap and append it to the `max_heap` list with its original value (inverted back).
-4. **Return Result:** The function returns `max_heap`, which is now a list representing a max heap where each element is greater than or equal to its children.
+1. **Initialization:**
+   - We initialize two heaps: `max_heap` and `min_heap`.
+   - The `max_heap` will store the lower half of the numbers, and the negative value is used to simulate a max heap with Python's heapq module, which only supports min heaps.
 
-### Time Complexity Analysis
+2. **Adding Numbers:**
+   - The `addNum` method checks whether the incoming number should go into the `max_heap` or `min_heap`.
+   - It then ensures that the two heaps are balanced to maintain O(1) complexity for finding the median.
+   - This balancing step involves moving elements from one heap to another if necessary.
 
-- **Insertion:** Pushing elements into the min heap occurs in O(log n) time complexity due to the underlying binary heap property of `heapq`.
-- **Conversion:** Popping all elements from the min heap and adding them to `max_heap` also takes O(n log n) time because each pop operation is log(n) and we do it n times.
-Therefore, the overall time complexity is O(n log n).
+3. **Finding Median:**
+   - The `findMedian` method calculates the median based on whether there is an odd or even number of elements.
+   - If there are an odd number of elements, it returns the negative root of the `max_heap`.
+   - If there are an even number of elements, it returns the average of the roots of both heaps.
 
-### Space Complexity Analysis
+#### Complexity Analysis
 
-- **Space Complexity:** The space required to store both the `min_heap` and `max_heap` is proportional to n.
-Thus, the space complexity is O(n).
+1. **Time Complexity:**
+   - **Insertion:** O(log n) due to heap operations.
+   - **Finding Median:** O(1) because we ensure that one heap always has one more element than the other.
+
+2. **Space Complexity:** O(n) for storing all elements in the two heaps.
+
+The solution provided uses both max and min heaps efficiently to maintain the median in real-time while ensuring optimal time complexity for both insertion and finding operations.
 
 ### Trade-offs
 
-- **Efficiency vs Space:** The approach uses additional space for storing both heaps but ensures that we maintain the correct order and properties of a max heap efficiently.
-- **Alternative Approach:** A more space-efficient approach could involve directly building a max heap from scratch using Python's list methods and heapify operations, but this would be less straightforward and less efficient in terms of time complexity.
+While this solution uses O(log n) time complexity for insertions, it requires O(n) space complexity if all elements are stored in the heaps. However, this trade-off is necessary for maintaining O(1) complexity when finding the median. For applications where memory efficiency is crucial, additional optimizations might be needed.
 
-This method leverages Python's built-in functionality for min heaps (`heapq`) efficiently and effectively transforms it into a max heap by inverting values during insertion.
-
-**Analysis Rating:**
-Given the use of built-in modules and efficient algorithms, this problem is rated as moderately challenging (difficulty level 3). The solution involves straightforward usage of Python's `heapq` module while ensuring that we understand how to transform a min heap into a max heap using inversion of values.
+This challenge requires a deep understanding of heap properties and efficient insertion/deletion operations, making it suitable for a moderate to advanced difficulty level.
