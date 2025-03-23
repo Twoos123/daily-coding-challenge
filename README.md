@@ -19,97 +19,94 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-**DIFFICULTY: 4**
+### Problem Description
 
-### Challenge: Median Maintenance in Real-Time
+**Closest K Values in a Binary Search Tree**
 
-Given a stream of numbers, implement a data structure to maintain the median of the numbers seen so far. The stream may contain duplicate numbers, and you need to handle both max and min heaps for efficient median calculation.
+Given a binary search tree (BST) and a target value, find the k values in the BST that are closest to the target value. The values can be returned in any order, and it is guaranteed that there is a unique set of k values in the tree that are closest to the target.
 
-#### Problem Description
+### Example Input/Output
 
-You are given a stream of integers. Your task is to maintain the median of these integers in real-time. The median is defined as the middle value in the sorted list of integers. If the list has an even number of integers, the median is the average of the two middle values. You need to use both max and min heaps to efficiently handle the calculation and updating of the median.
+#### Example BST
+```
+    4
+   / \
+  2   6
+ / \   \
+1   3   7
 
-#### Example Input/Output
+Target: 5
+k: 3
+Output: [4, 3, 7]
+```
 
-- **Input:** `[1, 3, 2, 5, 3, 7]`
-- **Output:** `[1, 2, 2, 5, 3, average of 3 and 5 (which is 4), average of 5 and 7 (which is 6)]`
+### Constraints
 
-#### Constraints
+- The binary search tree must be a valid BST.
+- The target value must be within the range of node values in the BST.
+- The number of closest values (k) is a positive integer.
 
-- The stream of numbers is unbounded.
-- The numbers can be any integer value.
-- You should handle both insertion and deletion operations.
+### The Most Efficient Solution
+
+To solve this problem efficiently, we use a modified in-order traversal of the BST. This approach ensures that we visit nodes in ascending order while maintaining the ability to stop early and track the closest values.
 
 #### Solution in Python
 
 ```python
-import heapq
-
-class MedianFinder:
-    def __init__(self):
-        self.max_heap = []  # Stores lower half of the numbers
-        self.min_heap = []  # Stores higher half of the numbers
-
-    def addNum(self, num):
-        # Add the number to the appropriate heap
-        if not self.max_heap or num <= -self.max_heap[0]:
-            heapq.heappush(self.max_heap, -num)
-        else:
-            heapq.heappush(self.min_heap, num)
-
-        # Balance the heaps to maintain O(1) complexity for finding the median
-        if len(self.max_heap) > len(self.min_heap) + 1:
-            heapq.heappush(self.min_heap, -heapq.heappop(self.max_heap))
-        elif len(self.min_heap) > len(self.max_heap):
-            heapq.heappush(self.max_heap, -heapq.heappop(self.min_heap))
-
-    def findMedian(self):
-        # Determine whether the total count of numbers is odd or even
-        if len(self.max_heap) == len(self.min_heap):
-            return (-self.max_heap[0] + self.min_heap[0]) / 2.0
-        else:
-            return -self.max_heap[0]
-
-# Example usage:
-median_finder = MedianFinder()
-median_finder.addNum(1)
-median_finder.addNum(3)
-median_finder.addNum(2)
-print(median_finder.findMedian()) # Output: 2
-median_finder.addNum(5)
-print(median_finder.findMedian()) # Output: (average of 2 and 5) = 3.5
+class Solution:
+    def closestKValues(self, root, target, k):
+        self.ans = []
+        self.target = target
+        self.k = k
+        
+        def inOrder(node):
+            if not node:
+                return
+            
+            # Traverse left subtree if target < current node value
+            if self.target < node.val:
+                inOrder(node.left)
+            else:
+                # Add current node to result list if not full or if closer than current front
+                if len(self.ans) < k or abs(self.target - node.val) < abs(self.target - self.ans[-1]):
+                    self.ans.append(node.val)
+                    if len(self.ans) > k:
+                        self.ans.pop(0)
+                inOrder(node.right)
+        
+        inOrder(root)
+        
+        return self.ans
 ```
 
-#### Detailed Explanation
+#### Detailed Explanation of the Algorithm
 
-1. **Initialization:**
-   - We initialize two heaps: `max_heap` and `min_heap`.
-   - The `max_heap` will store the lower half of the numbers, and the negative value is used to simulate a max heap with Python's heapq module, which only supports min heaps.
+1. **Initialization**:
+   - The `closestKValues` method initializes three variables: `self.ans` for storing the result, `self.target` for storing the target value, and `self.k` for storing the count of closest values.
+   
+2. **In-Order Traversal**:
+   - A helper function `inOrder` is defined to perform in-order traversal of the BST.
+   - If the target value is less than the current node's value, it traverses the left subtree.
+   - Otherwise, it checks if adding the current node to `self.ans` is necessary based on whether `self.ans` is full (`k` elements) or if adding this node makes it closer than the current front element of `self.ans`.
 
-2. **Adding Numbers:**
-   - The `addNum` method checks whether the incoming number should go into the `max_heap` or `min_heap`.
-   - It then ensures that the two heaps are balanced to maintain O(1) complexity for finding the median.
-   - This balancing step involves moving elements from one heap to another if necessary.
+3. **Tracking Closest Values**:
+   - During traversal, it maintains a list (`self.ans`) with at most `k` elements that are closest to the target value.
+   - If `self.ans` is not full and adding this node makes it closer than the current front element, it adds this node and removes the front element if it exceeds `k`.
 
-3. **Finding Median:**
-   - The `findMedian` method calculates the median based on whether there is an odd or even number of elements.
-   - If there are an odd number of elements, it returns the negative root of the `max_heap`.
-   - If there are an even number of elements, it returns the average of the roots of both heaps.
+4. **Returning Result**:
+   - After completing traversal, it returns `self.ans`, which contains exactly `k` values closest to the target value in any order.
 
-#### Complexity Analysis
+#### Time and Space Complexity
 
-1. **Time Complexity:**
-   - **Insertion:** O(log n) due to heap operations.
-   - **Finding Median:** O(1) because we ensure that one heap always has one more element than the other.
+- The time complexity is O(N), where N is the number of nodes in the BST. This is because in the worst case, we visit each node exactly once.
+- The space complexity is O(k), as we need to keep track of up to k values at any given time.
 
-2. **Space Complexity:** O(n) for storing all elements in the two heaps.
+#### Why This Approach is Optimal
 
-The solution provided uses both max and min heaps efficiently to maintain the median in real-time while ensuring optimal time complexity for both insertion and finding operations.
+This approach leverages in-order traversal to efficiently find closest values. By using a dynamic list (`self.ans`) that stops early when necessary and maintains only k elements, we ensure both time and space efficiency.
 
-### Trade-offs
+### Difficulty Rating
 
-While this solution uses O(log n) time complexity for insertions, it requires O(n) space complexity if all elements are stored in the heaps. However, this trade-off is necessary for maintaining O(1) complexity when finding the median. For applications where memory efficiency is crucial, additional optimizations might be needed.
-
-This challenge requires a deep understanding of heap properties and efficient insertion/deletion operations, making it suitable for a moderate to advanced difficulty level.
+This problem requires efficient use of data structures and algorithms to traverse a BST while maintaining a running set of closest values. It necessitates understanding how to optimize both time and space complexity, making it challenging but not extremely difficult like some advanced LeetCode problems.
