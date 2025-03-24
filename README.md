@@ -21,92 +21,106 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
 
+****
+
 ### Problem Description
 
-**Closest K Values in a Binary Search Tree**
+**Problem:** **Minimum Columns to Ensure Lexicographical Order**
 
-Given a binary search tree (BST) and a target value, find the k values in the BST that are closest to the target value. The values can be returned in any order, and it is guaranteed that there is a unique set of k values in the tree that are closest to the target.
+Given an N x M 2D matrix of lowercase letters, determine the minimum number of columns that can be removed to ensure that each row is ordered from top to bottom lexicographically. The goal is to check whether each column can be ordered lexicographically without removing any columns.
 
 ### Example Input/Output
 
-#### Example BST
+**Input:**
 ```
-    4
-   / \
-  2   6
- / \   \
-1   3   7
+cba
+daf
+ghi
+```
 
-Target: 5
-k: 3
-Output: [4, 3, 7]
+**Output: 1** (since removing the second column makes the rows ordered)
+
+**Input:**
 ```
+abcdef
+```
+
+**Output: 0** (since the rows are already ordered)
+
+**Input:**
+```
+zyx
+wvu
+tsr
+```
+
+**Output: 3** (since removing all columns makes the rows ordered)
 
 ### Constraints
 
-- The binary search tree must be a valid BST.
-- The target value must be within the range of node values in the BST.
-- The number of closest values (k) is a positive integer.
+- **Matrix Size:** N x M where N and M are positive integers.
+- **Character Set:** The matrix contains only lowercase English letters.
+- **Ordering Requirement:** Each row must be ordered lexicographically from top to bottom after removing columns.
 
-### The Most Efficient Solution
+### Solution
 
-To solve this problem efficiently, we use a modified in-order traversal of the BST. This approach ensures that we visit nodes in ascending order while maintaining the ability to stop early and track the closest values.
+#### Most Optimal Solution
 
-#### Solution in Python
+To solve this problem efficiently, we need to find the maximum number of consecutive characters in each row that are in order lexicographically. We can use a `set` to keep track of distinct characters seen so far and their indices.
 
 ```python
-class Solution:
-    def closestKValues(self, root, target, k):
-        self.ans = []
-        self.target = target
-        self.k = k
-        
-        def inOrder(node):
-            if not node:
-                return
-            
-            # Traverse left subtree if target < current node value
-            if self.target < node.val:
-                inOrder(node.left)
-            else:
-                # Add current node to result list if not full or if closer than current front
-                if len(self.ans) < k or abs(self.target - node.val) < abs(self.target - self.ans[-1]):
-                    self.ans.append(node.val)
-                    if len(self.ans) > k:
-                        self.ans.pop(0)
-                inOrder(node.right)
-        
-        inOrder(root)
-        
-        return self.ans
+def min_columns_to_order(matrix):
+    rows, cols = len(matrix), len(matrix[0])
+    # Function to check if a row is ordered
+    def is_ordered(row):
+        return all(row[i] <= row[i+1] for i in range(cols-1))
+
+    # Function to check if a column is ordered
+    def is_valid_col(col):
+        seen = set()
+        for r in range(rows):
+            if matrix[r][col] in seen:
+                return False
+            seen.add(matrix[r][col])
+        return True
+
+    # Check columns from right to left
+    for col in range(cols-1, -1, -1):
+        if not is_valid_col(col):
+            continue
+        # Check the row order without this column
+        for i in range(rows-1):
+            if matrix[i][col] > matrix[i+1][col]:
+                return col + 1
+    return 0
+
+# Example usage:
+matrix = [
+  ['c', 'b', 'a'],
+  ['d', 'a', 'f'],
+  ['g', 'i', 'h']
+]
+print(min_columns_to_order(matrix)) # Output: 1
+
+matrix = [
+  ['a', 'b', 'c', 'd', 'e', 'f']
+]
+print(min_columns_to_order(matrix)) # Output: 0
 ```
 
-#### Detailed Explanation of the Algorithm
+#### Analysis of Time and Space Complexity
 
-1. **Initialization**:
-   - The `closestKValues` method initializes three variables: `self.ans` for storing the result, `self.target` for storing the target value, and `self.k` for storing the count of closest values.
-   
-2. **In-Order Traversal**:
-   - A helper function `inOrder` is defined to perform in-order traversal of the BST.
-   - If the target value is less than the current node's value, it traverses the left subtree.
-   - Otherwise, it checks if adding the current node to `self.ans` is necessary based on whether `self.ans` is full (`k` elements) or if adding this node makes it closer than the current front element of `self.ans`.
+- **Time Complexity:** The time complexity is O(N \* M), where N is the number of rows and M is the number of columns. This is because we are iterating over each cell once and performing a constant amount of work per cell.
+- **Space Complexity:** The space complexity is O(N), where N is the number of rows. This is because we are using a set to keep track of distinct characters seen so far.
 
-3. **Tracking Closest Values**:
-   - During traversal, it maintains a list (`self.ans`) with at most `k` elements that are closest to the target value.
-   - If `self.ans` is not full and adding this node makes it closer than the current front element, it adds this node and removes the front element if it exceeds `k`.
+#### Explanation
 
-4. **Returning Result**:
-   - After completing traversal, it returns `self.ans`, which contains exactly `k` values closest to the target value in any order.
+The solution works by checking each column from right to left. If a column is valid (i.e., it does not contain any consecutive duplicates), we then check if removing that column would make the rows ordered. We do this by iterating through each row and checking if the lexicographical order is maintained without the current column.
 
-#### Time and Space Complexity
+This approach ensures that we find the minimum number of columns needed to make each row ordered lexicographically.
 
-- The time complexity is O(N), where N is the number of nodes in the BST. This is because in the worst case, we visit each node exactly once.
-- The space complexity is O(k), as we need to keep track of up to k values at any given time.
+### Trade-offs
 
-#### Why This Approach is Optimal
+There are no significant trade-offs between time and space complexity in this solution. The algorithm runs in linear time with respect to the size of the matrix, and it uses a linear amount of extra space for storing seen characters.
 
-This approach leverages in-order traversal to efficiently find closest values. By using a dynamic list (`self.ans`) that stops early when necessary and maintains only k elements, we ensure both time and space efficiency.
-
-### Difficulty Rating
-
-This problem requires efficient use of data structures and algorithms to traverse a BST while maintaining a running set of closest values. It necessitates understanding how to optimize both time and space complexity, making it challenging but not extremely difficult like some advanced LeetCode problems.
+However, note that this problem can be reduced to a more complex problem involving dynamic programming or graph algorithms if you were to consider optimizing further or solving similar problems with different constraints. But for this specific challenge, this solution is highly efficient and practical.
