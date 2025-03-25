@@ -19,108 +19,70 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-****
+### Challenge: **"Maximize the Sum of Descendants in a Binary Tree"**
 
-### Problem Description
+**Problem Description:**
+Given a binary tree where each node contains a non-negative integer value, determine the maximum sum of the descendants of a given node. The sum of descendants for a node is the sum of all values in its subtree.
 
-**Problem:** **Minimum Columns to Ensure Lexicographical Order**
-
-Given an N x M 2D matrix of lowercase letters, determine the minimum number of columns that can be removed to ensure that each row is ordered from top to bottom lexicographically. The goal is to check whether each column can be ordered lexicographically without removing any columns.
-
-### Example Input/Output
-
-**Input:**
+**Example Input/Output:**
+Consider the following binary tree:
 ```
-cba
-daf
-ghi
+    1
+   / \
+  2   3
+ / \
+4   5
 ```
+- If we query for the node with value 1, the sum of its descendants would be \(1 + 2 + 4 + 5 = 12\).
+- If we query for the node with value 3, the sum of its descendants would be \(3\).
 
-**Output: 1** (since removing the second column makes the rows ordered)
+**Constraints:**
+- The binary tree is not necessarily a balanced tree.
+- Each node's value is a non-negative integer.
 
-**Input:**
-```
-abcdef
-```
+**Difficulty Rating: 3**
 
-**Output: 0** (since the rows are already ordered)
-
-**Input:**
-```
-zyx
-wvu
-tsr
-```
-
-**Output: 3** (since removing all columns makes the rows ordered)
-
-### Constraints
-
-- **Matrix Size:** N x M where N and M are positive integers.
-- **Character Set:** The matrix contains only lowercase English letters.
-- **Ordering Requirement:** Each row must be ordered lexicographically from top to bottom after removing columns.
-
-### Solution
-
-#### Most Optimal Solution
-
-To solve this problem efficiently, we need to find the maximum number of consecutive characters in each row that are in order lexicographically. We can use a `set` to keep track of distinct characters seen so far and their indices.
+### Most Efficient Solution in Python:
 
 ```python
-def min_columns_to_order(matrix):
-    rows, cols = len(matrix), len(matrix[0])
-    # Function to check if a row is ordered
-    def is_ordered(row):
-        return all(row[i] <= row[i+1] for i in range(cols-1))
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
-    # Function to check if a column is ordered
-    def is_valid_col(col):
-        seen = set()
-        for r in range(rows):
-            if matrix[r][col] in seen:
-                return False
-            seen.add(matrix[r][col])
-        return True
+class Solution:
+    def maxDescendantSum(self, root):
+        def dfs(node):
+            if not node:
+                return 0, 0  # Return (sum of descendants, value of current node)
+            left_sum, _ = dfs(node.left)
+            right_sum, _ = dfs(node.right)
+            return left_sum + right_sum + node.val
 
-    # Check columns from right to left
-    for col in range(cols-1, -1, -1):
-        if not is_valid_col(col):
-            continue
-        # Check the row order without this column
-        for i in range(rows-1):
-            if matrix[i][col] > matrix[i+1][col]:
-                return col + 1
-    return 0
-
-# Example usage:
-matrix = [
-  ['c', 'b', 'a'],
-  ['d', 'a', 'f'],
-  ['g', 'i', 'h']
-]
-print(min_columns_to_order(matrix)) # Output: 1
-
-matrix = [
-  ['a', 'b', 'c', 'd', 'e', 'f']
-]
-print(min_columns_to_order(matrix)) # Output: 0
+        return dfs(root)[0]
 ```
 
-#### Analysis of Time and Space Complexity
+**Detailed Explanation of the Algorithm:**
 
-- **Time Complexity:** The time complexity is O(N \* M), where N is the number of rows and M is the number of columns. This is because we are iterating over each cell once and performing a constant amount of work per cell.
-- **Space Complexity:** The space complexity is O(N), where N is the number of rows. This is because we are using a set to keep track of distinct characters seen so far.
+1. **Definition of `TreeNode`:** A simple definition to represent a node in the binary tree.
 
-#### Explanation
+2. **Solution Class:**
+   - The `maxDescendantSum` method uses a helper function `dfs` (depth-first search) to calculate the maximum sum of descendants for any given node.
 
-The solution works by checking each column from right to left. If a column is valid (i.e., it does not contain any consecutive duplicates), we then check if removing that column would make the rows ordered. We do this by iterating through each row and checking if the lexicographical order is maintained without the current column.
+3. **Helper Function `dfs`:**
+   - It recursively traverses the tree.
+   - If the current node is `None`, it returns `(0, 0)` indicating no node (sum = 0 and value = 0).
+   - It then calculates the sum of descendants for the left and right subtrees and adds the value of the current node to get the total sum.
 
-This approach ensures that we find the minimum number of columns needed to make each row ordered lexicographically.
+4. **Return Value:** The function returns the total sum of descendants for the given root.
 
-### Trade-offs
+**Time Complexity Analysis:**
+- The time complexity is O(n) where n is the number of nodes in the tree. This is because each node is visited once during the DFS traversal.
 
-There are no significant trade-offs between time and space complexity in this solution. The algorithm runs in linear time with respect to the size of the matrix, and it uses a linear amount of extra space for storing seen characters.
+**Space Complexity Analysis:**
+- The space complexity is O(h) where h is the height of the tree. This is because in the worst case, the recursive call stack will have a depth equal to the height of the tree.
 
-However, note that this problem can be reduced to a more complex problem involving dynamic programming or graph algorithms if you were to consider optimizing further or solving similar problems with different constraints. But for this specific challenge, this solution is highly efficient and practical.
+This solution is optimal because it uses a single pass through the tree with a constant amount of extra space for recursion or iteration. It leverages the properties of tree traversal to efficiently compute the sum of descendants for any given node.
