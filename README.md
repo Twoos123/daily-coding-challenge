@@ -21,68 +21,127 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: **"Maximize the Sum of Descendants in a Binary Tree"**
+### Problem Description
 
-**Problem Description:**
-Given a binary tree where each node contains a non-negative integer value, determine the maximum sum of the descendants of a given node. The sum of descendants for a node is the sum of all values in its subtree.
+**Task:**
+Given a list of words, implement a Trie data structure to efficiently handle prefix searches and word occurrences. The task requires you to:
+1. **Insert** words into the Trie.
+2. **Search** for words within the Trie.
+3. **Count** the number of words that start with a given prefix.
+4. **Query** for the longest prefix that matches a given string.
 
-**Example Input/Output:**
-Consider the following binary tree:
-```
-    1
-   / \
-  2   3
- / \
-4   5
-```
-- If we query for the node with value 1, the sum of its descendants would be \(1 + 2 + 4 + 5 = 12\).
-- If we query for the node with value 3, the sum of its descendants would be \(3\).
+### Example Input/Output
 
-**Constraints:**
-- The binary tree is not necessarily a balanced tree.
-- Each node's value is a non-negative integer.
+**Input:**
+- Words: ["apple", "app", "banana", "band"]
+- Queries: [search for "app", count words starting with "a", query for longest prefix of "band"]
 
-**Difficulty Rating: 3**
+**Output:**
+- Search for "app": True
+- Count words starting with "a": 3
+- Longest prefix of "band": "band"
 
-### Most Efficient Solution in Python:
+### Constraints
+1. **Word Length:** Each word can have a maximum length of 2000 characters.
+2. **Prefix Length:** Prefixes can have any length up to the length of the words.
+3. **Case Sensitivity:** Words and prefixes are case-sensitive (only lowercase English letters).
+4. **Queries Limitation:** No more than 3 * 10^4 operations (insert, search, count, query) will be made.
+
+### Complexity Analysis
+
+#### Time Complexity:
+- **Insert Operation:** O(m), where m is the length of the word.
+- **Search Operation:** O(m), where m is the length of the word.
+- **Count Words Starting with Prefix Operation:** O(m), where m is the length of the prefix.
+- **Query Longest Prefix Operation:** O(m), where m is the length of the query string.
+
+#### Space Complexity:
+- The space complexity is O(n * m), where n is the number of words and m is the maximum length of a word.
+
+### Most Efficient Solution in Python
 
 ```python
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_word = False
 
-class Solution:
-    def maxDescendantSum(self, root):
-        def dfs(node):
-            if not node:
-                return 0, 0  # Return (sum of descendants, value of current node)
-            left_sum, _ = dfs(node.left)
-            right_sum, _ = dfs(node.right)
-            return left_sum + right_sum + node.val
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-        return dfs(root)[0]
+    def insert(self, word):
+        current = self.root
+        for char in word:
+            if char not in current.children:
+                current.children[char] = TrieNode()
+            current = current.children[char]
+        current.is_word = True
+
+    def search(self, word):
+        current = self.root
+        for char in word:
+            if char not in current.children:
+                return False
+            current = current.children[char]
+        return current.is_word
+
+    def count_words_starting_with(self, prefix):
+        current = self.root
+        for char in prefix:
+            if char not in current.children:
+                return 0
+            current = current.children[char]
+        return self._count_words_from_node(current, prefix)
+
+    def _count_words_from_node(self, node, prefix):
+        if node.is_word:
+            return 1
+        count = 0
+        for char, child in node.children.items():
+            if char >= prefix[-1]: # Ensure we only count words that are a continuation of the prefix
+                count += self._count_words_from_node(child, prefix + char)
+        return count
+
+    def query_longest_prefix(self, query_string):
+        current = self.root
+        longest_prefix = ""
+        for char in query_string:
+            if char not in current.children:
+                break
+            longest_prefix += char
+            current = current.children[char]
+        return longest_prefix
+
+# Example usage:
+trie = Trie()
+trie.insert("apple")
+trie.insert("app")
+trie.insert("banana")
+trie.insert("band")
+
+print(trie.search("app"))  # True
+print(trie.count_words_starting_with("a"))  # 3
+print(trie.query_longest_prefix("band"))  # "band"
 ```
 
-**Detailed Explanation of the Algorithm:**
+### Detailed Explanation
 
-1. **Definition of `TreeNode`:** A simple definition to represent a node in the binary tree.
+1. **Trie Node Implementation:**
+   - Each node in the Trie has a dictionary `children` to store its child nodes and a boolean flag `is_word` to indicate if the current node represents the end of a word.
 
-2. **Solution Class:**
-   - The `maxDescendantSum` method uses a helper function `dfs` (depth-first search) to calculate the maximum sum of descendants for any given node.
+2. **Insert Operation:**
+   - We traverse through the Trie, creating new nodes as needed and marking the last character of the inserted word as `True` using `is_word`.
 
-3. **Helper Function `dfs`:**
-   - It recursively traverses the tree.
-   - If the current node is `None`, it returns `(0, 0)` indicating no node (sum = 0 and value = 0).
-   - It then calculates the sum of descendants for the left and right subtrees and adds the value of the current node to get the total sum.
+3. **Search Operation:**
+   - We traverse through the Trie and return `True` if we reach a node marked as `True`, indicating that the word exists in the Trie.
 
-4. **Return Value:** The function returns the total sum of descendants for the given root.
+4. **Count Words Starting with Prefix Operation:**
+   - We traverse through the Trie up to the prefix length and then recursively count all words that start with this prefix by traversing down from each character node.
 
-**Time Complexity Analysis:**
-- The time complexity is O(n) where n is the number of nodes in the tree. This is because each node is visited once during the DFS traversal.
+5. **Query Longest Prefix Operation:**
+   - We traverse through the Trie up to where it matches the query string and return that matched part as it represents the longest possible prefix.
 
-**Space Complexity Analysis:**
-- The space complexity is O(h) where h is the height of the tree. This is because in the worst case, the recursive call stack will have a depth equal to the height of the tree.
+### Trade-offs
 
-This solution is optimal because it uses a single pass through the tree with a constant amount of extra space for recursion or iteration. It leverages the properties of tree traversal to efficiently compute the sum of descendants for any given node.
+-
