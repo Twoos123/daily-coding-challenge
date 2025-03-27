@@ -21,127 +21,60 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Dynamic Programming Challenge: Maximum Subarray Product
 
-**Task:**
-Given a list of words, implement a Trie data structure to efficiently handle prefix searches and word occurrences. The task requires you to:
-1. **Insert** words into the Trie.
-2. **Search** for words within the Trie.
-3. **Count** the number of words that start with a given prefix.
-4. **Query** for the longest prefix that matches a given string.
+**Problem Description:**
+Given an array of integers, find the maximum contiguous subarray product. The problem requires implementing dynamic programming to efficiently track and compute the maximum product of a subarray.
 
-### Example Input/Output
+**Example Input/Output:**
+- **Input:** `[2, 3, -2, 4]`
+- **Output:** `6` (Maximum product of subarray `[2, 3]`)
 
-**Input:**
-- Words: ["apple", "app", "banana", "band"]
-- Queries: [search for "app", count words starting with "a", query for longest prefix of "band"]
+**Constraints:**
+- The array will not be empty.
+- The array will contain integers.
+- The maximum length of the array is assumed to be reasonable (e.g., not excessively large).
 
-**Output:**
-- Search for "app": True
-- Count words starting with "a": 3
-- Longest prefix of "band": "band"
+**Difficulty Rating:**
+### Solution Explanation
 
-### Constraints
-1. **Word Length:** Each word can have a maximum length of 2000 characters.
-2. **Prefix Length:** Prefixes can have any length up to the length of the words.
-3. **Case Sensitivity:** Words and prefixes are case-sensitive (only lowercase English letters).
-4. **Queries Limitation:** No more than 3 * 10^4 operations (insert, search, count, query) will be made.
+The solution involves two steps:
+1. **Tracking Maximum and Minimum Products:** Since we are looking for the maximum product, we need to track both maximum and minimum products up to each position.
+2. **Updating Maximum Product:** At each step, update the maximum product by considering both the current maximum and minimum products.
 
-### Complexity Analysis
-
-#### Time Complexity:
-- **Insert Operation:** O(m), where m is the length of the word.
-- **Search Operation:** O(m), where m is the length of the word.
-- **Count Words Starting with Prefix Operation:** O(m), where m is the length of the prefix.
-- **Query Longest Prefix Operation:** O(m), where m is the length of the query string.
-
-#### Space Complexity:
-- The space complexity is O(n * m), where n is the number of words and m is the maximum length of a word.
-
-### Most Efficient Solution in Python
+#### Optimal Solution in Python
 
 ```python
-class TrieNode:
-    def __init__(self):
-        self.children = {}
-        self.is_word = False
+def maxSubarrayProduct(nums):
+    if not nums:
+        return 0
 
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
+    max_product = min_product = result = nums[0]
+    
+    for num in nums[1:]:
+        temp_max_product = max(num, max_product * num, min_product * num)
+        temp_min_product = min(num, max_product * num, min_product * num)
+        
+        max_product = temp_max_product
+        min_product = temp_min_product
+        
+        result = max(result, max_product)
 
-    def insert(self, word):
-        current = self.root
-        for char in word:
-            if char not in current.children:
-                current.children[char] = TrieNode()
-            current = current.children[char]
-        current.is_word = True
-
-    def search(self, word):
-        current = self.root
-        for char in word:
-            if char not in current.children:
-                return False
-            current = current.children[char]
-        return current.is_word
-
-    def count_words_starting_with(self, prefix):
-        current = self.root
-        for char in prefix:
-            if char not in current.children:
-                return 0
-            current = current.children[char]
-        return self._count_words_from_node(current, prefix)
-
-    def _count_words_from_node(self, node, prefix):
-        if node.is_word:
-            return 1
-        count = 0
-        for char, child in node.children.items():
-            if char >= prefix[-1]: # Ensure we only count words that are a continuation of the prefix
-                count += self._count_words_from_node(child, prefix + char)
-        return count
-
-    def query_longest_prefix(self, query_string):
-        current = self.root
-        longest_prefix = ""
-        for char in query_string:
-            if char not in current.children:
-                break
-            longest_prefix += char
-            current = current.children[char]
-        return longest_prefix
+    return result
 
 # Example usage:
-trie = Trie()
-trie.insert("apple")
-trie.insert("app")
-trie.insert("banana")
-trie.insert("band")
-
-print(trie.search("app"))  # True
-print(trie.count_words_starting_with("a"))  # 3
-print(trie.query_longest_prefix("band"))  # "band"
+print(maxSubarrayProduct([2, 3, -2, 4])) # Output: 6
 ```
 
-### Detailed Explanation
+#### Analysis of Time and Space Complexity:
+- **Time Complexity:** The algorithm iterates through the array once, performing constant-time operations at each step. Therefore, the time complexity is O(n).
+- **Space Complexity:** The algorithm uses a constant amount of space to store temporary variables. Hence, the space complexity is O(1).
 
-1. **Trie Node Implementation:**
-   - Each node in the Trie has a dictionary `children` to store its child nodes and a boolean flag `is_word` to indicate if the current node represents the end of a word.
+#### Explanation:
+This approach is optimal because it leverages the property that a negative number can turn a maximum into a minimum and vice versa. By tracking both maximum and minimum products, we ensure that we capture all possible subarray products efficiently.
 
-2. **Insert Operation:**
-   - We traverse through the Trie, creating new nodes as needed and marking the last character of the inserted word as `True` using `is_word`.
+### Trade-offs:
+- **Efficiency:** The algorithm's efficiency stems from its ability to handle both positive and negative numbers within the same iteration. This is crucial for problems involving products where negative numbers are common.
+- **Simplicity:** The solution is straightforward and requires minimal additional data structures beyond what's necessary for tracking maximum and minimum values.
 
-3. **Search Operation:**
-   - We traverse through the Trie and return `True` if we reach a node marked as `True`, indicating that the word exists in the Trie.
-
-4. **Count Words Starting with Prefix Operation:**
-   - We traverse through the Trie up to the prefix length and then recursively count all words that start with this prefix by traversing down from each character node.
-
-5. **Query Longest Prefix Operation:**
-   - We traverse through the Trie up to where it matches the query string and return that matched part as it represents the longest possible prefix.
-
-### Trade-offs
-
--
+This challenge balances complexity and difficulty by requiring a deep understanding of dynamic programming principles while maintaining a relatively straightforward implementation.
