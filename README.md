@@ -21,60 +21,69 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Dynamic Programming Challenge: Maximum Subarray Product
+### Coding Challenge: **Longest Common Prefix Among Multiple Strings**
 
 **Problem Description:**
-Given an array of integers, find the maximum contiguous subarray product. The problem requires implementing dynamic programming to efficiently track and compute the maximum product of a subarray.
+Given a list of strings `strs`, find the longest common prefix among all strings. The common prefix is the substring that appears as a prefix to each of the strings in the given list.
 
 **Example Input/Output:**
-- **Input:** `[2, 3, -2, 4]`
-- **Output:** `6` (Maximum product of subarray `[2, 3]`)
+
+- **Input:** `strs = ["flower","flow","flight"]`
+- **Output:** `"fl"`
+
+- **Input:** `strs = ["dog","racecar","car"]`
+- **Output:** `""`
+
+- **Input:** `strs = ["interspecies","interstellar","intergalactic"]`
+- **Output:** `"inter"`
 
 **Constraints:**
-- The array will not be empty.
-- The array will contain integers.
-- The maximum length of the array is assumed to be reasonable (e.g., not excessively large).
+- The list of strings `strs` is not empty.
+- All strings in `strs` have the same length.
 
-**Difficulty Rating:**
-### Solution Explanation
-
-The solution involves two steps:
-1. **Tracking Maximum and Minimum Products:** Since we are looking for the maximum product, we need to track both maximum and minimum products up to each position.
-2. **Updating Maximum Product:** At each step, update the maximum product by considering both the current maximum and minimum products.
-
-#### Optimal Solution in Python
+**Difficulty Rating:** **Most Efficient Solution in Python:**
+The most efficient solution to this problem involves iterating through the characters of the first string and comparing them to the characters at the same position in all other strings. This approach ensures that we find the common prefix as early as possible and stops as soon as a mismatch is found.
 
 ```python
-def maxSubarrayProduct(nums):
-    if not nums:
-        return 0
-
-    max_product = min_product = result = nums[0]
+def longest_common_prefix(strs):
+    if not strs:
+        return ""
     
-    for num in nums[1:]:
-        temp_max_product = max(num, max_product * num, min_product * num)
-        temp_min_product = min(num, max_product * num, min_product * num)
-        
-        max_product = temp_max_product
-        min_product = temp_min_product
-        
-        result = max(result, max_product)
+    shortest_str = min(strs, key=len)
+    
+    for i, char in enumerate(shortest_str):
+        for other in strs:
+            if other[i] != char:
+                return shortest_str[:i]
+    
+    return shortest_str
 
-    return result
-
-# Example usage:
-print(maxSubarrayProduct([2, 3, -2, 4])) # Output: 6
+# Example usage
+print(longest_common_prefix(["flower","flow","flight"]))  # Output: "fl"
+print(longest_common_prefix(["dog","racecar","car"]))  # Output: ""
+print(longest_common_prefix(["interspecies","interstellar","intergalactic"]))  # Output: "inter"
 ```
 
-#### Analysis of Time and Space Complexity:
-- **Time Complexity:** The algorithm iterates through the array once, performing constant-time operations at each step. Therefore, the time complexity is O(n).
-- **Space Complexity:** The algorithm uses a constant amount of space to store temporary variables. Hence, the space complexity is O(1).
+**Detailed Explanation:**
+1. **Initialization:**
+   - Check if the input list `strs` is empty. If it is, return an empty string.
+   - Find the shortest string in the list using the `min` function with the `key` argument set to `len`. This ensures that we don't waste time iterating through longer strings when a shorter one will suffice.
 
-#### Explanation:
-This approach is optimal because it leverages the property that a negative number can turn a maximum into a minimum and vice versa. By tracking both maximum and minimum products, we ensure that we capture all possible subarray products efficiently.
+2. **Iteration:**
+   - Iterate through each character of the shortest string using `enumerate`, which provides both the index `i` and the character itself.
+   - For each position `i`, check if all other strings have the same character at that position by iterating through each string in `strs`.
+   - As soon as a mismatch is found (i.e., any other string does not have the same character), return the common prefix up to the previous position `i`.
 
-### Trade-offs:
-- **Efficiency:** The algorithm's efficiency stems from its ability to handle both positive and negative numbers within the same iteration. This is crucial for problems involving products where negative numbers are common.
-- **Simplicity:** The solution is straightforward and requires minimal additional data structures beyond what's necessary for tracking maximum and minimum values.
+3. **Return Result:**
+   - If no mismatches are found during iteration, return the entire shortest string, which represents the longest common prefix among all strings.
 
-This challenge balances complexity and difficulty by requiring a deep understanding of dynamic programming principles while maintaining a relatively straightforward implementation.
+**Time Complexity Analysis:**
+- The solution has a time complexity of O(n*m), where n is the length of the shortest string and m is the number of strings. This is because we iterate through each character of the shortest string and compare it with each corresponding character in all other strings.
+
+**Space Complexity Analysis:**
+- The solution has a space complexity of O(1), excluding the input, because we only use a constant amount of space to store indices and characters.
+
+**Optimality Explanation:**
+- This approach is optimal because it leverages the fact that we only need to consider characters up to the length of the shortest string.
+- By stopping as soon as a mismatch is found, we avoid unnecessary iterations beyond what is necessary to determine the common prefix.
+- Using the shortest string as our reference ensures that we find any common prefix as efficiently as possible without compromising on correctness.
