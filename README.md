@@ -19,71 +19,140 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: **Longest Common Prefix Among Multiple Strings**
+### Coding Challenge: "Topological Sorting with Cycle Detection"
 
-**Problem Description:**
-Given a list of strings `strs`, find the longest common prefix among all strings. The common prefix is the substring that appears as a prefix to each of the strings in the given list.
+#### Problem Description
 
-**Example Input/Output:**
+Given a directed acyclic graph (DAG), perform a topological sort and detect whether the graph contains a cycle. If a cycle is found, return `False`; otherwise, return the topologically sorted order of nodes.
 
-- **Input:** `strs = ["flower","flow","flight"]`
-- **Output:** `"fl"`
+#### Example Input/Output
 
-- **Input:** `strs = ["dog","racecar","car"]`
-- **Output:** `""`
-
-- **Input:** `strs = ["interspecies","interstellar","intergalactic"]`
-- **Output:** `"inter"`
-
-**Constraints:**
-- The list of strings `strs` is not empty.
-- All strings in `strs` have the same length.
-
-**Difficulty Rating:** **Most Efficient Solution in Python:**
-The most efficient solution to this problem involves iterating through the characters of the first string and comparing them to the characters at the same position in all other strings. This approach ensures that we find the common prefix as early as possible and stops as soon as a mismatch is found.
-
+Input:
 ```python
-def longest_common_prefix(strs):
-    if not strs:
-        return ""
-    
-    shortest_str = min(strs, key=len)
-    
-    for i, char in enumerate(shortest_str):
-        for other in strs:
-            if other[i] != char:
-                return shortest_str[:i]
-    
-    return shortest_str
-
-# Example usage
-print(longest_common_prefix(["flower","flow","flight"]))  # Output: "fl"
-print(longest_common_prefix(["dog","racecar","car"]))  # Output: ""
-print(longest_common_prefix(["interspecies","interstellar","intergalactic"]))  # Output: "inter"
+graph = {
+    1: [2, 3],
+    2: [4],
+    3: [5, 6],
+    4: [],
+    5: [],
+    6: []
+}
 ```
 
-**Detailed Explanation:**
-1. **Initialization:**
-   - Check if the input list `strs` is empty. If it is, return an empty string.
-   - Find the shortest string in the list using the `min` function with the `key` argument set to `len`. This ensures that we don't waste time iterating through longer strings when a shorter one will suffice.
+Output:
+- `True` and `[1, 2, 3, 4, 5, 6]` if the graph is a DAG.
+- `False` if the graph contains a cycle.
 
-2. **Iteration:**
-   - Iterate through each character of the shortest string using `enumerate`, which provides both the index `i` and the character itself.
-   - For each position `i`, check if all other strings have the same character at that position by iterating through each string in `strs`.
-   - As soon as a mismatch is found (i.e., any other string does not have the same character), return the common prefix up to the previous position `i`.
+#### Constraints
 
-3. **Return Result:**
-   - If no mismatches are found during iteration, return the entire shortest string, which represents the longest common prefix among all strings.
+- The input graph is represented as an adjacency list.
+- The number of nodes (`V`) and edges (`E`) are relatively small (e.g., V <= 100, E <= 1000).
+- The challenge requires both topological sorting and cycle detection.
 
-**Time Complexity Analysis:**
-- The solution has a time complexity of O(n*m), where n is the length of the shortest string and m is the number of strings. This is because we iterate through each character of the shortest string and compare it with each corresponding character in all other strings.
+#### Most Efficient Solution
 
-**Space Complexity Analysis:**
-- The solution has a space complexity of O(1), excluding the input, because we only use a constant amount of space to store indices and characters.
+To solve this challenge efficiently, we can use a combination of techniques:
+1. **Detecting Cycles:** Use a recursive DFS to detect cycles.
+2. **Topological Sorting:** Perform DFS in a way that we keep track of visited nodes and their finishing times to maintain a valid topological order.
 
-**Optimality Explanation:**
-- This approach is optimal because it leverages the fact that we only need to consider characters up to the length of the shortest string.
-- By stopping as soon as a mismatch is found, we avoid unnecessary iterations beyond what is necessary to determine the common prefix.
-- Using the shortest string as our reference ensures that we find any common prefix as efficiently as possible without compromising on correctness.
+Here is the most efficient solution in Python:
+
+```python
+from collections import defaultdict, deque
+
+def has_cycle(graph):
+    # Initialize the DFS stack
+    stack = []
+    
+    def dfs(node, parent=None):
+        # Mark the node as visited
+        visited.add(node)
+        
+        # Add the node to the recursion stack
+        recursion_stack.add(node)
+        
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                if dfs(neighbor, node):
+                    return True
+            elif neighbor in recursion_stack:
+                return True
+        
+        # Remove the node from the recursion stack
+        recursion_stack.remove(node)
+        
+        return False
+    
+    visited = set()
+    recursion_stack = set()
+    
+    for node in graph:
+        if node not in visited:
+            if dfs(node):
+                return False
+    
+    return True
+
+def topological_sort(graph):
+    if not has_cycle(graph):
+        stack = deque()
+        visited = set()
+        
+        def dfs(node):
+            visited.add(node)
+            
+            for neighbor in graph[node]:
+                if neighbor not in visited:
+                    dfs(neighbor)
+            
+            stack.appendleft(node)
+        
+        for node in graph:
+            if node not in visited:
+                dfs(node)
+        
+        return list(stack)
+    
+    return False
+
+# Example usage
+graph = {
+    1: [2, 3],
+    2: [4],
+    3: [5, 6],
+    4: [],
+    5: [],
+    6: []
+}
+
+result = topological_sort(graph)
+if result:
+    print("Topologically sorted order:", result)
+else:
+    print("Graph contains a cycle")
+```
+
+#### Analysis
+
+- **Time Complexity:** The overall time complexity is O(V + E) due to the following reasons:
+  - The `has_cycle` function uses DFS with a time complexity of O(V + E).
+  - The `topological_sort` function also uses DFS and maintains the same time complexity because it visits each node and edge exactly once.
+  
+- **Space Complexity:** The space complexity is O(V) because:
+  - The `visited` set and `recursion_stack` set each use O(V) space.
+  
+#### Explanation
+
+- **Cycle Detection:** The `has_cycle` function uses a recursive DFS to detect cycles. It keeps track of visited nodes and those currently in the recursion stack to identify any back edges that indicate a cycle.
+  
+- **Topological Sorting:** The `topological_sort` function performs DFS while keeping track of visited nodes and utilizes a deque to maintain the correct order of nodes. It returns `False` if a cycle is detected by `has_cycle`.
+
+#### Trade-offs
+
+There are no significant trade-offs between time and space complexity in this solution. Both functions run in linear time relative to the number of nodes and edges, and they use linear space relative to the number of nodes.
+
+### Difficulty Rating
+
+This problem combines both topological sorting and cycle detection, making it moderately challenging. It requires understanding how to use DFS effectively for both tasks and maintaining proper data structures to keep track of visited nodes and cycles.
