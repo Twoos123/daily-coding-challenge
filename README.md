@@ -21,138 +21,75 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: "Topological Sorting with Cycle Detection"
+****
 
-#### Problem Description
+### Challenge: "Hash Table Frequency Counting and Anagram Detection"
 
-Given a directed acyclic graph (DAG), perform a topological sort and detect whether the graph contains a cycle. If a cycle is found, return `False`; otherwise, return the topologically sorted order of nodes.
+**Problem Description:**
 
-#### Example Input/Output
+Given two strings, `s1` and `s2`, determine if they are anagrams of each other. Additionally, count the frequency of each character in the first string and store this information in a hash table.
 
-Input:
-```python
-graph = {
-    1: [2, 3],
-    2: [4],
-    3: [5, 6],
-    4: [],
-    5: [],
-    6: []
-}
-```
+**Example Input/Output:**
 
-Output:
-- `True` and `[1, 2, 3, 4, 5, 6]` if the graph is a DAG.
-- `False` if the graph contains a cycle.
+Input: `s1 = "anagram"`, `s2 = "nagaram"`
+Output: 
+- **Anagram Detection:** `True`
+- **Character Frequencies:**
+    - `{'a': 1, 'g': 1, 'm': 1, 'n': 2, 'r': 1}`
 
-#### Constraints
+**Constraints:**
+- The input strings only contain lowercase English letters.
+- The strings are not empty, and their lengths are less than or equal to 100 characters.
 
-- The input graph is represented as an adjacency list.
-- The number of nodes (`V`) and edges (`E`) are relatively small (e.g., V <= 100, E <= 1000).
-- The challenge requires both topological sorting and cycle detection.
+### Analysis:
 
-#### Most Efficient Solution
+#### Solution Approach:
 
-To solve this challenge efficiently, we can use a combination of techniques:
-1. **Detecting Cycles:** Use a recursive DFS to detect cycles.
-2. **Topological Sorting:** Perform DFS in a way that we keep track of visited nodes and their finishing times to maintain a valid topological order.
+1. **Character Frequency Counting:**
+   - Use a hash table (in Python's case, `dict`) to store the frequency of each character in the first string.
+   - Iterate through the string and increment the count for each character in the hash table.
 
-Here is the most efficient solution in Python:
+2. **Anagram Detection:**
+   - Check if the sorted versions of both strings are equal.
+   - Alternatively, compare the character frequencies from the hash table for both strings.
+
+#### Optimal Solution in Python:
 
 ```python
-from collections import defaultdict, deque
+def hash_table_frequency_counting_and_anagram_detection(s1, s2):
+    # Part 1: Character Frequency Counting in Hash Table
+    frequency = {}
+    for char in s1:
+        frequency[char] = frequency.get(char, 0) + 1
 
-def has_cycle(graph):
-    # Initialize the DFS stack
-    stack = []
-    
-    def dfs(node, parent=None):
-        # Mark the node as visited
-        visited.add(node)
-        
-        # Add the node to the recursion stack
-        recursion_stack.add(node)
-        
-        for neighbor in graph[node]:
-            if neighbor not in visited:
-                if dfs(neighbor, node):
-                    return True
-            elif neighbor in recursion_stack:
-                return True
-        
-        # Remove the node from the recursion stack
-        recursion_stack.remove(node)
-        
-        return False
-    
-    visited = set()
-    recursion_stack = set()
-    
-    for node in graph:
-        if node not in visited:
-            if dfs(node):
-                return False
-    
-    return True
+    # Part 2: Anagram Detection
+    if sorted(s1) == sorted(s2):
+        return True, frequency
+    else:
+        return False, frequency
 
-def topological_sort(graph):
-    if not has_cycle(graph):
-        stack = deque()
-        visited = set()
-        
-        def dfs(node):
-            visited.add(node)
-            
-            for neighbor in graph[node]:
-                if neighbor not in visited:
-                    dfs(neighbor)
-            
-            stack.appendleft(node)
-        
-        for node in graph:
-            if node not in visited:
-                dfs(node)
-        
-        return list(stack)
-    
-    return False
+# Example usage:
+s1 = "anagram"
+s2 = "nagaram"
+is_anagram, frequency = hash_table_frequency_counting_and_anagram_detection(s1, s2)
 
-# Example usage
-graph = {
-    1: [2, 3],
-    2: [4],
-    3: [5, 6],
-    4: [],
-    5: [],
-    6: []
-}
-
-result = topological_sort(graph)
-if result:
-    print("Topologically sorted order:", result)
-else:
-    print("Graph contains a cycle")
+print(f"Is anagram: {is_anagram}")
+print(f"Character frequencies: {frequency}")
 ```
 
-#### Analysis
+#### Complexity Analysis:
 
-- **Time Complexity:** The overall time complexity is O(V + E) due to the following reasons:
-  - The `has_cycle` function uses DFS with a time complexity of O(V + E).
-  - The `topological_sort` function also uses DFS and maintains the same time complexity because it visits each node and edge exactly once.
-  
-- **Space Complexity:** The space complexity is O(V) because:
-  - The `visited` set and `recursion_stack` set each use O(V) space.
-  
-#### Explanation
+- **Time Complexity:**
+  - The time complexity for counting character frequencies is O(n), where n is the length of the string.
+  - The time complexity for sorting and comparing strings is O(n log n) in Python's built-in sorting function. However, this is not strictly necessary as anagram detection can be done with O(n) complexity by directly comparing character frequencies from the hash table.
 
-- **Cycle Detection:** The `has_cycle` function uses a recursive DFS to detect cycles. It keeps track of visited nodes and those currently in the recursion stack to identify any back edges that indicate a cycle.
-  
-- **Topological Sorting:** The `topological_sort` function performs DFS while keeping track of visited nodes and utilizes a deque to maintain the correct order of nodes. It returns `False` if a cycle is detected by `has_cycle`.
+- **Space Complexity:**
+  - The space complexity is O(n) because we need to store the frequency of each character in the hash table.
 
-#### Trade-offs
+#### Why This Approach is Optimal:
 
-There are no significant trade-offs between time and space complexity in this solution. Both functions run in linear time relative to the number of nodes and edges, and they use linear space relative to the number of nodes.
+- **Efficiency:** The approach uses a hash table for efficient counting of character frequencies, which allows for O(n) time complexity.
+- **Simplicity:** The algorithm is straightforward and easy to understand.
+- **Flexibility:** It handles both tasks (frequency counting and anagram detection) simultaneously, making it a good choice for this problem.
 
-### Difficulty Rating
-
-This problem combines both topological sorting and cycle detection, making it moderately challenging. It requires understanding how to use DFS effectively for both tasks and maintaining proper data structures to keep track of visited nodes and cycles.
+This solution balances both time and space complexity effectively, making it suitable for this challenge. The difficulty rating of 4 indicates that while it requires some understanding of hash tables and efficient algorithms, it is still manageable with a moderate level of programming experience.
