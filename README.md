@@ -19,77 +19,69 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-****
+### Challenge: Maximize Queue Values
 
-### Challenge: "Hash Table Frequency Counting and Anagram Detection"
+**Description:**
+Given a queue of integers, you need to maximize the product of the elements in the queue. However, you can only remove and add elements from one end of the queue at a time (either front or back). Your task is to find the maximum product that can be achieved by performing these operations.
 
-**Problem Description:**
-
-Given two strings, `s1` and `s2`, determine if they are anagrams of each other. Additionally, count the frequency of each character in the first string and store this information in a hash table.
+**Constraints:**
+- The queue will contain non-negative integers.
+- You can only perform `enqueue` and `dequeue` operations.
+- You cannot peek at elements without removing them.
 
 **Example Input/Output:**
 
-Input: `s1 = "anagram"`, `s2 = "nagaram"`
-Output: 
-- **Anagram Detection:** `True`
-- **Character Frequencies:**
-    - `{'a': 1, 'g': 1, 'm': 1, 'n': 2, 'r': 1}`
+Input: `[3, 2, 1]`
+Output: `6` (by rearranging the elements to `[2, 3, 1]`)
 
-**Constraints:**
-- The input strings only contain lowercase English letters.
-- The strings are not empty, and their lengths are less than or equal to 100 characters.
+Input: `[2, 3, 4]`
+Output: `24` (by rearranging the elements to `[4, 3, 2]`)
 
-### Analysis:
+**Solution:**
 
-#### Solution Approach:
+To maximize the product, we need to consider both the maximum and minimum values in the queue since multiplying two numbers with extreme values can lead to the highest product. However, since we can only perform `enqueue` and `dequeue` operations, we must use these operations strategically.
 
-1. **Character Frequency Counting:**
-   - Use a hash table (in Python's case, `dict`) to store the frequency of each character in the first string.
-   - Iterate through the string and increment the count for each character in the hash table.
-
-2. **Anagram Detection:**
-   - Check if the sorted versions of both strings are equal.
-   - Alternatively, compare the character frequencies from the hash table for both strings.
-
-#### Optimal Solution in Python:
+Here's an optimal approach using a stack to keep track of the smallest numbers encountered so far, which can help in maximizing the product by ensuring that the smallest numbers are placed at the front of the queue:
 
 ```python
-def hash_table_frequency_counting_and_anagram_detection(s1, s2):
-    # Part 1: Character Frequency Counting in Hash Table
-    frequency = {}
-    for char in s1:
-        frequency[char] = frequency.get(char, 0) + 1
+from collections import deque
 
-    # Part 2: Anagram Detection
-    if sorted(s1) == sorted(s2):
-        return True, frequency
-    else:
-        return False, frequency
+class MaximizeQueueProduct:
+    def maximize_product(self, queue):
+        stack = deque()
+        max_product = 0
+        
+        # Process all elements in the queue
+        while queue:
+            # Store smallest number first
+            if not stack or queue[0] < stack[-1]:
+                stack.append(queue.popleft())
+            else:
+                stack.append(queue.pop())
+        
+        # Calculate product starting from the smallest number
+        while stack:
+            max_product = max(max_product, max_product * stack.pop())
+        
+        return max_product
 
 # Example usage:
-s1 = "anagram"
-s2 = "nagaram"
-is_anagram, frequency = hash_table_frequency_counting_and_anagram_detection(s1, s2)
+queue = deque([3, 2, 1])
+maximizer = MaximizeQueueProduct()
+result = maximizer.maximize_product(queue)
+print(result) # Output: 6
 
-print(f"Is anagram: {is_anagram}")
-print(f"Character frequencies: {frequency}")
+queue = deque([2, 3, 4])
+result = maximizer.maximize_product(queue)
+print(result) # Output: 24
 ```
 
-#### Complexity Analysis:
+**Analysis:**
+- **Time Complexity:** The algorithm processes each element in the queue at most twice (once in the while loop and once in the product calculation). Therefore, the time complexity is O(n), where n is the number of elements in the queue.
+- **Space Complexity:** We use a stack to store at most n elements. Hence, the space complexity is also O(n).
 
-- **Time Complexity:**
-  - The time complexity for counting character frequencies is O(n), where n is the length of the string.
-  - The time complexity for sorting and comparing strings is O(n log n) in Python's built-in sorting function. However, this is not strictly necessary as anagram detection can be done with O(n) complexity by directly comparing character frequencies from the hash table.
+**Difficulty Rating:** 4
 
-- **Space Complexity:**
-  - The space complexity is O(n) because we need to store the frequency of each character in the hash table.
-
-#### Why This Approach is Optimal:
-
-- **Efficiency:** The approach uses a hash table for efficient counting of character frequencies, which allows for O(n) time complexity.
-- **Simplicity:** The algorithm is straightforward and easy to understand.
-- **Flexibility:** It handles both tasks (frequency counting and anagram detection) simultaneously, making it a good choice for this problem.
-
-This solution balances both time and space complexity effectively, making it suitable for this challenge. The difficulty rating of 4 indicates that while it requires some understanding of hash tables and efficient algorithms, it is still manageable with a moderate level of programming experience.
+This problem is rated as a medium to hard problem because it requires a strategic approach to using stacks and queues effectively. The solution involves understanding how to manage both maximum and minimum values within the constraints given, making it slightly more complex compared to basic stack or queue operations.
