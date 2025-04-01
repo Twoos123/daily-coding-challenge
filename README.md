@@ -21,67 +21,117 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: Maximize Queue Values
+****
 
-**Description:**
-Given a queue of integers, you need to maximize the product of the elements in the queue. However, you can only remove and add elements from one end of the queue at a time (either front or back). Your task is to find the maximum product that can be achieved by performing these operations.
+**Problem Description:**
 
-**Constraints:**
-- The queue will contain non-negative integers.
-- You can only perform `enqueue` and `dequeue` operations.
-- You cannot peek at elements without removing them.
+Given a directed acyclic graph (DAG) with n nodes and m edges, determine if it is possible to assign a unique color to each node such that no two adjacent nodes have the same color. This is known as a **coloring** problem in graph theory. The additional constraint is that the coloring should be done in such a way that the color of each node is determined based on its **in-degree**.
 
 **Example Input/Output:**
 
-Input: `[3, 2, 1]`
-Output: `6` (by rearranging the elements to `[2, 3, 1]`)
+Input:
+```
+n = 4
+edges = [(0, 1), (1, 2), (2, 3), (3, 0)]
+```
+Output:
+```
+True
+```
 
-Input: `[2, 3, 4]`
-Output: `24` (by rearranging the elements to `[4, 3, 2]`)
+**Constraints:**
+
+- The graph is a directed acyclic graph (DAG).
+- The number of nodes `n` is at most 10,000.
+- The number of edges `m` is at most 20,000.
+- All edges have non-negative weights.
 
 **Solution:**
 
-To maximize the product, we need to consider both the maximum and minimum values in the queue since multiplying two numbers with extreme values can lead to the highest product. However, since we can only perform `enqueue` and `dequeue` operations, we must use these operations strategically.
+To solve this problem efficiently, we can use a combination of DFS and BFS. Here’s an optimal approach:
 
-Here's an optimal approach using a stack to keep track of the smallest numbers encountered so far, which can help in maximizing the product by ensuring that the smallest numbers are placed at the front of the queue:
+1. **Initialization:**
+   - Create a lookup table `color` to store the color assigned to each node.
+   - Initialize `color` dictionary with default color as -1 (unassigned).
+
+2. **DFS Traversal:**
+   - Perform DFS traversal from each node starting from the nodes with in-degree 0.
+   - During DFS, assign the opposite color to each node compared to its parent node.
+   - If a node already has a color assigned and it conflicts with the new assignment, return False.
+
+3. **BFS Verification:**
+   - Once all nodes have been assigned colors using DFS, perform BFS to verify that no two adjacent nodes have the same color.
+   - If any conflict is found during BFS traversal, return False.
+
+Here is the Python implementation:
 
 ```python
 from collections import deque
 
-class MaximizeQueueProduct:
-    def maximize_product(self, queue):
-        stack = deque()
-        max_product = 0
+def is_valid_coloring(graph):
+    # Initialize color assignment with default value -1
+    color = {node: -1 for node in range(len(graph))}
+    
+    # Perform DFS from nodes with in-degree 0
+    def dfs(node):
+        if color[node] != -1:
+            return color[node]
+        color[node] = 0  # Assign first color (0)
+        for neighbor in graph[node]:
+            if color[neighbor] == color[node]:
+                return False  # Conflict found
+            if color[neighbor] == -1:
+                color[neighbor] = 1 - color[node]  # Assign opposite color
+                visited.add(neighbor)
+                if not dfs(neighbor):
+                    return False
+        return True
+    
+    visited = set()
+    
+    # Start DFS from nodes with in-degree 0
+    for node in range(len(graph)):
+        if all(neighbor != node for neighbor in graph[node]):
+            visited.add(node)
+            if not dfs(node):
+                return False
+    
+    # Perform BFS to verify no two adjacent nodes have same color
+    def bfs():
+        queue = deque([node for node in visited])
         
-        # Process all elements in the queue
         while queue:
-            # Store smallest number first
-            if not stack or queue[0] < stack[-1]:
-                stack.append(queue.popleft())
-            else:
-                stack.append(queue.pop())
+            current_node = queue.popleft()
+            for neighbor in graph[current_node]:
+                if color[current_node] == color[neighbor]:
+                    return False  # Conflict found during BFS
         
-        # Calculate product starting from the smallest number
-        while stack:
-            max_product = max(max_product, max_product * stack.pop())
-        
-        return max_product
+        return True
+    
+    return bfs()
 
 # Example usage:
-queue = deque([3, 2, 1])
-maximizer = MaximizeQueueProduct()
-result = maximizer.maximize_product(queue)
-print(result) # Output: 6
+n = 4
+edges = [(0, 1), (1, 2), (2, 3), (3, 0)]
+graph = [[] for _ in range(n)]
+for u,v in edges:
+    graph[u].append(v)
 
-queue = deque([2, 3, 4])
-result = maximizer.maximize_product(queue)
-print(result) # Output: 24
+print(is_valid_coloring(graph))
 ```
 
-**Analysis:**
-- **Time Complexity:** The algorithm processes each element in the queue at most twice (once in the while loop and once in the product calculation). Therefore, the time complexity is O(n), where n is the number of elements in the queue.
-- **Space Complexity:** We use a stack to store at most n elements. Hence, the space complexity is also O(n).
+### Complexity Analysis:
 
-**Difficulty Rating:** 4
+- **Time Complexity:** The overall time complexity is dominated by the DFS traversal which runs in O(V + E) where V is the number of nodes and E is the number of edges. The BFS verification step also runs in O(V + E). Therefore, the overall time complexity is O(V + E).
 
-This problem is rated as a medium to hard problem because it requires a strategic approach to using stacks and queues effectively. The solution involves understanding how to manage both maximum and minimum values within the constraints given, making it slightly more complex compared to basic stack or queue operations.
+- **Space Complexity:** We use O(V) space for storing color assignments and visited set. The recursion stack used by DFS also contributes O(V) space complexity.
+
+### Optimality Explanation:
+
+The chosen approach ensures that each node is assigned a unique color based on its in-degree efficiently. The use of DFS for initial coloring avoids conflicts by assigning opposite colors when necessary. The subsequent BFS verification step ensures that no conflicts arise between adjacent nodes, making it an optimal solution for this problem.
+
+### Trade-off Explanation:
+
+There are no significant trade-offs between time and space complexity in this approach. The algorithm’s efficiency stems from its ability to leverage both DFS and BFS techniques effectively without introducing unnecessary complexity or optimizations that might increase space requirements significantly.
+
+Thus, this problem solution is well-suited for practical implementation with clear explanations of both its correctness and efficiency characteristics.
