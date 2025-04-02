@@ -19,119 +19,92 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-****
+### **Matrix Challenge: Maximum Rectangle with All 1s**
 
-**Problem Description:**
+Given a binary matrix where each cell can be either 0 or 1, find the maximum size rectangular sub-matrix with all 1s. The matrix is not necessarily square, and the sub-matrix can be rotated.
 
-Given a directed acyclic graph (DAG) with n nodes and m edges, determine if it is possible to assign a unique color to each node such that no two adjacent nodes have the same color. This is known as a **coloring** problem in graph theory. The additional constraint is that the coloring should be done in such a way that the color of each node is determined based on its **in-degree**.
+#### Problem Description
 
-**Example Input/Output:**
+You are given a binary matrix `matrix` of size `m x n`. The task is to find the maximum size of a rectangular sub-matrix that consists only of 1s. The sub-matrix can be oriented in any direction (i.e., it can be rotated). 
 
-Input:
+#### Example Input/Output
+
+**Input:**
+```python
+matrix = [
+    [1, 0, 1, 0],
+    [1, 0, 1, 1],
+    [1, 1, 1, 1],
+    [0, 0, 0, 1]
+]
 ```
-n = 4
-edges = [(0, 1), (1, 2), (2, 3), (3, 0)]
-```
-Output:
-```
-True
-```
 
-**Constraints:**
+**Output:**
+The maximum size of a rectangular sub-matrix with all 1s is `4 x 1`.
 
-- The graph is a directed acyclic graph (DAG).
-- The number of nodes `n` is at most 10,000.
-- The number of edges `m` is at most 20,000.
-- All edges have non-negative weights.
+#### Constraints
+- The matrix will not be empty.
+- Each cell in the matrix will be either 0 or 1.
 
-**Solution:**
+### Solution
 
-To solve this problem efficiently, we can use a combination of DFS and BFS. Here’s an optimal approach:
+The solution involves using a histogram-based approach to track the height of the current rectangle and the maximum rectangle found so far. We iterate through each row and column to maintain these heights and widths.
 
-1. **Initialization:**
-   - Create a lookup table `color` to store the color assigned to each node.
-   - Initialize `color` dictionary with default color as -1 (unassigned).
-
-2. **DFS Traversal:**
-   - Perform DFS traversal from each node starting from the nodes with in-degree 0.
-   - During DFS, assign the opposite color to each node compared to its parent node.
-   - If a node already has a color assigned and it conflicts with the new assignment, return False.
-
-3. **BFS Verification:**
-   - Once all nodes have been assigned colors using DFS, perform BFS to verify that no two adjacent nodes have the same color.
-   - If any conflict is found during BFS traversal, return False.
-
-Here is the Python implementation:
+#### Algorithm
 
 ```python
-from collections import deque
 
-def is_valid_coloring(graph):
-    # Initialize color assignment with default value -1
-    color = {node: -1 for node in range(len(graph))}
-    
-    # Perform DFS from nodes with in-degree 0
-    def dfs(node):
-        if color[node] != -1:
-            return color[node]
-        color[node] = 0  # Assign first color (0)
-        for neighbor in graph[node]:
-            if color[neighbor] == color[node]:
-                return False  # Conflict found
-            if color[neighbor] == -1:
-                color[neighbor] = 1 - color[node]  # Assign opposite color
-                visited.add(neighbor)
-                if not dfs(neighbor):
-                    return False
-        return True
-    
-    visited = set()
-    
-    # Start DFS from nodes with in-degree 0
-    for node in range(len(graph)):
-        if all(neighbor != node for neighbor in graph[node]):
-            visited.add(node)
-            if not dfs(node):
-                return False
-    
-    # Perform BFS to verify no two adjacent nodes have same color
-    def bfs():
-        queue = deque([node for node in visited])
+def maxRectangle(matrix):
+    if not matrix or not matrix[0]:
+        return 0
+
+    m, n = len(matrix), len(matrix[0])
+    heights = [0] * (n + 1)
+    max_area = 0
+
+    for i in range(m):
+        for j in range(n):
+            heights[j] = heights[j] + 1 if matrix[i][j] == '1' else 0
         
-        while queue:
-            current_node = queue.popleft()
-            for neighbor in graph[current_node]:
-                if color[current_node] == color[neighbor]:
-                    return False  # Conflict found during BFS
-        
-        return True
-    
-    return bfs()
+        stack = []
+        for k in range(n + 1):
+            while stack and heights[stack[-1]] >= heights[k]:
+                h = heights[stack.pop()]
+                w = k if not stack else k - stack[-1] - 1
+                max_area = max(max_area, h * w)
+            stack.append(k)
+
+    return max_area
 
 # Example usage:
-n = 4
-edges = [(0, 1), (1, 2), (2, 3), (3, 0)]
-graph = [[] for _ in range(n)]
-for u,v in edges:
-    graph[u].append(v)
+matrix = [
+    ['1', '0', '1', '0'],
+    ['1', '0', '1', '1'],
+    ['1', '1', '1', '1'],
+    ['0', '0', '0', '1'],
+]
 
-print(is_valid_coloring(graph))
+print(maxRectangle(matrix)) # Output: 4
+
 ```
 
-### Complexity Analysis:
+#### Time and Space Complexity Analysis
+- **Time Complexity:** The time complexity is O(m * n), where m is the number of rows and n is the number of columns. This is because we are iterating through each cell once.
+- **Space Complexity:** The space complexity is O(n), which includes the space used by `heights` and `stack`.
 
-- **Time Complexity:** The overall time complexity is dominated by the DFS traversal which runs in O(V + E) where V is the number of nodes and E is the number of edges. The BFS verification step also runs in O(V + E). Therefore, the overall time complexity is O(V + E).
+### Explanation
 
-- **Space Complexity:** We use O(V) space for storing color assignments and visited set. The recursion stack used by DFS also contributes O(V) space complexity.
+1. **Initialization:** We initialize an array `heights` of size n+1 to keep track of the heights of the histogram.
+2. **Row Iteration:** For each row, we update the heights array based on the current row's values.
+3. **Stack-Based Approach:** We use a stack to maintain the indices where the histogram would decrease. For each index k, we pop elements from the stack and calculate the area covered by these elements. We then push k back onto the stack.
+4. **Area Calculation:** The maximum area covered by a rectangle is calculated as `h * w`, where `h` is the height of the rectangle and `w` is its width.
 
-### Optimality Explanation:
+This approach ensures that we efficiently track the maximum size of rectangular sub-matrices with all 1s by treating each row as a histogram and using a stack to efficiently handle the decreasing heights.
 
-The chosen approach ensures that each node is assigned a unique color based on its in-degree efficiently. The use of DFS for initial coloring avoids conflicts by assigning opposite colors when necessary. The subsequent BFS verification step ensures that no conflicts arise between adjacent nodes, making it an optimal solution for this problem.
+### Trade-Offs
 
-### Trade-off Explanation:
+- **Time vs Space:** The space complexity could be optimized by not storing the full histogram but only necessary elements in the stack. However, this would complicate the implementation without significantly reducing space usage.
 
-There are no significant trade-offs between time and space complexity in this approach. The algorithm’s efficiency stems from its ability to leverage both DFS and BFS techniques effectively without introducing unnecessary complexity or optimizations that might increase space requirements significantly.
-
-Thus, this problem solution is well-suited for practical implementation with clear explanations of both its correctness and efficiency characteristics.
+By maintaining a simple but effective approach with a linear time complexity and constant space complexity per row iteration, this solution optimizes both aspects.
