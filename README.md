@@ -19,98 +19,115 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Challenge: "Maximum Sum Path in N-ary Tree"
+****
 
-**Problem Description:**
+### Problem Description
 
-Given an N-ary tree, find the maximum sum path from the root to any leaf node. This path can include nodes from any level of the tree, and the sum of the path should be maximized.
+Given a directed acyclic graph (DAG) represented as an adjacency list, implement a function to find all strongly connected components (SCCs) using Depth-First Search (DFS). A strongly connected component is a subgraph where there is a path from every node to every other node in the subgraph.
 
-**Example Input/Output:**
+### Constraints
 
-Input:
+- **Input**: An adjacency list representing a DAG.
+- **Output**: A list of strongly connected components.
+- **Assumptions**: The input graph is a DAG.
+
+### Example Input/Output
+
+**Input**:
+```python
+graph = {
+    0: [1, 2],
+    1: [3],
+    2: [3],
+    3: [],
+    4: [5],
+    5: []
+}
 ```
-       1
-      / \
-     3   2
-    / \   \
-   4   5   6
-  / \
- 7   8
+
+**Output**:
+```python
+[[0, 1, 2], [3], [4, 5]]
 ```
 
-Output: The maximum sum path is `1 -> 3 -> 4 -> 7` with a sum of `20`.
+### Solution
 
-**Constraints:**
-1. The N-ary tree is represented as a list of nodes where each node contains a value and a list of its children.
-2. The input tree is valid (i.e., no cycles and all nodes have unique values).
-3. The path can start from any node in the tree.
+The most optimal approach to solve this problem involves using Tarjan's algorithm, which is a well-known algorithm for finding strongly connected components in a directed graph. This algorithm uses DFS to perform a depth-first traversal of the graph and keeps track of the lowest reachable ancestor (LCA) for each node to identify SCCs.
 
-### Most Efficient Solution:
-
-To solve this problem efficiently, we can use a depth-first search (DFS) approach with backtracking to explore all possible paths and keep track of the maximum sum encountered.
-
-**Solution in Python:**
+#### Implementation
 
 ```python
-class Node:
-    def __init__(self, value, children=None):
-        self.value = value
-        self.children = children if children else []
+from collections import defaultdict
 
-def max_sum_path(root):
-    # Base case: If the tree is empty, return 0
-    if not root:
-        return 0
-    
-    # Initialize maximum sum with positive infinity
-    max_sum = float('-inf')
-    
-    # Helper function for DFS with backtracking
-    def dfs(node, current_sum):
-        nonlocal max_sum
-        
-        # Update current sum with node's value
-        current_sum += node.value
-        
-        # If the node is a leaf node, update max_sum if necessary
-        if not node.children:
-            max_sum = max(max_sum, current_sum)
-        
-        # Recursively explore children nodes
-        for child in node.children:
-            dfs(child, current_sum)
-    
-    dfs(root, 0)
-    
-    return max_sum
+class DFS:
+    def __init__(self):
+        self.stack = []
+        self.index = 0
+        self.lowlinks = {}
+        self.indexstack = defaultdict(list)
 
-# Example usage:
-# Constructing the example N-ary tree
-root = Node(1)
-root.children = [Node(3), Node(2)]
-root.children[0].children = [Node(4), Node(5)]
-root.children[0].children[0].children = [Node(7), Node(8)]
-root.children[1].children = [Node(6)]
+    def strong_connect(self, graph, node):
+        self.lowlinks[node] = self.index
+        self.indexstack[node].append(node)
+        self.stack.append(node)
+        
+        for neighbor in graph[node]:
+            if neighbor not in self.lowlinks:
+                self.strong_connect(graph, neighbor)
+            elif neighbor in self.stack:
+                lowlink = self.lowlinks[neighbor]
+                self.index = min(self.index, lowlink)
+        
+        while self.stack and self.stack[-1] != node:
+            w = self.stack.pop()
+            self.indexstack[w].append(node)
+        
+        if self.stack[-1] == node:
+            self.component = self.component.append(self.indexstack[node])
+            self.component[-1].sort()
 
-print(max_sum_path(root))  # Output should be 20
+# Usage
+graph = {
+    0: [1, 2],
+    1: [3],
+    2: [3],
+    3: [],
+    4: [5],
+    5: []
+}
+
+dfs = DFS()
+dfs.component = []
+for node in graph:
+    if node not in dfs.lowlinks:
+        dfs.strong_connect(graph, node)
+
+print(dfs.component)
 ```
 
-### Analysis:
+### Analysis of Complexity
 
-**Time Complexity:** The time complexity of this solution is O(N * M), where N is the number of nodes in the tree and M is the maximum number of children for any node. This is because each node may be visited multiple times during DFS traversal.
+- **Time Complexity**: The time complexity of Tarjan's algorithm is O(V + E), where V is the number of vertices and E is the number of edges. This is because each node and edge are visited exactly once.
+  
+- **Space Complexity**: The space complexity is also O(V), since we need to store the DFS traversal stack and the lowlink values for each node.
 
-**Space Complexity:** The space complexity is O(H), where H is the height of the tree. This includes both recursion stack space and potential extra space needed for storing temporary data during DFS.
+### Explanation
 
-### Why This Approach is Optimal:
+1. **Initialization**:
+   - Initialize the `lowlinks` dictionary to keep track of each node's lowest reachable ancestor.
+   - Initialize an index counter to keep track of unique indices for each SCC.
+   - Create an `indexstack` to store nodes in the current SCC.
 
-1. **DFS Traversal:** Using DFS allows us to explore all possible paths efficiently by traversing down the tree recursively.
-2. **Backtracking:** By keeping track of the current sum in each recursive call, we can ensure that we consider all possible combinations of nodes along the path.
-3. **Efficient Handling of Leaf Nodes:** When we reach a leaf node, we update our maximum sum immediately since we have exhausted all possibilities from that node.
+2. **DFS Traversal**:
+   - Perform DFS starting from each unvisited node.
+   - For each unvisited neighbor, recursively call `strong_connect`.
+   - If a neighbor is already visited but not yet processed (i.e., in the stack), update the lowest reachable ancestor if necessary.
 
-This approach ensures that we find the maximum sum path efficiently while handling large and complex N-ary trees effectively.
+3. **Component Formation**:
+   - Pop nodes from the stack until we reach the current node being processed.
+   - Group these popped nodes into an SCC by appending them to `indexstack[node]`.
+   - Add this group to `self.component`.
 
-### Difficulty Rating: 4
-
-This problem requires a good understanding of DFS traversal techniques along with careful handling of backtracking logic to ensure that all possible paths are explored optimally. The challenge lies in handling leaf nodes correctly while keeping track of maximum sums efficiently, making it moderately difficult like many LeetCode problems rated around difficulty level 4.
+This approach ensures that we correctly identify all strongly connected components in the given DAG.
