@@ -19,115 +19,95 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-****
+### Problem: Matrix Rotation and Zeroing
 
-### Problem Description
+Given a square matrix \( M \) of size \( n \times n \), perform the following operations in a single pass:
 
-Given a directed acyclic graph (DAG) represented as an adjacency list, implement a function to find all strongly connected components (SCCs) using Depth-First Search (DFS). A strongly connected component is a subgraph where there is a path from every node to every other node in the subgraph.
+1. **Rotate the Matrix**: Rotate the matrix \( M \) by \( 90^\circ \) clockwise.
+2. **Zero Certain Rows and Columns**: If any element in a row or column is set to zero, mark the entire row and column for zeroing.
+
+**Example Input/Output**:
+
+Input:
+```
+[
+  [1, 2, 3],
+  [4, 5, 0],
+  [7, 8, 9]
+]
+```
+
+Output:
+```
+[
+  [7, 4, 1],
+  [8, 5, 0],
+  [9, 0, 0]
+]
+```
 
 ### Constraints
 
-- **Input**: An adjacency list representing a DAG.
-- **Output**: A list of strongly connected components.
-- **Assumptions**: The input graph is a DAG.
+- The input matrix is guaranteed to be square (\( n \times n \)).
+- The matrix size \( n \) is less than or equal to 10.
+- The elements in the matrix are integers.
 
-### Example Input/Output
-
-**Input**:
-```python
-graph = {
-    0: [1, 2],
-    1: [3],
-    2: [3],
-    3: [],
-    4: [5],
-    5: []
-}
-```
-
-**Output**:
-```python
-[[0, 1, 2], [3], [4, 5]]
-```
-
-### Solution
-
-The most optimal approach to solve this problem involves using Tarjan's algorithm, which is a well-known algorithm for finding strongly connected components in a directed graph. This algorithm uses DFS to perform a depth-first traversal of the graph and keeps track of the lowest reachable ancestor (LCA) for each node to identify SCCs.
-
-#### Implementation
+### Solution in Python
 
 ```python
-from collections import defaultdict
+def rotate_and_zero(matrix):
+    n = len(matrix)
+    
+    # Step 1: Transpose the matrix
+    matrix = [list(i) for i in zip(*matrix)]
+    
+    # Step 2: Reverse each row to achieve clockwise rotation
+    for row in matrix:
+        row.reverse()
+    
+    # Step 3: Initialize sets to keep track of rows and columns that need to be zeroed
+    rows_to_zero = set()
+    cols_to_zero = set()
+    
+    # Check for rows and columns that need to be zeroed
+    for i in range(n):
+        for j in range(n):
+            if matrix[i][j] == 0:
+                rows_to_zero.add(i)
+                cols_to_zero.add(j)
+    
+    # Step 4: Zero the identified rows and columns
+    for i in range(n):
+        for j in range(n):
+            if i in rows_to_zero or j in cols_to_zero:
+                matrix[i][j] = 0
+    
+    return matrix
 
-class DFS:
-    def __init__(self):
-        self.stack = []
-        self.index = 0
-        self.lowlinks = {}
-        self.indexstack = defaultdict(list)
-
-    def strong_connect(self, graph, node):
-        self.lowlinks[node] = self.index
-        self.indexstack[node].append(node)
-        self.stack.append(node)
-        
-        for neighbor in graph[node]:
-            if neighbor not in self.lowlinks:
-                self.strong_connect(graph, neighbor)
-            elif neighbor in self.stack:
-                lowlink = self.lowlinks[neighbor]
-                self.index = min(self.index, lowlink)
-        
-        while self.stack and self.stack[-1] != node:
-            w = self.stack.pop()
-            self.indexstack[w].append(node)
-        
-        if self.stack[-1] == node:
-            self.component = self.component.append(self.indexstack[node])
-            self.component[-1].sort()
-
-# Usage
-graph = {
-    0: [1, 2],
-    1: [3],
-    2: [3],
-    3: [],
-    4: [5],
-    5: []
-}
-
-dfs = DFS()
-dfs.component = []
-for node in graph:
-    if node not in dfs.lowlinks:
-        dfs.strong_connect(graph, node)
-
-print(dfs.component)
+# Example usage:
+matrix = [
+  [1, 2, 3],
+  [4, 5, 0],
+  [7, 8, 9]
+]
+result = rotate_and_zero(matrix)
+print(result)
 ```
-
-### Analysis of Complexity
-
-- **Time Complexity**: The time complexity of Tarjan's algorithm is O(V + E), where V is the number of vertices and E is the number of edges. This is because each node and edge are visited exactly once.
-  
-- **Space Complexity**: The space complexity is also O(V), since we need to store the DFS traversal stack and the lowlink values for each node.
 
 ### Explanation
 
-1. **Initialization**:
-   - Initialize the `lowlinks` dictionary to keep track of each node's lowest reachable ancestor.
-   - Initialize an index counter to keep track of unique indices for each SCC.
-   - Create an `indexstack` to store nodes in the current SCC.
+1. **Transpose**: The first step involves transposing the matrix using `zip(*matrix)`, which swaps rows with columns.
+2. **Reverse Rows**: To achieve a \(90^\circ\) clockwise rotation, we reverse each row using `row.reverse()`.
+3. **Identify Rows and Columns to Zero**: We use sets (`rows_to_zero` and `cols_to_zero`) to track indices of rows and columns that contain zeros.
+4. **Zero Identified Rows and Columns**: We iterate through the transposed matrix with reversed rows and set elements identified by indices in `rows_to_zero` or `cols_to_zero` to zero.
 
-2. **DFS Traversal**:
-   - Perform DFS starting from each unvisited node.
-   - For each unvisited neighbor, recursively call `strong_connect`.
-   - If a neighbor is already visited but not yet processed (i.e., in the stack), update the lowest reachable ancestor if necessary.
+### Time and Space Complexity
 
-3. **Component Formation**:
-   - Pop nodes from the stack until we reach the current node being processed.
-   - Group these popped nodes into an SCC by appending them to `indexstack[node]`.
-   - Add this group to `self.component`.
+- **Time Complexity**: The overall time complexity is \( O(n^2) \) due to transposing, reversing rows, and checking/zeroing rows/columns.
+- **Space Complexity**: The space complexity is \( O(n^2) \) for storing the transposed matrix with reversed rows.
 
-This approach ensures that we correctly identify all strongly connected components in the given DAG.
+### Difficulty Rating
+
+This problem combines matrix manipulation techniques (transpose and reverse) with element-wise operations, making it moderately challenging. The use of sets for efficient tracking of rows/columns to zero adds an additional layer of complexity, but the overall solution remains efficient in terms of both time and space complexity.
