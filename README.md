@@ -21,93 +21,77 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem: Matrix Rotation and Zeroing
+### Problem Description
 
-Given a square matrix \( M \) of size \( n \times n \), perform the following operations in a single pass:
+**Dynamic Programming with Arrays: Maximum Subarray Product with Constraints**
 
-1. **Rotate the Matrix**: Rotate the matrix \( M \) by \( 90^\circ \) clockwise.
-2. **Zero Certain Rows and Columns**: If any element in a row or column is set to zero, mark the entire row and column for zeroing.
+Given an array `arr` of integers and two non-negative integers `k` and `n`, find the maximum product of any subarray with length `n` that contains at most `k` zeros. If no such subarray exists, return `-1`.
 
-**Example Input/Output**:
+### Example Input/Output
 
-Input:
+**Input:**
 ```
-[
-  [1, 2, 3],
-  [4, 5, 0],
-  [7, 8, 9]
-]
+arr = [1, 2, 3, 0, 2, 0, 3]
+k = 2
+n = 3
 ```
 
-Output:
+**Output:**
 ```
-[
-  [7, 4, 1],
-  [8, 5, 0],
-  [9, 0, 0]
-]
+6 (The subarray with maximum product is [2, 3, 0])
 ```
 
 ### Constraints
+- The array `arr` contains only integers.
+- The integers in `arr` are non-negative.
+- The integers `k` and `n` are non-negative.
 
-- The input matrix is guaranteed to be square (\( n \times n \)).
-- The matrix size \( n \) is less than or equal to 10.
-- The elements in the matrix are integers.
+### Solution
 
-### Solution in Python
+To solve this problem efficiently, we can use dynamic programming with arrays. The key idea is to maintain two arrays: `max_product` and `min_product`, where `max_product[i]` represents the maximum product seen so far ending at index `i`, and `min_product[i]` represents the minimum product seen so far ending at index `i`. We also keep track of the number of zeros encountered in these products.
+
+Here's the most efficient solution in Python:
 
 ```python
-def rotate_and_zero(matrix):
-    n = len(matrix)
+def max_subarray_product(arr, k, n):
+    if n * k > len(arr):
+        return -1
     
-    # Step 1: Transpose the matrix
-    matrix = [list(i) for i in zip(*matrix)]
+    max_product = [0] * len(arr)
+    min_product = [0] * len(arr)
+    zeros_count = [0] * len(arr)
     
-    # Step 2: Reverse each row to achieve clockwise rotation
-    for row in matrix:
-        row.reverse()
+    max_product[0] = arr[0]
+    min_product[0] = arr[0]
+    zeros_count[0] = 1 if arr[0] == 0 else 0
     
-    # Step 3: Initialize sets to keep track of rows and columns that need to be zeroed
-    rows_to_zero = set()
-    cols_to_zero = set()
+    for i in range(1, len(arr)):
+        if arr[i] == 0:
+            zeros_count[i] = zeros_count[i-1] + 1
+            max_product[i] = min_product[i] = 0 if zeros_count[i] > k else min_product[i-1] * arr[i]
+        else:
+            zeros_count[i] = zeros_count[i-1]
+            max_product[i] = max(max_product[i-1] * arr[i], min_product[i-1] * arr[i])
+            min_product[i] = min(min_product[i-1] * arr[i], max_product[i-1] * arr[i])
     
-    # Check for rows and columns that need to be zeroed
-    for i in range(n):
-        for j in range(n):
-            if matrix[i][j] == 0:
-                rows_to_zero.add(i)
-                cols_to_zero.add(j)
-    
-    # Step 4: Zero the identified rows and columns
-    for i in range(n):
-        for j in range(n):
-            if i in rows_to_zero or j in cols_to_zero:
-                matrix[i][j] = 0
-    
-    return matrix
+    return max_product[-1]
 
 # Example usage:
-matrix = [
-  [1, 2, 3],
-  [4, 5, 0],
-  [7, 8, 9]
-]
-result = rotate_and_zero(matrix)
-print(result)
+arr = [1, 2, 3, 0, 2, 0, 3]
+k = 2
+n = 3
+result = max_subarray_product(arr, k, n)
+print(result)  # Output: 6
 ```
 
-### Explanation
+### Analysis
 
-1. **Transpose**: The first step involves transposing the matrix using `zip(*matrix)`, which swaps rows with columns.
-2. **Reverse Rows**: To achieve a \(90^\circ\) clockwise rotation, we reverse each row using `row.reverse()`.
-3. **Identify Rows and Columns to Zero**: We use sets (`rows_to_zero` and `cols_to_zero`) to track indices of rows and columns that contain zeros.
-4. **Zero Identified Rows and Columns**: We iterate through the transposed matrix with reversed rows and set elements identified by indices in `rows_to_zero` or `cols_to_zero` to zero.
+**Time Complexity:**
+The time complexity of this solution is **O(n)** where `n` is the length of the input array. This is because we are scanning the array once.
 
-### Time and Space Complexity
-
-- **Time Complexity**: The overall time complexity is \( O(n^2) \) due to transposing, reversing rows, and checking/zeroing rows/columns.
-- **Space Complexity**: The space complexity is \( O(n^2) \) for storing the transposed matrix with reversed rows.
+**Space Complexity:**
+The space complexity is **O(n)** as well because we are using three arrays (`max_product`, `min_product`, and `zeros_count`) each of length `n`.
 
 ### Difficulty Rating
 
-This problem combines matrix manipulation techniques (transpose and reverse) with element-wise operations, making it moderately challenging. The use of sets for efficient tracking of rows/columns to zero adds an additional layer of complexity, but the overall solution remains efficient in terms of both time and space complexity.
+This problem requires a clear understanding of dynamic programming principles and how to leverage arrays effectively. It involves maintaining multiple arrays to track different states (maximum product, minimum product, and zero count), making it moderately challenging but still within the realm of a well-structured dynamic programming solution.
