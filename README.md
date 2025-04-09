@@ -21,85 +21,123 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-**DIFFICULTY: 4**
+### Coding Challenge: Topological Sorting with Cycle Detection
 
-### Problem Description
-
-**Reverse Words in a String with Limited Buffer Size**
-
-Given a string `s` and an integer `k`, reverse the words in the string such that each segment of `k` words is reversed as a whole. If `k` is greater than the number of words in the string, reverse the entire string.
+**Problem Description:**
+Given a directed acyclic graph (DAG) represented by an adjacency list, implement a function `topological_sort` that performs a topological sort on the graph while also detecting and handling cycles. If a cycle is detected, the function should return an empty list.
 
 **Example Input/Output:**
-
-- **Input:** `s = "abcdefg", k = 3`
-- **Output:** `"cba fedg"`
-
-- **Input:** `s = "abcdefg", k = 6`
-- **Output:** `"gfedcba"`
-
-**Constraints:**
-- The string `s` contains only lowercase English letters.
-- The integer `k` is a positive integer.
-- The number of words in the string `s` is at least 1.
-
-### Solution
-
-The most optimal solution involves using a two-pointer approach to segment the string into parts of `k` words each and then reversing each segment.
-
 ```python
-def reverse_words_in_string(s: str, k: int) -> str:
-    # Split the string into words
-    words = s.split()
-    
-    # If k is greater than or equal to the number of words
-    if k >= len(words):
-        # Reverse the entire string
-        return ' '.join(reversed(words))
-    
-    start = 0
-    reversed_segments = []
-    
-    for end in range(0, len(words), k):
-        # Segment boundaries
-        segment_start = start
-        segment_end = end + k
-        
-        # Adjust segment_end if it exceeds the list length
-        if segment_end > len(words):
-            segment_end = len(words)
-        
-        # Reverse the current segment and add it to the result
-        reversed_segment = words[start:end]
-        reversed_segment.reverse()
-        
-        # Extend the result list with the reversed segment(s)
-        if segment_start < segment_end:
-            reversed_segments.extend(words[start:end])
-        else:
-            reversed_segments.append(words[start:end])
-        
-        # Move to the next set of k words
-        start = segment_end
-    
-    return ' '.join(reversed_segments)
+graph = {
+    1: [2, 3],
+    2: [4, 5],
+    3: [6],
+    4: [],
+    5: [],
+    6: []
+}
 
-# Example usage:
-print(reverse_words_in_string("abcdefg", 3)) # Output: "cba fedg"
-print(reverse_words_in_string("abcdefg", 6)) # Output: "gfedcba"
+# Valid DAG with no cycles
+print(topological_sort(graph))  # [1, 2, 3, 4, 5, 6]
+
+# DAG with a cycle
+graph_cycle = {
+    1: [2],
+    2: [3],
+    3: [1]  # Cycle: 1 -> 2 -> 3 -> 1
+}
+
+# Detects cycle and returns empty list
+print(topological_sort(graph_cycle))  # []
 ```
 
-### Analysis
+**Constraints:**
+- The graph is represented as an adjacency list.
+- The function should handle both valid DAGs and DAGs with cycles.
+- The function should return a list of nodes in a valid topological order if no cycle is detected; otherwise, return an empty list.
 
-1. **Time Complexity:** The time complexity is primarily determined by the splitting of the string into words and then reversing each segment. The `split()` method splits the string into a list of words, which takes O(n) time where n is the number of words. The `join()` method concatenates these segments back together, also taking O(n) time. However, since we are iterating over segments of `k` words and reversing each segment, the overall time complexity remains O(n).
+### Optimal Solution
 
-2. **Space Complexity:** The space complexity is O(n) because we need to store the reversed segments in lists before joining them back together.
+#### Detailed Explanation
 
-### Why This Approach is Optimal
+To solve this problem efficiently, we will use a combination of depth-first search (DFS) and topological sorting techniques.
 
-This approach is efficient because it avoids unnecessary allocations and manipulations. It directly segments the string into parts of `k` words and reverses each segment without scanning the entire string multiple times. This makes it efficient in terms of both time and space complexity.
+1. **Initialization:**
+   - Create a set to keep track of visited nodes (`visited`) and a set to keep track of nodes that are currently being visited (`current_path`).
+   - Initialize an empty list to store the result of the topological sort (`result`). If a cycle is detected, return an empty list.
 
-### Trade-offs
+2. **DFS Traversal:**
+   - Perform a DFS traversal on each unvisited node in the graph.
+   - During the traversal, mark each node as visited and add it to the `current_path`.
+   - If we encounter a node that is already in the `current_path`, it means we have detected a cycle.
 
-There are no significant trade-offs between time and space complexity in this approach. The algorithm's correctness depends on ensuring that each segment of `k` words is properly reversed and then concatenated back together without any additional characters or segments being added unnecessarily. 
+3. **Topological Sorting:**
+   - Once we finish traversing all nodes without detecting any cycles, we can perform the topological sort by adding visited nodes to the result list in reverse order of their finish times.
 
-This problem would be rated a difficulty level of 4 because it requires careful handling of string manipulation while ensuring that all segments are correctly reversed and concatenated. It involves understanding how to segment a string into parts based on a given parameter (`k`) and then reversing those segments.
+#### Implementation
+
+```python
+from collections import defaultdict
+
+def topological_sort(graph):
+    # Initialize sets and list
+    visited = set()
+    current_path = set()
+    result = []
+
+    def dfs(node):
+        # Mark node as visited and add it to current path
+        visited.add(node)
+        current_path.add(node)
+
+        # Traverse neighbors
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                dfs(neighbor)
+            elif neighbor in current_path:
+                return False  # Cycle detected
+
+        # Remove node from current path after visiting all its neighbors
+        current_path.remove(node)
+        result.append(node)
+
+    # Traverse all nodes in graph
+    for node in graph:
+        if node not in visited:
+            if not dfs(node):
+                return []
+
+    return result[::-1]  # Return result in reverse order
+
+# Example usage:
+graph_valid = {
+    1: [2, 3],
+    2: [4, 5],
+    3: [6],
+    4: [],
+    5: [],
+    6: []
+}
+
+print(topological_sort(graph_valid))  # [6, 5, 4, 3, 2, 1]
+
+graph_cycle = {
+    1: [2],
+    2: [3],
+    3: [1]  
+}
+
+print(topological_sort(graph_cycle))  # []
+```
+
+### Complexity Analysis
+
+- **Time Complexity:** O(V + E)
+  - Each node and edge in the graph is visited at most once during the DFS traversal.
+  - The time complexity of DFS is linear with respect to the number of nodes and edges (O(V + E)).
+
+- **Space Complexity:** O(V)
+  - The maximum number of nodes in the `current_path` and `visited` sets is equal to the number of nodes in the graph (O(V)).
+
+### Difficulty Rating
+This challenge is moderately difficult because it requires understanding how to detect cycles using DFS and then performing a valid topological sort on the remaining nodes. The solution is straightforward once you understand these concepts, but implementing it correctly requires attention to detail.
