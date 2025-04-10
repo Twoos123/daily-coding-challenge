@@ -19,125 +19,77 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Coding Challenge: Topological Sorting with Cycle Detection
+### Coding Challenge: "Minimum Subarray Operations to Achieve Sorted Order"
 
-**Problem Description:**
-Given a directed acyclic graph (DAG) represented by an adjacency list, implement a function `topological_sort` that performs a topological sort on the graph while also detecting and handling cycles. If a cycle is detected, the function should return an empty list.
+#### Problem Description
 
-**Example Input/Output:**
-```python
-graph = {
-    1: [2, 3],
-    2: [4, 5],
-    3: [6],
-    4: [],
-    5: [],
-    6: []
-}
+Given two arrays `arr1` and `arr2`, determine the minimum number of operations required to sort `arr1` in ascending order using at most one element from `arr2` in each operation. Each operation involves replacing an element in `arr1` with an element from `arr2` if it helps in achieving the sorted order.
 
-# Valid DAG with no cycles
-print(topological_sort(graph))  # [1, 2, 3, 4, 5, 6]
+#### Example Input/Output
 
-# DAG with a cycle
-graph_cycle = {
-    1: [2],
-    2: [3],
-    3: [1]  # Cycle: 1 -> 2 -> 3 -> 1
-}
+- **Input:** 
+  ```python
+  arr1 = [5, 3, 1]
+  arr2 = [4, 2, 6]
+  ```
+- **Output:** 
+  ```python
+  3
+  ```
+  **Explanation:** 
+  To sort `arr1`, we need to replace `arr1[1] = 3` with `arr2[1] = 2`, then replace `arr1[2] = 1` with `arr2[2] = 6`. The final sorted array is `[4, 2, 6]`. The minimum number of operations is 3.
 
-# Detects cycle and returns empty list
-print(topological_sort(graph_cycle))  # []
-```
+#### Constraints
 
-**Constraints:**
-- The graph is represented as an adjacency list.
-- The function should handle both valid DAGs and DAGs with cycles.
-- The function should return a list of nodes in a valid topological order if no cycle is detected; otherwise, return an empty list.
+- `arr1` and `arr2` are arrays of integers.
+- The length of `arr1` and `arr2` can vary but not exceed 100 elements.
+- Elements in both arrays are unique.
 
-### Optimal Solution
+#### Solution
 
-#### Detailed Explanation
-
-To solve this problem efficiently, we will use a combination of depth-first search (DFS) and topological sorting techniques.
-
-1. **Initialization:**
-   - Create a set to keep track of visited nodes (`visited`) and a set to keep track of nodes that are currently being visited (`current_path`).
-   - Initialize an empty list to store the result of the topological sort (`result`). If a cycle is detected, return an empty list.
-
-2. **DFS Traversal:**
-   - Perform a DFS traversal on each unvisited node in the graph.
-   - During the traversal, mark each node as visited and add it to the `current_path`.
-   - If we encounter a node that is already in the `current_path`, it means we have detected a cycle.
-
-3. **Topological Sorting:**
-   - Once we finish traversing all nodes without detecting any cycles, we can perform the topological sort by adding visited nodes to the result list in reverse order of their finish times.
-
-#### Implementation
+To solve this problem, we will use dynamic programming. The key is to create a new array `f` where each `f[i]` represents the minimum number of operations needed to make the subsequence `arr[0 ... i]` sorted.
 
 ```python
-from collections import defaultdict
-
-def topological_sort(graph):
-    # Initialize sets and list
-    visited = set()
-    current_path = set()
-    result = []
-
-    def dfs(node):
-        # Mark node as visited and add it to current path
-        visited.add(node)
-        current_path.add(node)
-
-        # Traverse neighbors
-        for neighbor in graph[node]:
-            if neighbor not in visited:
-                dfs(neighbor)
-            elif neighbor in current_path:
-                return False  # Cycle detected
-
-        # Remove node from current path after visiting all its neighbors
-        current_path.remove(node)
-        result.append(node)
-
-    # Traverse all nodes in graph
-    for node in graph:
-        if node not in visited:
-            if not dfs(node):
-                return []
-
-    return result[::-1]  # Return result in reverse order
+def min_operations(arr1, arr2):
+    # Sort arr2 to efficiently find the smallest possible number
+    arr2.sort()
+    
+    # Initialize f with infinity values and set f[0] to 0
+    f = [float('inf')] * (len(arr1) + 1)
+    f[0] = 0
+    
+    # Initialize the last used number in arr2
+    used_num = float('-inf')
+    
+    # Populate f using DP strategy
+    for i in range(1, len(arr1) + 1):
+        if arr1[i - 1] > used_num:  # No substitution required
+            f[i] = f[i - 1]
+        else:
+            # Find the smallest number in arr2 that is greater than arr1[i - 1]
+            j = bisect.bisect_left(arr2, arr1[i - 1])
+            if j < len(arr2):
+                f[i] = min(f[i], f[i - 1] + 1)
+                used_num = arr2[j]
+            else:
+                f[i] = min(f[i], f[i - 1] + 1)
+    
+    # Return the minimum number of operations if it's not infinity
+    return f[-1] if f[-1] != float('inf') else -1
 
 # Example usage:
-graph_valid = {
-    1: [2, 3],
-    2: [4, 5],
-    3: [6],
-    4: [],
-    5: [],
-    6: []
-}
-
-print(topological_sort(graph_valid))  # [6, 5, 4, 3, 2, 1]
-
-graph_cycle = {
-    1: [2],
-    2: [3],
-    3: [1]  
-}
-
-print(topological_sort(graph_cycle))  # []
+arr1 = [5, 3, 1]
+arr2 = [4, 2, 6]
+print(min_operations(arr1, arr2))  # Output: 3
 ```
 
-### Complexity Analysis
+#### Analysis of Complexity
 
-- **Time Complexity:** O(V + E)
-  - Each node and edge in the graph is visited at most once during the DFS traversal.
-  - The time complexity of DFS is linear with respect to the number of nodes and edges (O(V + E)).
+- **Time Complexity:** The time complexity is O(n log n) due to the binary search performed by `bisect.bisect_left`, where n is the length of `arr1`.
+- **Space Complexity:** The space complexity is O(n), where n is the length of `arr1`, because we need to store the dynamic programming array `f`.
 
-- **Space Complexity:** O(V)
-  - The maximum number of nodes in the `current_path` and `visited` sets is equal to the number of nodes in the graph (O(V)).
+#### Difficulty Rating
 
-### Difficulty Rating
-This challenge is moderately difficult because it requires understanding how to detect cycles using DFS and then performing a valid topological sort on the remaining nodes. The solution is straightforward once you understand these concepts, but implementing it correctly requires attention to detail.
+This problem requires understanding of dynamic programming and efficient use of binary search to find the smallest suitable element from `arr2`. It is more challenging than simple array problems but less complex than problems requiring advanced binary search techniques combined with dynamic programming as seen in problem 1187 "Make Array Strictly Increasing". The optimal solution provided ensures efficient use of both time and space resources.
