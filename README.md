@@ -19,77 +19,74 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Minimum Subarray Operations to Achieve Sorted Order"
+### Problem Description
+**Matrix Operations Challenge: Non-Overlapping Sub-Matrices**
 
-#### Problem Description
+Given a 2D matrix `matrix` of size `m x n`, where each element is a positive integer, find the number of non-overlapping sub-matrices within `matrix` such that each sub-matrix is a square with side length `k` (where `k` is a given integer).
 
-Given two arrays `arr1` and `arr2`, determine the minimum number of operations required to sort `arr1` in ascending order using at most one element from `arr2` in each operation. Each operation involves replacing an element in `arr1` with an element from `arr2` if it helps in achieving the sorted order.
+### Example Input/Output
 
-#### Example Input/Output
-
-- **Input:** 
-  ```python
-  arr1 = [5, 3, 1]
-  arr2 = [4, 2, 6]
-  ```
-- **Output:** 
-  ```python
-  3
-  ```
-  **Explanation:** 
-  To sort `arr1`, we need to replace `arr1[1] = 3` with `arr2[1] = 2`, then replace `arr1[2] = 1` with `arr2[2] = 6`. The final sorted array is `[4, 2, 6]`. The minimum number of operations is 3.
-
-#### Constraints
-
-- `arr1` and `arr2` are arrays of integers.
-- The length of `arr1` and `arr2` can vary but not exceed 100 elements.
-- Elements in both arrays are unique.
-
-#### Solution
-
-To solve this problem, we will use dynamic programming. The key is to create a new array `f` where each `f[i]` represents the minimum number of operations needed to make the subsequence `arr[0 ... i]` sorted.
-
+**Input:**
 ```python
-def min_operations(arr1, arr2):
-    # Sort arr2 to efficiently find the smallest possible number
-    arr2.sort()
-    
-    # Initialize f with infinity values and set f[0] to 0
-    f = [float('inf')] * (len(arr1) + 1)
-    f[0] = 0
-    
-    # Initialize the last used number in arr2
-    used_num = float('-inf')
-    
-    # Populate f using DP strategy
-    for i in range(1, len(arr1) + 1):
-        if arr1[i - 1] > used_num:  # No substitution required
-            f[i] = f[i - 1]
-        else:
-            # Find the smallest number in arr2 that is greater than arr1[i - 1]
-            j = bisect.bisect_left(arr2, arr1[i - 1])
-            if j < len(arr2):
-                f[i] = min(f[i], f[i - 1] + 1)
-                used_num = arr2[j]
-            else:
-                f[i] = min(f[i], f[i - 1] + 1)
-    
-    # Return the minimum number of operations if it's not infinity
-    return f[-1] if f[-1] != float('inf') else -1
-
-# Example usage:
-arr1 = [5, 3, 1]
-arr2 = [4, 2, 6]
-print(min_operations(arr1, arr2))  # Output: 3
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+k = 2
+```
+**Output:**
+```python
+Number of non-overlapping sub-matrices: 6
 ```
 
-#### Analysis of Complexity
+### Constraints
+- The matrix `matrix` is a 2D list of integers.
+- The side length `k` of the sub-matrices is a positive integer.
+- All sub-matrices must be non-overlapping.
 
-- **Time Complexity:** The time complexity is O(n log n) due to the binary search performed by `bisect.bisect_left`, where n is the length of `arr1`.
-- **Space Complexity:** The space complexity is O(n), where n is the length of `arr1`, because we need to store the dynamic programming array `f`.
+### Solution in Python
 
-#### Difficulty Rating
+The optimal solution involves counting the number of possible starting positions for a sub-matrix of size `k x k` and then summing these counts. Since each sub-matrix can start at any position where its top-left corner aligns with the top-left corner of the original matrix, we need to consider all such positions.
 
-This problem requires understanding of dynamic programming and efficient use of binary search to find the smallest suitable element from `arr2`. It is more challenging than simple array problems but less complex than problems requiring advanced binary search techniques combined with dynamic programming as seen in problem 1187 "Make Array Strictly Increasing". The optimal solution provided ensures efficient use of both time and space resources.
+```python
+def countSubmatrices(matrix, k):
+    m, n = len(matrix), len(matrix[0])
+    count = 0
+    
+    # Check rows for valid starting positions
+    for i in range(m):
+        # Check columns for valid starting positions
+        for j in range(n):
+            # Validate if a sub-matrix of size k x k can be formed starting at position (i, j)
+            if i + k <= m and j + k <= n:
+                count += 1
+                
+    return count
+
+# Example usage:
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+k = 2
+print(countSubmatrices(matrix, k))  # Output: 6
+```
+
+### Analysis
+
+#### Time Complexity:
+The time complexity is O(m*n), where m and n are the dimensions of the matrix. This is because we iterate through each cell in the matrix once.
+
+#### Space Complexity:
+The space complexity is O(1), as we only use a constant amount of space to store variables like `count`.
+
+This solution is optimal because it directly counts the number of valid starting positions for sub-matrices without needing additional data structures or complex algorithms.
+
+### Difficulty Rating:
+DIFFICULTY: 3
+
+This problem requires basic understanding of matrix operations and simple counting logic. However, it does involve careful consideration of valid starting positions for sub-matrices within a given matrix structure, which adds a slight complexity level compared to simpler matrix-related problems.
