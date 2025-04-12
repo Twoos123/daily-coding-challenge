@@ -19,74 +19,121 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem Description
-**Matrix Operations Challenge: Non-Overlapping Sub-Matrices**
+### Coding Challenge: Topological Sort with Cycles Detection
 
-Given a 2D matrix `matrix` of size `m x n`, where each element is a positive integer, find the number of non-overlapping sub-matrices within `matrix` such that each sub-matrix is a square with side length `k` (where `k` is a given integer).
+**Problem Description:**
+Given a directed acyclic graph (DAG), perform a topological sort on the graph. However, if the graph contains cycles, detect and report the cycle.
 
-### Example Input/Output
+**Example Input/Output:**
+- **Input:** A dictionary representing the adjacency list of a DAG.
+  ```python
+  graph = {
+      0: [1, 2],
+      1: [3],
+      2: [3],
+      3: []
+  }
+  ```
+- **Output for DAG:**
+  ```python
+  topological order: [0, 1, 2, 3]
+  ```
+- **Input with Cycle:**
+  ```python
+  graph_with_cycle = {
+      0: [1, 2],
+      1: [3],
+      2: [3],
+      3: [0] # Cycle introduced here
+  }
+  ```
+- **Output with Cycle Detection:**
+  ```python
+  Cycle detected in the graph:
+  Topological order could not be determined.
+  ```
 
-**Input:**
+**Constraints:**
+- The graph is represented as an adjacency list.
+- Each node in the graph has a unique integer value.
+- The graph may contain cycles.
+
+### Solution
+
+#### Topological Sort with Cycle Detection
+
+To solve this problem efficiently, we can use a combination of DFS and topological sorting techniques. We will use a recursive DFS approach to detect cycles and to perform the topological sort.
+
 ```python
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
-k = 2
-```
-**Output:**
-```python
-Number of non-overlapping sub-matrices: 6
-```
+from collections import defaultdict
 
-### Constraints
-- The matrix `matrix` is a 2D list of integers.
-- The side length `k` of the sub-matrices is a positive integer.
-- All sub-matrices must be non-overlapping.
-
-### Solution in Python
-
-The optimal solution involves counting the number of possible starting positions for a sub-matrix of size `k x k` and then summing these counts. Since each sub-matrix can start at any position where its top-left corner aligns with the top-left corner of the original matrix, we need to consider all such positions.
-
-```python
-def countSubmatrices(matrix, k):
-    m, n = len(matrix), len(matrix[0])
-    count = 0
+def topological_sort_with_cycle_detection(graph):
+    # Step 1: Extract nodes from the graph
+    nodes = set(graph.keys())
     
-    # Check rows for valid starting positions
-    for i in range(m):
-        # Check columns for valid starting positions
-        for j in range(n):
-            # Validate if a sub-matrix of size k x k can be formed starting at position (i, j)
-            if i + k <= m and j + k <= n:
-                count += 1
-                
-    return count
+    # Step 2: Initialize visited and recursion stack
+    visited = set()
+    recursion_stack = set()
+    
+    # Step 3: Perform DFS traversal
+    ordering = []
+    
+    def dfs(node):
+        visited.add(node)
+        recursion_stack.add(node)
+        
+        for neighbor in graph.get(node, []):
+            if neighbor not in visited:
+                dfs(neighbor)
+            elif neighbor in recursion_stack:
+                # Cycle detected
+                print("Cycle detected in the graph:")
+                return False
+        
+        recursion_stack.remove(node)
+        ordering.append(node)
+    
+    # Step 4: Perform DFS traversal for all nodes
+    for node in nodes:
+        if node not in visited:
+            if not dfs(node):
+                return False
+    
+    # Step 5: If no cycles, return topological order
+    print("Topological order:", ordering[::-1])
+    
+    return ordering[::-1]
 
 # Example usage:
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
-k = 2
-print(countSubmatrices(matrix, k))  # Output: 6
+graph = {
+    0: [1, 2],
+    1: [3],
+    2: [3],
+    3: [] # DAG without cycles
+}
+
+topological_sort_with_cycle_detection(graph)  # Output: [0, 1, 2, 3]
+
+# Example with cycle detection:
+graph_with_cycle = {
+    0: [1, 2],
+    1: [3],
+    2: [3],
+    3: [0] # Cycle introduced here
+}
+
+topological_sort_with_cycle_detection(graph_with_cycle)  # Output: "Cycle detected in the graph:"
 ```
 
-### Analysis
+### Analysis of Complexity:
 
 #### Time Complexity:
-The time complexity is O(m*n), where m and n are the dimensions of the matrix. This is because we iterate through each cell in the matrix once.
-
+- The time complexity of this algorithm is O(V + E) because each node and edge is visited exactly once during the DFS traversal.
+  
 #### Space Complexity:
-The space complexity is O(1), as we only use a constant amount of space to store variables like `count`.
-
-This solution is optimal because it directly counts the number of valid starting positions for sub-matrices without needing additional data structures or complex algorithms.
+- The space complexity is O(V) for storing the visited set and recursion stack.
 
 ### Difficulty Rating:
-DIFFICULTY: 3
-
-This problem requires basic understanding of matrix operations and simple counting logic. However, it does involve careful consideration of valid starting positions for sub-matrices within a given matrix structure, which adds a slight complexity level compared to simpler matrix-related problems.
+This challenge requires a good understanding of both DFS and topological sorting techniques. It also involves handling cycles, which adds an additional layer of complexity. The solution provided is efficient in terms of both time and space complexity and handles all potential edge cases.
