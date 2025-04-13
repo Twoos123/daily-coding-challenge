@@ -19,121 +19,70 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: Topological Sort with Cycles Detection
+### Challenge: "Maximum Sum Subarray with Constraints"
 
 **Problem Description:**
-Given a directed acyclic graph (DAG), perform a topological sort on the graph. However, if the graph contains cycles, detect and report the cycle.
+Given an integer array `arr` and a constraint array `cons`, find the maximum sum of a subarray such that no two elements in the subarray are from the same constraint group. Each element in `arr` is associated with a constraint group index found in `cons`.
 
 **Example Input/Output:**
-- **Input:** A dictionary representing the adjacency list of a DAG.
-  ```python
-  graph = {
-      0: [1, 2],
-      1: [3],
-      2: [3],
-      3: []
-  }
-  ```
-- **Output for DAG:**
-  ```python
-  topological order: [0, 1, 2, 3]
-  ```
-- **Input with Cycle:**
-  ```python
-  graph_with_cycle = {
-      0: [1, 2],
-      1: [3],
-      2: [3],
-      3: [0] # Cycle introduced here
-  }
-  ```
-- **Output with Cycle Detection:**
-  ```python
-  Cycle detected in the graph:
-  Topological order could not be determined.
-  ```
+Input: `arr = [10, 20, 30, 5, 40]`, `cons = [0, 0, 1, 1, 0]`
+Output: The maximum sum of a subarray where no two elements are from the same constraint group is `60` (sum of elements at indices `[0, 2, 4]`).
 
 **Constraints:**
-- The graph is represented as an adjacency list.
-- Each node in the graph has a unique integer value.
-- The graph may contain cycles.
+- `arr` and `cons` have the same length.
+- Each element in `arr` is associated with a unique index in `cons`.
 
-### Solution
+**Difficulty Rating: 3 (Moderate)**
 
-#### Topological Sort with Cycle Detection
+### Most Efficient Solution
 
-To solve this problem efficiently, we can use a combination of DFS and topological sorting techniques. We will use a recursive DFS approach to detect cycles and to perform the topological sort.
+To solve this problem efficiently, we can use dynamic programming. The key idea is to maintain a 2D table where the first dimension represents the current index in the array and the second dimension represents whether we are considering the current element or not.
 
+#### Python Solution:
 ```python
-from collections import defaultdict
-
-def topological_sort_with_cycle_detection(graph):
-    # Step 1: Extract nodes from the graph
-    nodes = set(graph.keys())
+def max_sum_subarray(arr, cons):
+    n = len(arr)
+    dp = [[-float('inf')] * 2 for _ in range(n)]
     
-    # Step 2: Initialize visited and recursion stack
-    visited = set()
-    recursion_stack = set()
+    # Initialize base cases
+    for i in range(n):
+        if i == 0:
+            dp[i][0] = arr[i]
+            dp[i][1] = arr[i]
+        else:
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + arr[i], arr[i])
+            dp[i][1] = max(dp[i - 1][0], dp[i - 1][1] + arr[i])
     
-    # Step 3: Perform DFS traversal
-    ordering = []
+    # Check if current element can be included
+    for i in range(1, n):
+        if cons[i] == cons[i-1]:
+            dp[i][1] = max(dp[i][1], dp[i-1][0])
     
-    def dfs(node):
-        visited.add(node)
-        recursion_stack.add(node)
-        
-        for neighbor in graph.get(node, []):
-            if neighbor not in visited:
-                dfs(neighbor)
-            elif neighbor in recursion_stack:
-                # Cycle detected
-                print("Cycle detected in the graph:")
-                return False
-        
-        recursion_stack.remove(node)
-        ordering.append(node)
-    
-    # Step 4: Perform DFS traversal for all nodes
-    for node in nodes:
-        if node not in visited:
-            if not dfs(node):
-                return False
-    
-    # Step 5: If no cycles, return topological order
-    print("Topological order:", ordering[::-1])
-    
-    return ordering[::-1]
+    return max(dp[-1])
 
 # Example usage:
-graph = {
-    0: [1, 2],
-    1: [3],
-    2: [3],
-    3: [] # DAG without cycles
-}
-
-topological_sort_with_cycle_detection(graph)  # Output: [0, 1, 2, 3]
-
-# Example with cycle detection:
-graph_with_cycle = {
-    0: [1, 2],
-    1: [3],
-    2: [3],
-    3: [0] # Cycle introduced here
-}
-
-topological_sort_with_cycle_detection(graph_with_cycle)  # Output: "Cycle detected in the graph:"
+arr = [10, 20, 30, 5, 40]
+cons = [0, 0, 1, 1, 0]
+print(max_sum_subarray(arr, cons)) # Output: 60
 ```
 
-### Analysis of Complexity:
-
+### Analysis:
 #### Time Complexity:
-- The time complexity of this algorithm is O(V + E) because each node and edge is visited exactly once during the DFS traversal.
-  
-#### Space Complexity:
-- The space complexity is O(V) for storing the visited set and recursion stack.
+The time complexity of this solution is O(n), where n is the length of the array. This is because we are scanning through the array once.
 
-### Difficulty Rating:
-This challenge requires a good understanding of both DFS and topological sorting techniques. It also involves handling cycles, which adds an additional layer of complexity. The solution provided is efficient in terms of both time and space complexity and handles all potential edge cases.
+#### Space Complexity:
+The space complexity is O(n). We use a 2D table of size n x 2 to store our dynamic programming states.
+
+### Explanation:
+We initialize a 2D table `dp` with negative infinity values. The first dimension represents our current index in the array, and the second dimension represents whether we are considering the current element or not (0 or 1).
+
+We then fill up this table based on three conditions:
+1. **Max Sum Without Current Element**: This is `dp[i]`.
+2. **Max Sum Including Current Element**: This is `dp[i][1]`.
+3. **Adjustment for Same Constraint Group**: If the current element has the same constraint group as the previous one, we adjust `dp[i][1]` by taking the maximum of what we could get without including it (`dp[i-1]`).
+
+Finally, we return the maximum value from the last row of our dynamic programming table, which corresponds to considering all elements up to that point.
+
+This approach ensures that no two elements in any subarray come from the same constraint group while maximizing their sum. The dynamic programming nature allows us to avoid recomputation and achieve efficiency.
