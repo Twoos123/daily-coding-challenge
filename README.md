@@ -21,68 +21,88 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: "Maximum Sum Subarray with Constraints"
+### Problem Description
 
-**Problem Description:**
-Given an integer array `arr` and a constraint array `cons`, find the maximum sum of a subarray such that no two elements in the subarray are from the same constraint group. Each element in `arr` is associated with a constraint group index found in `cons`.
+**Challenge: "Delete Consecutive Duplicates in a Linked List"**
 
-**Example Input/Output:**
-Input: `arr = [10, 20, 30, 5, 40]`, `cons = [0, 0, 1, 1, 0]`
-Output: The maximum sum of a subarray where no two elements are from the same constraint group is `60` (sum of elements at indices `[0, 2, 4]`).
+Given a singly-linked list, delete all consecutive duplicate nodes. If a sequence of identical nodes is found, remove all of them, leaving only the first occurrence of each node.
 
-**Constraints:**
-- `arr` and `cons` have the same length.
-- Each element in `arr` is associated with a unique index in `cons`.
+### Example Input/Output
 
-**Difficulty Rating: 3 (Moderate)**
+**Input List:** `1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4`
+**Output List:** `1 -> 2 -> 3 -> 4`
 
-### Most Efficient Solution
+### Constraints
 
-To solve this problem efficiently, we can use dynamic programming. The key idea is to maintain a 2D table where the first dimension represents the current index in the array and the second dimension represents whether we are considering the current element or not.
+- The linked list can be empty.
+- The input list can contain cycles, but this problem assumes no cycles.
+- The solution must be implemented in a single pass through the list.
 
-#### Python Solution:
+### Difficulty Rating
+
+****
+
+This problem requires managing a pointer to keep track of the previous node and handling cases where there are no duplicates or non-consecutive duplicates. It is moderately challenging because it involves updating the list in-place without creating additional space, which is a common requirement in linked list problems.
+
+### Optimal Solution in Python
+
 ```python
-def max_sum_subarray(arr, cons):
-    n = len(arr)
-    dp = [[-float('inf')] * 2 for _ in range(n)]
-    
-    # Initialize base cases
-    for i in range(n):
-        if i == 0:
-            dp[i][0] = arr[i]
-            dp[i][1] = arr[i]
-        else:
-            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + arr[i], arr[i])
-            dp[i][1] = max(dp[i - 1][0], dp[i - 1][1] + arr[i])
-    
-    # Check if current element can be included
-    for i in range(1, n):
-        if cons[i] == cons[i-1]:
-            dp[i][1] = max(dp[i][1], dp[i-1][0])
-    
-    return max(dp[-1])
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
-# Example usage:
-arr = [10, 20, 30, 5, 40]
-cons = [0, 0, 1, 1, 0]
-print(max_sum_subarray(arr, cons)) # Output: 60
+def delete_consecutive_duplicates(head):
+    if not head or not head.next:
+        return head
+    
+    dummy = ListNode(0)
+    dummy.next = head
+    current = dummy
+    
+    while current.next and current.next.next:
+        if current.next.val == current.next.next.val:
+            temp = current.next
+            # Skip over all consecutive duplicates by updating next pointers
+            while temp and temp.next and temp.val == temp.next.val:
+                temp = temp.next
+            # Update dummy pointers to skip over all consecutive duplicates
+            current.next = temp.next if temp else None
+        else:
+            # Move to the next unique node if no duplicates are found
+            current = current.next
+    
+    return dummy.next
 ```
 
-### Analysis:
-#### Time Complexity:
-The time complexity of this solution is O(n), where n is the length of the array. This is because we are scanning through the array once.
+### Detailed Explanation of the Algorithm
 
-#### Space Complexity:
-The space complexity is O(n). We use a 2D table of size n x 2 to store our dynamic programming states.
+1. **Handle Edge Cases:**
+   - If the input list is empty or only contains one node, return the head as it is.
+   
+2. **Create a Dummy Node:**
+   - A dummy node is created to simplify handling edge cases at the beginning of the list.
 
-### Explanation:
-We initialize a 2D table `dp` with negative infinity values. The first dimension represents our current index in the array, and the second dimension represents whether we are considering the current element or not (0 or 1).
+3. **Initialize Current Pointer:**
+   - The current pointer (`dummy`) points to the dummy node and then moves to the head of the list.
 
-We then fill up this table based on three conditions:
-1. **Max Sum Without Current Element**: This is `dp[i]`.
-2. **Max Sum Including Current Element**: This is `dp[i][1]`.
-3. **Adjustment for Same Constraint Group**: If the current element has the same constraint group as the previous one, we adjust `dp[i][1]` by taking the maximum of what we could get without including it (`dp[i-1]`).
+4. **Traversal Loop:**
+   - The while loop ensures that we check for at least two nodes ahead.
+   - Check if the next two nodes have the same value. If they do, mark them as duplicates by updating pointers accordingly.
 
-Finally, we return the maximum value from the last row of our dynamic programming table, which corresponds to considering all elements up to that point.
+5. **Skipping Consecutive Duplicates:**
+   - If duplicates are found, traverse through them by updating `temp` until a non-duplicate node or end of list is reached.
+   - Update `current.next` to skip over all consecutive duplicates.
 
-This approach ensures that no two elements in any subarray come from the same constraint group while maximizing their sum. The dynamic programming nature allows us to avoid recomputation and achieve efficiency.
+6. **Move to Next Unique Node:**
+   - If no duplicates are found, simply move `current` to the next unique node.
+
+7. **Return Result:**
+   - After traversing the entire list, return `dummy.next`, which points to the modified head of the list.
+
+### Time and Space Complexity Analysis
+
+- **Time Complexity:** O(n), where n is the number of nodes in the linked list. This is because we make a single pass through the list.
+- **Space Complexity:** O(1), since we only use a constant amount of space to store pointers and do not create any additional data structures that scale with input size.
+
+This approach ensures that we handle all edge cases efficiently and modify the list in-place without requiring additional space beyond what is needed for pointers, making it both time and space efficient.
