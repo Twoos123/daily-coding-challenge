@@ -23,86 +23,118 @@ Difficulty: ⭐⭐⭐ (3/5)
 
 ### Problem Description
 
-**Challenge: "Delete Consecutive Duplicates in a Linked List"**
+**Challenge: Prefix Tree Queries**
 
-Given a singly-linked list, delete all consecutive duplicate nodes. If a sequence of identical nodes is found, remove all of them, leaving only the first occurrence of each node.
+You are given a Trie data structure and a set of operations related to prefix queries. Your task is to implement a Trie class that supports the following operations:
+
+1. **Insert** a word into the Trie.
+2. **Count Words Equal To** a given word, which returns the number of instances of the given word in the Trie.
+3. **Count Words Starting With** a given prefix, which returns the number of strings in the Trie that have the given prefix as a prefix.
+4. **Erase** a word from the Trie.
+
+Your implementation should ensure that these operations are efficient, especially for large datasets.
 
 ### Example Input/Output
 
-**Input List:** `1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4`
-**Output List:** `1 -> 2 -> 3 -> 4`
+- **Insert**: `trie.insert("apple")`
+- **Count Words Equal To**: `trie.countWordsEqualTo("apple")` returns `1`
+- **Count Words Starting With**: `trie.countWordsStartingWith("app")` returns `2`
+- **Erase**: `trie.erase("apple")`
+- **Count Words Equal To**: `trie.countWordsEqualTo("apple")` returns `0`
 
 ### Constraints
 
-- The linked list can be empty.
-- The input list can contain cycles, but this problem assumes no cycles.
-- The solution must be implemented in a single pass through the list.
+- The words and prefixes consist only of lowercase English letters.
+- The maximum length of a word or prefix is 2000 characters.
+- At most 3 * 10^4 calls will be made to `insert`, `search`, and `startsWith`.
 
-### Difficulty Rating
+### Most Efficient Solution
 
-****
-
-This problem requires managing a pointer to keep track of the previous node and handling cases where there are no duplicates or non-consecutive duplicates. It is moderately challenging because it involves updating the list in-place without creating additional space, which is a common requirement in linked list problems.
-
-### Optimal Solution in Python
+Here is the most efficient solution in Python:
 
 ```python
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
+class TrieNode:
+    def __init__(self):
+        self.children = [None] * 26  # Children nodes for a-z
+        self.count = 0  # Number of words ending at this node
 
-def delete_consecutive_duplicates(head):
-    if not head or not head.next:
-        return head
-    
-    dummy = ListNode(0)
-    dummy.next = head
-    current = dummy
-    
-    while current.next and current.next.next:
-        if current.next.val == current.next.next.val:
-            temp = current.next
-            # Skip over all consecutive duplicates by updating next pointers
-            while temp and temp.next and temp.val == temp.next.val:
-                temp = temp.next
-            # Update dummy pointers to skip over all consecutive duplicates
-            current.next = temp.next if temp else None
-        else:
-            # Move to the next unique node if no duplicates are found
-            current = current.next
-    
-    return dummy.next
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def _char_to_index(self, char):
+        return ord(char) - ord('a')  # Convert char to index (0-25)
+
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            index = self._char_to_index(char)
+            if not node.children[index]:
+                node.children[index] = TrieNode()
+            node = node.children[index]
+            node.count += 1
+
+    def countWordsEqualTo(self, word):
+        node = self.root
+        for char in word:
+            index = self._char_to_index(char)
+            if not node.children[index]:
+                return 0
+            node = node.children[index]
+        return node.count
+
+    def countWordsStartingWith(self, prefix):
+        node = self.root
+        for char in prefix:
+            index = self._char_to_index(char)
+            if not node.children[index]:
+                return 0
+            node = node.children[index]
+        return self._dfs(node, prefix)
+
+    def erase(self, word):
+        self._erase(word, self.root)
+
+    def _erase(self, word, node):
+        if not node:
+            return False
+        if not word:
+            node.count -= 1
+            return node.count > 0 and any(child.count > 0 for child in node.children)
+        
+        index = self._char_to_index(word[0])
+        if self._erase(word[1:], node.children[index]):
+            node.children[index] = None
+            return True
+        
+        return False
+
+    def _dfs(self, node, prefix):
+        count = 0
+        for child in node.children:
+            if child:
+                count += self._dfs(child, prefix)
+        
+        return count + (node.count if node.count > 0 else 0)
+
 ```
 
-### Detailed Explanation of the Algorithm
+### Detailed Explanation
 
-1. **Handle Edge Cases:**
-   - If the input list is empty or only contains one node, return the head as it is.
-   
-2. **Create a Dummy Node:**
-   - A dummy node is created to simplify handling edge cases at the beginning of the list.
+**Time Complexity Analysis:**
 
-3. **Initialize Current Pointer:**
-   - The current pointer (`dummy`) points to the dummy node and then moves to the head of the list.
+- **Insert**: O(m), where m is the length of the word. This is because we traverse down the Trie once for each character in the word.
+- **Count Words Equal To**: O(m), as we traverse down the Trie once for each character in the word.
+- **Count Words Starting With**: O(m), as we traverse down the Trie once for each character in the prefix. The `_dfs` function recursively counts all words starting with the given prefix.
+- **Erase**: O(m), as we traverse down the Trie once for each character in the word.
 
-4. **Traversal Loop:**
-   - The while loop ensures that we check for at least two nodes ahead.
-   - Check if the next two nodes have the same value. If they do, mark them as duplicates by updating pointers accordingly.
+**Space Complexity Analysis:**
+The space complexity is O(n * m), where n is the number of nodes in the Trie and m is the average length of a word. However, in practice, it's closer to O(n) since each node only stores a reference to its children and a count.
 
-5. **Skipping Consecutive Duplicates:**
-   - If duplicates are found, traverse through them by updating `temp` until a non-duplicate node or end of list is reached.
-   - Update `current.next` to skip over all consecutive duplicates.
+### Why This Approach is Optimal
 
-6. **Move to Next Unique Node:**
-   - If no duplicates are found, simply move `current` to the next unique node.
+This approach is optimal because it uses a combination of efficient insertion and traversal techniques:
 
-7. **Return Result:**
-   - After traversing the entire list, return `dummy.next`, which points to the modified head of the list.
-
-### Time and Space Complexity Analysis
-
-- **Time Complexity:** O(n), where n is the number of nodes in the linked list. This is because we make a single pass through the list.
-- **Space Complexity:** O(1), since we only use a constant amount of space to store pointers and do not create any additional data structures that scale with input size.
-
-This approach ensures that we handle all edge cases efficiently and modify the list in-place without requiring additional space beyond what is needed for pointers, making it both time and space efficient.
+1. **Indexing**: Using an array of size 26 simplifies indexing since we only need to handle lowercase English letters.
+2. **Child Node Initialization**: Ensuring that child nodes are initialized only when necessary reduces unnecessary memory allocations.
+3. **Count Maintenance**: Updating node counts
