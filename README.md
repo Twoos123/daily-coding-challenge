@@ -21,120 +21,74 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Problem Description: Matrix Element Rotation
 
-**Challenge: Prefix Tree Queries**
+**Problem:**
+Given a 2D matrix `matrix` of size `n x m` where each element is a non-negative integer, rotate the elements in the matrix such that each element moves to a position that is one position counterclockwise from its original position. For example, if we have a 3x3 matrix:
+```plaintext
+1 2 3
+4 5 6
+7 8 9
+```
+The rotated matrix would be:
+```plaintext
+7 4 1
+8 5 2
+9 6 3
+```
+**Input/Output Example:**
+Input:
+```plaintext
+[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+```
+Output:
+```plaintext
+[[7, 4, 1], [8, 5, 2], [9, 6, 3]]
+```
+**Constraints:**
+- The matrix is a square matrix with dimensions `n x n`.
+- Each element in the matrix is a non-negative integer.
 
-You are given a Trie data structure and a set of operations related to prefix queries. Your task is to implement a Trie class that supports the following operations:
-
-1. **Insert** a word into the Trie.
-2. **Count Words Equal To** a given word, which returns the number of instances of the given word in the Trie.
-3. **Count Words Starting With** a given prefix, which returns the number of strings in the Trie that have the given prefix as a prefix.
-4. **Erase** a word from the Trie.
-
-Your implementation should ensure that these operations are efficient, especially for large datasets.
-
-### Example Input/Output
-
-- **Insert**: `trie.insert("apple")`
-- **Count Words Equal To**: `trie.countWordsEqualTo("apple")` returns `1`
-- **Count Words Starting With**: `trie.countWordsStartingWith("app")` returns `2`
-- **Erase**: `trie.erase("apple")`
-- **Count Words Equal To**: `trie.countWordsEqualTo("apple")` returns `0`
-
-### Constraints
-
-- The words and prefixes consist only of lowercase English letters.
-- The maximum length of a word or prefix is 2000 characters.
-- At most 3 * 10^4 calls will be made to `insert`, `search`, and `startsWith`.
-
-### Most Efficient Solution
-
-Here is the most efficient solution in Python:
+### Solution in Python
 
 ```python
-class TrieNode:
-    def __init__(self):
-        self.children = [None] * 26  # Children nodes for a-z
-        self.count = 0  # Number of words ending at this node
+def rotate_matrix(matrix):
+    n = len(matrix)
+    
+    # Transpose the matrix
+    transposed_matrix = list(zip(*matrix))
+    
+    # Reverse each row in the transposed matrix
+    rotated_matrix = [list(reversed(row)) for row in transposed_matrix]
+    
+    return rotated_matrix
 
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def _char_to_index(self, char):
-        return ord(char) - ord('a')  # Convert char to index (0-25)
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            index = self._char_to_index(char)
-            if not node.children[index]:
-                node.children[index] = TrieNode()
-            node = node.children[index]
-            node.count += 1
-
-    def countWordsEqualTo(self, word):
-        node = self.root
-        for char in word:
-            index = self._char_to_index(char)
-            if not node.children[index]:
-                return 0
-            node = node.children[index]
-        return node.count
-
-    def countWordsStartingWith(self, prefix):
-        node = self.root
-        for char in prefix:
-            index = self._char_to_index(char)
-            if not node.children[index]:
-                return 0
-            node = node.children[index]
-        return self._dfs(node, prefix)
-
-    def erase(self, word):
-        self._erase(word, self.root)
-
-    def _erase(self, word, node):
-        if not node:
-            return False
-        if not word:
-            node.count -= 1
-            return node.count > 0 and any(child.count > 0 for child in node.children)
-        
-        index = self._char_to_index(word[0])
-        if self._erase(word[1:], node.children[index]):
-            node.children[index] = None
-            return True
-        
-        return False
-
-    def _dfs(self, node, prefix):
-        count = 0
-        for child in node.children:
-            if child:
-                count += self._dfs(child, prefix)
-        
-        return count + (node.count if node.count > 0 else 0)
-
+# Example usage:
+matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+rotated_matrix = rotate_matrix(matrix)
+print(rotated_matrix)  # Output: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]
 ```
 
-### Detailed Explanation
+### Analysis of Complexity
 
-**Time Complexity Analysis:**
+**Time Complexity:**
+The time complexity of this solution is O(n^2) due to the following operations:
+1. Transposing the matrix: This involves creating tuples from rows and then zipping them, which is O(n^2).
+2. Reversing each row: This involves iterating over each row and reversing it, which is also O(n^2).
 
-- **Insert**: O(m), where m is the length of the word. This is because we traverse down the Trie once for each character in the word.
-- **Count Words Equal To**: O(m), as we traverse down the Trie once for each character in the word.
-- **Count Words Starting With**: O(m), as we traverse down the Trie once for each character in the prefix. The `_dfs` function recursively counts all words starting with the given prefix.
-- **Erase**: O(m), as we traverse down the Trie once for each character in the word.
+Thus, the total time complexity is O(n^2) + O(n^2) = O(2n^2), but since we drop constants in Big O notation, it simplifies to O(n^2).
 
-**Space Complexity Analysis:**
-The space complexity is O(n * m), where n is the number of nodes in the Trie and m is the average length of a word. However, in practice, it's closer to O(n) since each node only stores a reference to its children and a count.
+**Space Complexity:**
+The space complexity is O(n^2) because we are creating a new transposed matrix and then reversing each row to form the final rotated matrix.
 
-### Why This Approach is Optimal
+### Difficulty Rating: 3
 
-This approach is optimal because it uses a combination of efficient insertion and traversal techniques:
+This problem requires understanding basic matrix operations like transposition and row reversal. It also involves handling the 2D nature of matrices effectively. While it's not extremely challenging, it does require some insight into how matrices can be transformed efficiently. Therefore, it rates a 3 in difficulty.
 
-1. **Indexing**: Using an array of size 26 simplifies indexing since we only need to handle lowercase English letters.
-2. **Child Node Initialization**: Ensuring that child nodes are initialized only when necessary reduces unnecessary memory allocations.
-3. **Count Maintenance**: Updating node counts
+### Explanation of Approach
+
+The chosen solution is optimal because it leverages two well-known matrix operations:
+1. **Transposition**: This operation switches rows and columns, which helps in achieving the counterclockwise rotation.
+2. **Row Reversal**: After transposing, reversing each row achieves the desired effect of rotating elements counterclockwise.
+
+Using these operations together ensures that we achieve the rotation in O(n^2) time complexity without any additional overheads like nested loops or complex algorithms. The approach is straightforward and efficient for this specific task.
