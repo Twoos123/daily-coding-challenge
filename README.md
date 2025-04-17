@@ -21,74 +21,101 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description: Matrix Element Rotation
+**DIFFICULTY: 4**
 
-**Problem:**
-Given a 2D matrix `matrix` of size `n x m` where each element is a non-negative integer, rotate the elements in the matrix such that each element moves to a position that is one position counterclockwise from its original position. For example, if we have a 3x3 matrix:
-```plaintext
-1 2 3
-4 5 6
-7 8 9
-```
-The rotated matrix would be:
-```plaintext
-7 4 1
-8 5 2
-9 6 3
-```
-**Input/Output Example:**
-Input:
-```plaintext
-[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-```
-Output:
-```plaintext
-[[7, 4, 1], [8, 5, 2], [9, 6, 3]]
-```
+### Challenge: Trie-Based String Completion
+
+**Problem Description:**
+
+Implement a Trie-based string completion system that suggests words as users type. Given a dictionary of words, the system should efficiently handle insertions, searches, and auto-completion queries. When a user types a prefix of a word, the system should return all words in the dictionary that start with that prefix.
+
+**Example Input/Output:**
+
+- **Input:** Dictionary of words: `["apple", "banana", "app", "banana", "bat"]`
+- **Query:** User types "ap"
+  - **Output:** ["apple", "app"]
+- **Query:** User types "ba"
+  - **Output:** ["banana"]
+
 **Constraints:**
-- The matrix is a square matrix with dimensions `n x n`.
-- Each element in the matrix is a non-negative integer.
 
-### Solution in Python
+- The dictionary is a list of strings.
+- The system should handle multiple insertions and searches efficiently.
+- The system should handle auto-completion queries efficiently.
+
+### Solution
 
 ```python
-def rotate_matrix(matrix):
-    n = len(matrix)
-    
-    # Transpose the matrix
-    transposed_matrix = list(zip(*matrix))
-    
-    # Reverse each row in the transposed matrix
-    rotated_matrix = [list(reversed(row)) for row in transposed_matrix]
-    
-    return rotated_matrix
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word):
+        curr = self.root
+        for char in word:
+            if char not in curr.children:
+                curr.children[char] = TrieNode()
+            curr = curr.children[char]
+        curr.is_end_of_word = True
+
+    def search(self, word):
+        curr = self.root
+        for char in word:
+            if char not in curr.children:
+                return False
+            curr = curr.children[char]
+        return curr.is_end_of_word
+
+    def auto_complete(self, prefix):
+        def _auto_complete(current, word):
+            if current.is_end_of_word:
+                result.append(word)
+            for char, node in current.children.items():
+                _auto_complete(node, word + char)
+
+        result = []
+        current = self.root
+        for char in prefix:
+            if char not in current.children:
+                return result
+            current = current.children[char]
+        _auto_complete(current, prefix)
+        return result
 
 # Example usage:
-matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-rotated_matrix = rotate_matrix(matrix)
-print(rotated_matrix)  # Output: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]
+trie = Trie()
+words = ["apple", "banana", "app", "banana", "bat"]
+for word in words:
+    trie.insert(word)
+
+print(trie.auto_complete("ap"))  # Output: ["app", "apple"]
+print(trie.auto_complete("ba"))  # Output: ["banana"]
 ```
 
-### Analysis of Complexity
+### Analysis
 
 **Time Complexity:**
-The time complexity of this solution is O(n^2) due to the following operations:
-1. Transposing the matrix: This involves creating tuples from rows and then zipping them, which is O(n^2).
-2. Reversing each row: This involves iterating over each row and reversing it, which is also O(n^2).
 
-Thus, the total time complexity is O(n^2) + O(n^2) = O(2n^2), but since we drop constants in Big O notation, it simplifies to O(n^2).
+- **Insertion:** O(m), where m is the length of the word being inserted.
+- **Search:** O(m), where m is the length of the word being searched.
+- **Auto-completion:** 
+  - **Prefix Search:** O(m) where m is the length of the prefix.
+  - **Postfix Search:** O(k), where k is the number of words matching the prefix.
 
 **Space Complexity:**
-The space complexity is O(n^2) because we are creating a new transposed matrix and then reversing each row to form the final rotated matrix.
 
-### Difficulty Rating: 3
+- **Trie Node Creation:** O(n), where n is the number of unique characters in all words.
+- **Child Node Array:** O(26), since each node has at most 26 children (for English alphabet).
 
-This problem requires understanding basic matrix operations like transposition and row reversal. It also involves handling the 2D nature of matrices effectively. While it's not extremely challenging, it does require some insight into how matrices can be transformed efficiently. Therefore, it rates a 3 in difficulty.
+### Explanation
 
-### Explanation of Approach
+The solution uses a basic Trie implementation with optimized child node management. The `auto_complete` method leverages the Trie’s prefix matching capabilities by starting from the root node and traversing down based on the given prefix. This approach ensures that we only visit nodes that are relevant to the query, thus maintaining efficiency.
 
-The chosen solution is optimal because it leverages two well-known matrix operations:
-1. **Transposition**: This operation switches rows and columns, which helps in achieving the counterclockwise rotation.
-2. **Row Reversal**: After transposing, reversing each row achieves the desired effect of rotating elements counterclockwise.
+The time complexity for auto-completion is O(k) because after finding all potential endings (in O(m)), we only traverse down to each ending node once to mark it as a complete word, resulting in linear time complexity for each matching word.
 
-Using these operations together ensures that we achieve the rotation in O(n^2) time complexity without any additional overheads like nested loops or complex algorithms. The approach is straightforward and efficient for this specific task.
+The space complexity remains optimal because we only store references to child nodes and do not duplicate string data within the Trie. This approach ensures that our solution is both time and space efficient while handling the complex task of auto-completion efficiently.
