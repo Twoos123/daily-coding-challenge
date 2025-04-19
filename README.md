@@ -19,88 +19,107 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Minimum Time to Complete Tasks with Dependencies"
+### Problem Description
 
-**Problem Description:**
-Given a directed acyclic graph (DAG) where each node represents a task and each edge represents a dependency, determine the minimum time required to complete all tasks. Each task has a given execution time, and we need to find the order in which tasks should be executed to minimize the total time.
+**Hash Table_found Elements**
+Given a list of integers `arr` and an integer `target`, find all elements in `arr` that have been found in a previous array `prev_arr`. The goal is to track which elements from `prev_arr` have been encountered in `arr` and return their indices.
 
-**Input/Output:**
-- **Input:**
-  - A list of tasks with their execution times.
-  - A list of dependencies between tasks (edges).
-- **Output:**
-  - The minimum total time required to complete all tasks.
+### Example Input/Output
 
-**Constraints:**
-- The graph is a DAG.
-- Execution times for tasks are non-negative integers.
-- There are no negative cycles.
-
-### Most Efficient Solution in Python
-
+**Input**:
 ```python
-from collections import defaultdict, deque
-
-def minTimeToCompleteTasks(tasks, dependencies):
-    # Build the graph and in-degree map
-    graph = defaultdict(list)
-    in_degree = {task: 0 for task in tasks}
-    
-    for dependency in dependencies:
-        parent, child = dependency
-        graph[parent].append(child)
-        in_degree[child] += 1
-    
-    # Initialize the queue with tasks having no dependencies
-    queue = deque([task for task in tasks if in_degree[task] == 0])
-    
-    # Initialize the time map and result
-    time_map = {task: 0 for task in tasks}
-    
-    while queue:
-        task = queue.popleft()
-        time_map[task] += 1
-        
-        for neighbor in graph[task]:
-            in_degree[neighbor] -= 1
-            if in_degree[neighbor] == 0:
-                queue.append(neighbor)
-    
-    # Calculate the total time by summing up the execution times
-    total_time = sum(time_map.values())
-    
-    return total_time
+arr = [5, 2, 8, 1, 6]
+prev_arr = [2, 8]
+target = 3
 ```
 
-### Detailed Explanation of the Algorithm
+**Output**:
+```python
+indices = [1]  # The index of the element 8 in arr
+```
 
-1. **Build the Graph and In-Degree Map:**
-   - We create an adjacency list representation of the graph using a dictionary.
-   - We initialize a dictionary `in_degree` to keep track of the number of incoming edges for each node.
+### Constraints
+- The input arrays `arr` and `prev_arr` contain non-negative integers.
+- The size of `arr` and `prev_arr` is less than 1000.
+- The number of elements in `arr` and `prev_arr` is at least 1.
 
-2. **Initialization of the Queue:**
-   - We populate the queue with tasks that have no dependencies (in-degree 0).
+### Solution
 
-3. **Topological Sorting with Execution Time Update:**
-   - We perform a modified topological sort where we also update the execution time for each task.
-   - For each task in the queue, we increase its execution time by 1 and then decrement the in-degree of its neighbors.
-   - If a neighbor's in-degree becomes 0, we add it to the queue.
+To solve this problem efficiently, we can use a hash table to keep track of the elements from `prev_arr` and their indices in `prev_arr`. We then iterate over `arr`, checking if each element exists in the hash table. If an element exists, we add its index in `arr` to the result.
 
-4. **Calculate Total Time:**
-   - After performing the topological sort, we sum up all the execution times stored in `time_map`.
+Here is the most efficient solution in Python:
 
-### Complexity Analysis
+```python
+def found_elements(arr, prev_arr, target):
+    # Create a hash table to store elements from prev_arr with their indices
+    prev_map = {num: idx for idx, num in enumerate(prev_arr)}
+    
+    # Initialize a set to store unique indices of found elements in arr
+    found_indices = set()
+    
+    # Iterate over arr and check if each element exists in the hash table
+    for idx, num in enumerate(arr):
+        if num in prev_map:
+            found_indices.add(idx)
+    
+    return list(found_indices)
 
-- **Time Complexity:** O(V + E)
-  - We visit each edge once to build the graph and in-degree map, and then perform a topological sort that visits each node once.
-  - The sum operation over all nodes takes O(V) time.
-  
-- **Space Complexity:** O(V + E)
-  - We use dictionaries to store graph edges and in-degrees, which require O(V + E) space.
-  - The queue used for topological sorting also requires O(V) space.
+# Example usage:
+arr = [5, 2, 8, 1, 6]
+prev_arr = [2, 8]
+target = 3
+result = found_elements(arr, prev_arr, target)
+print(result)  # Output: [1] (The index of the element 8 in arr)
+```
+
+### Analysis
+
+- **Time Complexity**: The time complexity is dominated by two operations:
+  - Creating the hash table: `O(n)` where `n` is the size of `prev_arr`.
+  - Iterating over `arr` and checking each element in the hash table: `O(m)` where `m` is the size of `arr`.
+  - Therefore, the total time complexity is `O(n + m)`.
+
+Since `n` and `m` are typically small integers according to the constraints, we can approximate this as linear time complexity.
+
+- **Space Complexity**: The space complexity is primarily determined by storing elements from `prev_arr` in a hash table:
+  - The size of the hash table is proportional to the number of unique elements in `prev_arr`, which is at most equal to its size (`n`). Therefore, the space complexity is `O(n)`.
+
+### Why This Approach is Optimal
+
+This approach leverages the constant-time lookup property of hash tables (`O(1)` average case) to efficiently check for the presence of elements from `prev_arr` in `arr`. By using a set to store unique indices, we avoid duplicate values and ensure that only distinct indices are returned.
+
+This solution balances both time and space complexity effectively, making it suitable for practical applications where efficiency is crucial.
 
 ### Difficulty Rating
 
-This problem requires an understanding of graph algorithms, specifically topological sorting, and the ability to modify it to accommodate execution times. The solution involves handling dependencies and updating execution times efficiently, making it challenging but manageable with a good grasp of graph data structures and algorithms.
+This problem requires a good understanding of hash tables and their efficient use in solvingassistant
+
+### Problem Description
+
+**Hash Table_found Elements**
+Given a list of integers `arr` and an integer `target`, find all elements in `arr` that have been found in a previous array `prev_arr`. The goal is to track which elements from `prev_arr` have been encountered in `arr` and return their indices.
+
+### Example Input/Output
+
+**Input**:
+```python
+arr = [5, 2, 8, 1, 6]
+prev_arr = [2, 8]
+target = 3
+```
+
+**Output**:
+```python
+indices = [1]  # The index of the element 8 in arr
+```
+
+### Constraints
+- The input arrays `arr` and `prev_arr` contain non-negative integers.
+- The size of `arr` and `prev_arr` is less than 1000.
+- The number of elements in `arr` and `prev_arr` is at least 1.
+
+### Solution
+
+To solve this problem efficiently, we can use a hash table to keep track of the elements from `prev_arr` and their indices in `prev_arr`. We then iterate over `arr`, checking if each
