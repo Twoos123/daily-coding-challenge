@@ -21,126 +21,105 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### #### Problem Description
+**Flatten a Linked List with Merging Nodes**
+Given a singly linked list where each node contains an integer value and an additional pointer `next` and `prev` if it's a doubly linked list, and an optional pointer to another node `merge` (representing a merge point), flatten the linked list. The `merge` pointer should be ignored and treated as part of the normal list. The goal is to traverse through the linked list and merge adjacent nodes that have a value greater than their previous node's value, effectively creating a new flattened linked list.
 
-**Challenge: Detect and Remove Cycles in a Linked List**
+#### Example Input/Output
 
-Given a singly linked list, determine if it contains a cycle (i.e., if any node points back to a previous node). If a cycle exists, remove the cycle by merging the two parts of the linked list that form the cycle.
-
-**Example Input/Output:**
-
-- **Input:** `1 -> 2 -> 3 -> 4 -> 5 -> 1` (contains a cycle)
-  - **Output:** `1 -> 2 -> 3 -> 4 -> 5`
-- **Input:** `1 -> 2 -> 3 -> 4 -> 5` (no cycle)
-  - **Output:** `1 -> 2 -> 3 -> 4 -> 5`
-
-### Constraints
-
-- The linked list nodes have a `value` and a `next` pointer.
-- No additional data structures like dictionaries or sets are allowed.
-- The algorithm should run in O(n) time complexity where n is the number of nodes in the linked list.
-- The algorithm should useassistant
-
-### Problem Description
-
-**Challenge: Detect and Remove Cycles in a Linked List**
-
-Given a singly linked list, determine if it contains a cycle (i.e., if any node points back to a previous node). If a cycle exists, remove the cycle by merging the two parts of the linked list that form the cycle.
-
-**Example Input/Output:**
-
-- **Input:** `1 -> 2 -> 3 -> 4 -> 5 -> 1` (contains a cycle)
-  - **Output:** `1 -> 2 -> 3 -> 4 -> 5`
-- **Input:** `1 -> 2 -> 3 -> 4 -> 5` (no cycle)
-  - **Output:** `1 -> 2 -> 3 -> 4 -> 5`
-
-### Constraints
-
-- The linked list nodes have a `value` and a `next` pointer.
-- No additional data structures like dictionaries or sets are allowed.
-- The algorithm should run in O(n) time complexity where n is the number of nodes in the linked list.
-- The algorithm should use minimal space.
-
-### averages
-
-To solve this problem efficiently, we can use Floyd's cycle-finding algorithm (also known as the "tortoise and the hare" algorithm) to detect the presence of a cycle, and then remove it by identifying and merging the two parts of the cycle.
-
-### Solution
-
-#### Detecting a Cycle
-
-We use Floyd's cycle-finding algorithm to detect if there is a cycle in the linked list.
-
-```python
-def hasCycle(head):
-    if not head or not head.next:
-        return False
-    
-    tortoise = head
-    hare = head
-    while tortoise and hare and hare.next:
-        tortoise = tortoise.next
-        hare = hare.next.next
-        
-        if tortoise == hare:
-            return True
-    
-    return False
+Input: A doubly linked list with nodes containing values and merge points:
+```
+     1 -> 2 -> 3 -> 4 -> 5
+      ^   ^       ^       ^
+      |   |       |       |  
+      2   3       4       5
+        ^         ^         ^
+        |         |         |
+        3         4         5
+          ^         ^         
+          |         |         
+          4         5         
+            
+```
+Output: Flattened linked list:
+```
+     1 -> 2 -> 3 -> 4 -> 5
 ```
 
-#### Removing a Cycle
+#### Constraints
+- The input linked list is a doubly linked list for simplicity.
+- Each node has `value`, `next`, and `prev` pointers.
+- The `merge` pointer is optional and should be ignored.
+- The final flattened linked list should have adjacent nodes with values in ascending order.
 
-If a cycle is detected, we need to remove it. We can do this by identifying the start and end of the cycle and merging them.
+#### Solution
 
 ```python
-def removeCycle(head):
-    if not head or not head.next:
-        return head
-    
-    # Detecting the cycle using Floyd's algorithm
-    if not hasCycle(head):
-        return head
-    
-    # Finding the meeting point of the two pointers
-    tortoise = head
-    hare = head
-    while True:
-        tortoise = tortoise.next
-        hare = hare.next.next
-        if tortoise == hare:
-            break
-    
-    # Finding the length of the cycle
-    length = 1
-    while hare.next == tortoise:
-        length += 1
-        hare = hare.next
-    
-    # Moving tortoise to the start of the list and hare to the end of the cycle
-    tortoise = head
-    hare = hare
-    
-    # Removing the cycle by merging it with the rest of the list
-    while length > 0:
-        tortoise = tortoise.next
-        length -= 1
-    
-    # The node after the meeting point will be the start of the merged list
-    while tortoise != hare:
-        tortoise = tortoise.next
-        hare = hare.next
-    
-    # Setting next pointer of hare to null to break the cycle
-    hare.next = None
-    
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+        self.prev = None
+
+def flatten_linked_list(head):
+    # Initialize current and previous pointers
+    curr = head
+    prev = None
+
+    while curr:
+        # Store next node temporarily
+        next_node = curr.next
+
+        # Merge adjacent nodes with values greater than previous node's value
+        while curr and (prev is None or curr.value >= prev.value):
+            prev = curr
+            curr = curr.next
+
+        # Merge the stored next node with the current previous node
+        if prev:
+            prev.next = next_node
+            if next_node:
+                next_node.prev = prev
+        
+        # Move to next node in the original list
+        curr = next_node
+
     return head
 ```
 
-### Analysis
+#### Detailed Explanation of Algorithm
 
-- **Time Complexity:** The time complexity for detecting a cycle using Floyd's algorithm is O(n), where n is the number of nodes in the linked list. The additional operations to remove the cycle also run in O(n) time.
-- **Space Complexity:** The space complexity is O(1) as we are using constant space to store the pointers.
+1. **Initialization**:
+   - Set `curr` to the head of the linked list.
+   - Set `prev` to `None`.
 
-### Why This Approach is Optimal
+2. **Traversal**:
+   - While `curr` exists, traverse through the linked list.
+   - Store the next node in `next_node`.
 
-This approach is optimal because it uses Floyd's cycle-finding algorithm
+3. **Merging Nodes**:
+   - While traversing and `prev` exists or if `curr` exists and its value is greater than or equal to `prev`.value, update `prev` to be the current node and move `curr` one step forward.
+
+4. **Linking Adjacent Nodes**:
+   - After merging, link the stored `next_node` with `prev`.
+   - Update the `prev` and `next` pointers accordingly.
+
+5. **Repeat Traversal**:
+   - Move to the next node in the list and repeat steps 2-4 until all nodes are processed.
+
+6. **Return Head**:
+   - Return the head of the flattened linked list.
+
+#### Time Complexity Analysis
+The time complexity of this algorithm is O(n), where n is the number of nodes in the linked list. This is because each node is visited exactly once during traversal.
+
+#### Space Complexity Analysis
+The space complexity is O(1), as we only use a constant amount of space to store temporary pointers (`curr`, `prev`, and `next_node`).
+
+This approach ensures that the linked list is flattened efficiently by merging adjacent nodes with values in ascending order while maintaining correct linkages between nodes.
+
+---
+
+### Difficulty Rating: 3
+
+This problem requires a good understanding of linked list traversal and merging logic. It involves managing pointers efficiently to maintain the correct order while flattening the linked list. The solution provided is optimized in terms of both time and space complexity, making it suitable for a moderate-level difficulty rating.
