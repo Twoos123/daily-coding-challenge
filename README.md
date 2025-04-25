@@ -21,78 +21,99 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+## Problem Description: Trie-Based String Completion
 
-**Maximum Subarray Sum with Consecutive Elements**
-
-Given an array of integers, find the maximum sum that can be achieved by selecting a subarray where each element is either included or excluded, but the subarray must be consecutive.
+Given a Trie data structure, you need to implement a function that completes words based on a provided prefix. The function should return all words that start with the given prefix and are stored in the Trie. This problem is essential for understanding how Tries can be used efficiently for prefix CURLOPTs and auto-suggestions in applications.
 
 ### Example Input/Output
 
-**Input:** `arr = [1, -2, 3, 5, -6, 4, 1, 3]`
-
-**Output:** `12` (Subarray `[3, 5, -6, 4, 1, 3]`)
+- **Input**: `["apple", "banana", "orange"]`, `prefix = "a"`
+- **Output**: `["apple"]`
 
 ### Constraints
 
-- The array `arr` contains at least one element.
-- The sum of a subarray can be calculated as the sum of the elements in that subarray.
-- A subarray is considered consecutive if it is contiguous in the original array.
+- The input strings are all unique.
+- The prefix will always be a non-empty string.
+- The length of the prefix will be less than or equal to the length of any string in the Trie.
 
-### Most Efficient Solution
-
-#### Explanation
-
-To solve this problem efficiently, we can use dynamic programming with arrays. We will maintain an array `dp` where `dp[i]` will store the maximum sum that can be achieved by selecting a subarray ending at index `i`.
-
-The key insight is that for any subarray ending at index `i`, we have two options:
-1. Exclude the current element.
-2. Include the current element.
-
-If we include the current element, we need to ensure that its value is greater than zero, because if it's negative, it would reduce the sum rather than increase it.
-
-Here’s how we can implement this:
+## Optimal Solution in Python
 
 ```python
-def maxSubarraySumWithConsecutive(arr):
-    n = len(arr)
-    dp = [0] * n
-    
-    # Initialize dp[0] as the first element itself
-    dp[0] = arr[0]
+class TrieNode:
+    def __init__(self):
+        self.children = [None] * 26  # Using 26 for 'a' to 'z'
+        self.isEndOfWord = False
 
-    # Initialize maximum sum
-    max_sum = arr[0]
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-    for i in range(1, n):
-        # If current element is greater than zero, include it in dp[i]
-        if arr[i] > 0:
-            dp[i] = dp[i-1] + arr[i]
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            idx = ord(char) - ord('a')
+            if not node.children[idx]:
+                node.children[idx] = TrieNode()
+            node = node.children[idx]
+        node.isEndOfWord = True
+
+    def search(self, word):
+        node = self.root
+        for char in word:
+            idx = ord(char) - ord('a')
+            if not node.children[idx]:
+                return False
+            node = node.children[idx]
+        return node.isEndOfWord
+
+    def prefixSearch(self, prefix):
+        node = self.root
+        for char in prefix:
+            idx = ord(char) - ord('a')
+            if not node.children[idx]:
+                return []
+            node = node.children[idx]
         
-        # If current element is not greater than zero or dp[i-1] is greater,
-        # then exclude it and use dp[i-1] or the current element itself
-        else:
-            dp[i] = max(dp[i-1], arr[i])
+        # Find all words starting from the current node
+        words = []
+        self._dfs(node, prefix, words)
+        return words
 
-        # Update maximum sum
-        max_sum = max(max_sum, dp[i])
-
-    return max_sum
+    def _dfs(self, node, prefix, words):
+        if node.isEndOfWord:
+            words.append(prefix)
+        
+        for i in range(26):
+            if node.children[i]:
+                self._dfs(node.children[i], prefix + chr(i + ord('a')), words)
 
 # Example usage:
-arr = [1, -2, 3, 5, -6, 4, 1, 3]
-print(maxSubarraySumWithConsecutive(arr))  # Output: 12
+trie = Trie()
+trie.insert("apple")
+trie.insert("banana")
+trie.insert("orange")
+
+prefix = "a"
+print(trie.prefixSearch(prefix))  # Output: ['apple']
 ```
 
-#### Analysis
+## Algorithm Explanation
 
-- **Time Complexity:** The time complexity of this solution is O(n), where n is the length of the array. This is because we are iterating through the array once.
-- **Space Complexity:** The space complexity is also O(n) because we are using an additional array `dp` of the same size as the input array.
+1. **Initialization**: The `TrieNode` class initializes a node with an array of 26 children and a boolean flag `isEndOfWord`.
+2. **Insertion**: The `insert` method iterates through each character in the word and creates new nodes as necessary. It marks the final node as the end of a word.
+3. **Search**: The `search` method checks if a given word exists by traversing through characters and verifying if each node exists and if it marks the end of a word.
+4. **Prefix Search**: The `prefixSearch` method locates the prefix in the Trie by traversing through characters and then uses depth-first search (`_dfs`) to find all words starting from that prefix.
 
-#### Why this Approach is Optimal
+## Time and Space Complexity Analysis
 
-This approach is optimal because it directly uses dynamic programming to solve the problem by breaking it down into smaller subproblems and storing the results in an array (`dp`). This approach avoids recomputing the same subproblems multiple times, thus reducing time complexity to linear.
+- **Insertion**: \(O(m)\) where \(m\) is the length of the string because we are inserting each character once.
+- **Search**: \(O(m)\) where \(m\) is the length of the string because we are traversing through each character.
+- **Prefix Search**: \(O(n)\) where \(n\) is typically less than or equal to \(m\) because we are traversing through characters to find the prefix and then using DFS to find all matching words.
 
-### Difficulty Rating
+The space complexity for both insertion and search operations is \(O(m)\) due to the additional space required for storing nodes and flags in the Trie.
 
-This problem requires understanding how to apply dynamic programming principles to an array-based problem. It's challenging enough to require careful consideration of consecutive subarrays but not so complex that it becomes overly difficult. The solution provided is straightforward and efficient, making it a good challenge for those looking to practice dynamic programming with arrays.
+## Difficulty Rating: 3
+
+The problem requires understanding how Tries work and implementing basic operations like insertion, search, and prefix search. The prefix search operation involves traversing through characters to locate the prefix and then using DFS for finding matching words, which adds a slight complexity compared to simple insertion or search operations but is still manageable with clear understanding of Trie data structure.
+
+Thus, it is rated as a moderate difficulty problem, requiring a good grasp of Trie operations but not being overly complex or abstract.
