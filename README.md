@@ -21,99 +21,85 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-## Problem Description: Trie-Based String Completion
+****
 
-Given a Trie data structure, you need to implement a function that completes words based on a provided prefix. The function should return all words that start with the given prefix and are stored in the Trie. This problem is essential for understanding how Tries can be used efficiently for prefix CURLOPTs and auto-suggestions in applications.
+### Problem Description
 
-### Example Input/Output
+**Title: Longest Substring with K Distinct Characters**
 
-- **Input**: `["apple", "banana", "orange"]`, `prefix = "a"`
-- **Output**: `["apple"]`
+**Problem Statement:**
+Given a string `s` and an integer `k`, find the length of the longest substring that contains `k` distinct characters. You should implement this using a hash table to efficiently track the frequency of characters in each substring.
 
-### Constraints
+**Example Input/Output:**
+- **Input:** `s = "abcbaab"` and `k = 2`
+- **Output:** `4`
 
-- The input strings are all unique.
-- The prefix will always be a non-empty string.
-- The length of the prefix will be less than or equal to the length of any string in the Trie.
+### Constraints:
+- The string `s` contains only lowercase English letters.
+- The integer `k` is in the range `[1, 26]`.
 
-## Optimal Solution in Python
+### Solution
 
 ```python
-class TrieNode:
-    def __init__(self):
-        self.children = [None] * 26  # Using 26 for 'a' to 'z'
-        self.isEndOfWord = False
-
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            idx = ord(char) - ord('a')
-            if not node.children[idx]:
-                node.children[idx] = TrieNode()
-            node = node.children[idx]
-        node.isEndOfWord = True
-
-    def search(self, word):
-        node = self.root
-        for char in word:
-            idx = ord(char) - ord('a')
-            if not node.children[idx]:
-                return False
-            node = node.children[idx]
-        return node.isEndOfWord
-
-    def prefixSearch(self, prefix):
-        node = self.root
-        for char in prefix:
-            idx = ord(char) - ord('a')
-            if not node.children[idx]:
-                return []
-            node = node.children[idx]
+def longest_substring(s, k):
+    if not s or k > len(s):
+        return 0
+    
+    char_freq = {}
+    left = 0
+    max_length = 0
+    
+    for right in range(len(s)):
+        char_freq[s[right]] = char_freq.get(s[right], 0) + 1
         
-        # Find all words starting from the current node
-        words = []
-        self._dfs(node, prefix, words)
-        return words
-
-    def _dfs(self, node, prefix, words):
-        if node.isEndOfWord:
-            words.append(prefix)
+        while len(char_freq) > k:
+            char_freq[s[left]] -= 1
+            if char_freq[s[left]] == 0:
+                del char_freq[s[left]]
+            left += 1
         
-        for i in range(26):
-            if node.children[i]:
-                self._dfs(node.children[i], prefix + chr(i + ord('a')), words)
+        max_length = max(max_length, right - left + 1)
+    
+    return max_length
 
 # Example usage:
-trie = Trie()
-trie.insert("apple")
-trie.insert("banana")
-trie.insert("orange")
-
-prefix = "a"
-print(trie.prefixSearch(prefix))  # Output: ['apple']
+s = "abcbaab"
+k = 2
+print(longest_substring(s, k))  # Output: 4
 ```
 
-## Algorithm Explanation
+### Detailed Explanation of the Algorithm
 
-1. **Initialization**: The `TrieNode` class initializes a node with an array of 26 children and a boolean flag `isEndOfWord`.
-2. **Insertion**: The `insert` method iterates through each character in the word and creates new nodes as necessary. It marks the final node as the end of a word.
-3. **Search**: The `search` method checks if a given word exists by traversing through characters and verifying if each node exists and if it marks the end of a word.
-4. **Prefix Search**: The `prefixSearch` method locates the prefix in the Trie by traversing through characters and then uses depth-first search (`_dfs`) to find all words starting from that prefix.
+1. **Initialization:**
+   - `char_freq` is a dictionary to store the frequency of each character.
+   - `left` and `right` pointers represent the sliding window.
+   - `max_length` stores the maximum length of the substring seen so far.
 
-## Time and Space Complexity Analysis
+2. **Iterate Through String:**
+   - For each character in the string, increment its frequency in `char_freq`.
+   - If the number of distinct characters exceeds `k`, start moving the left pointer to the right until `k` distinct characters are found again.
 
-- **Insertion**: \(O(m)\) where \(m\) is the length of the string because we are inserting each character once.
-- **Search**: \(O(m)\) where \(m\) is the length of the string because we are traversing through each character.
-- **Prefix Search**: \(O(n)\) where \(n\) is typically less than or equal to \(m\) because we are traversing through characters to find the prefix and then using DFS to find all matching words.
+3. **Update Maximum Length:**
+   - Update `max_length` with the maximum length of the substring seen.
 
-The space complexity for both insertion and search operations is \(O(m)\) due to the additional space required for storing nodes and flags in the Trie.
+4. **Return Result:**
+   - Return the maximum length found.
 
-## Difficulty Rating: 3
+### Complexity Analysis
 
-The problem requires understanding how Tries work and implementing basic operations like insertion, search, and prefix search. The prefix search operation involves traversing through characters to locate the prefix and then using DFS for finding matching words, which adds a slight complexity compared to simple insertion or search operations but is still manageable with clear understanding of Trie data structure.
+- **Time Complexity:** O(n), where n is the length of the input string.
+  - Each character is processed exactly once.
+  - The while loop inside may run up to n times, but it's bounded by the size of the string.
 
-Thus, it is rated as a moderate difficulty problem, requiring a good grasp of Trie operations but not being overly complex or abstract.
+- **Space Complexity:** O(n), where n is the size of the string.
+  - In the worst case, we might need to store every character in `char_freq`.
+
+### Optimality Explanation
+
+This approach is optimal because it uses a hash table (`char_freq`) to efficiently track character frequencies. The sliding window technique allows us to find the longest substring containing exactly `k` distinct characters by maintaining a balance between expanding the window (right pointer) and shrinking it (left pointer) based on the number of distinct characters found. This ensures that we explore all possible substrings efficiently.
+
+### Trade-offs
+
+*Time vs Space:* The time complexity is optimal at O(n), but there is a space trade-off since we need O(n) space for storing character frequencies in the worst case. However, this space complexity is unavoidable if we need to track all characters within each substring.
+
+This problem effectively uses hash tables to solve a challenging substring problem while maintaining optimal time and space complexities.
