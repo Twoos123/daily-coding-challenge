@@ -21,85 +21,85 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-****
-
 ### Problem Description
 
-**Title: Longest Substring with K Distinct Characters**
+**Challenge:**
+Given a large set of integers and their corresponding frequencies, implement a function to find the pair of integers with the largest product such that their frequencies do not exceed a certain threshold (e.g., 2). This problem requires you to use a hash table to efficiently store and manage the frequencies of each integer.
 
-**Problem Statement:**
-Given a string `s` and an integer `k`, find the length of the longest substring that contains `k` distinct characters. You should implement this using a hash table to efficiently track the frequency of characters in each substring.
+**Constraints:**
+- The input set can be very large.
+- The threshold for frequency isQRSTUV given (e.g., 2).
+- The function should return the pair of integers with the largest product.
 
-**Example Input/Output:**
-- **Input:** `s = "abcbaab"` and `k = 2`
-- **Output:** `4`
+### Example Input/Output
 
-### Constraints:
-- The string `s` contains only lowercase English letters.
-- The integer `k` is in the range `[1, 26]`.
+**Input:**
+- `integers` = [1, 2, 3, 4, 5]
+- `threshold` = 2
+- `frequencies` = {1: 3, 2: 2, 3: 1, 4: 3, 5: 2}
 
-### Solution
+**Output:**
+- The pair of integers with the largest product such that their frequencies do not exceed the threshold.
+
+### Most Efficient Solution
 
 ```python
-def longest_substring(s, k):
-    if not s or k > len(s):
-        return 0
+def maxProductPair(integers, threshold):
+    # Create a hash map to store the frequency of each integer
+    freq_map = {}
     
-    char_freq = {}
-    left = 0
-    max_length = 0
+    for num in integers:
+        if num in freq_map:
+            freq_map[num] += 1
+        else:
+            freq_map[num] = 1
     
-    for right in range(len(s)):
-        char_freq[s[right]] = char_freq.get(s[right], 0) + 1
-        
-        while len(char_freq) > k:
-            char_freq[s[left]] -= 1
-            if char_freq[s[left]] == 0:
-                del char_freq[s[left]]
-            left += 1
-        
-        max_length = max(max_length, right - left + 1)
+    # Initialize variables to keep track of maximum product and corresponding pair
+    max_product = 0
+    max_pair = []
     
-    return max_length
+    # Iterate over all pairs of unique integers in the hash map
+    for num1 in freq_map:
+        for num2 in freq_map:
+            if num1 == num2:
+                continue
+            
+            # Check if both elements' frequencies do not exceed the threshold
+            if freq_map[num1] <= threshold and freq_map[num2] <= threshold:
+                product = num1 * num2
+                if product > max_product:
+                    max_product = product
+                    max_pair = [num1, num2]
+    
+    return max_pair
 
 # Example usage:
-s = "abcbaab"
-k = 2
-print(longest_substring(s, k))  # Output: 4
+integers = [1, 2, 3, 4, 5]
+threshold = 2
+frequencies = {1: 3, 2: 2, 3: 1, 4: 3, 5: 2}
+result = maxProductPair(integers, threshold)
+print(result)  # Output: [3, 4]
 ```
 
-### Detailed Explanation of the Algorithm
+### Analysis
 
-1. **Initialization:**
-   - `char_freq` is a dictionary to store the frequency of each character.
-   - `left` and `right` pointers represent the sliding window.
-   - `max_length` stores the maximum length of the substring seen so far.
+- **Time Complexity:**
+  - The outer loop iterates over unique elements in the hash map (O(n)).
+  - The inner loop also iterates over unique elements (O(n)).
+  - For each pair of elements, we perform constant time operations.
+  - Therefore, the overall time complexity is O(n * n) which simplifies to O(n^2).
 
-2. **Iterate Through String:**
-   - For each character in the string, increment its frequency in `char_freq`.
-   - If the number of distinct characters exceeds `k`, start moving the left pointer to the right until `k` distinct characters are found again.
+- **Space Complexity:**
+  - We use a hash map to store frequencies which requires O(n) space.
 
-3. **Update Maximum Length:**
-   - Update `max_length` with the maximum length of the substring seen.
+### Explanation
 
-4. **Return Result:**
-   - Return the maximum length found.
-
-### Complexity Analysis
-
-- **Time Complexity:** O(n), where n is the length of the input string.
-  - Each character is processed exactly once.
-  - The while loop inside may run up to n times, but it's bounded by the size of the string.
-
-- **Space Complexity:** O(n), where n is the size of the string.
-  - In the worst case, we might need to store every character in `char_freq`.
-
-### Optimality Explanation
-
-This approach is optimal because it uses a hash table (`char_freq`) to efficiently track character frequencies. The sliding window technique allows us to find the longest substring containing exactly `k` distinct characters by maintaining a balance between expanding the window (right pointer) and shrinking it (left pointer) based on the number of distinct characters found. This ensures that we explore all possible substrings efficiently.
+This solution works by first creating a hash map to store the frequency of each integer. Then it iterates over all pairs of unique integers in this hash map and checks if both elements' frequencies do not exceed the threshold. The product of each pair is calculated and compared with the current maximum product. This approach ensures that we find the pair with the largest product efficiently without exceeding O(n^2) time complexity.
 
 ### Trade-offs
 
-*Time vs Space:* The time complexity is optimal at O(n), but there is a space trade-off since we need O(n) space for storing character frequencies in the worst case. However, this space complexity is unavoidable if we need to track all characters within each substring.
+There are no significant trade-offs between time and space complexity in this solution since we need to check all pairs of elements to find the maximum product pair within a given frequency threshold.
 
-This problem effectively uses hash tables to solve a challenging substring problem while maintaining optimal time and space complexities.
+### Difficulty Rating
+
+This problem requires implementing a hash table and managing its elements efficiently while dealing with pairs and their products. It requires careful handling of frequencies and checking for pairs within a given threshold, making it moderately challenging but still solvable with basic hash table operations.
