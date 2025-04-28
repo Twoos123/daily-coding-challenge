@@ -19,87 +19,82 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
 ### Problem Description
 
-**Challenge:**
-Given a large set of integers and their corresponding frequencies, implement a function to find the pair of integers with the largest product such that their frequencies do not exceed a certain threshold (e.g., 2). This problem requires you to use a hash table to efficiently store and manage the frequencies of each integer.
+**Longest Increasing Subsequence with Constraints**
 
-**Constraints:**
-- The input set can be very large.
-- The threshold for frequency isQRSTUV given (e.g., 2).
-- The function should return the pair of integers with the largest product.
+Given an array of integers `arr` and a constraint value `maxSum`, find the length of the longest increasing subsequence that does not exceed the sum of its elements by `maxSum`. The subsequence must be strictly increasing, meaning that each element in the subsequence must be greater than the previous one.
 
 ### Example Input/Output
 
-**Input:**
-- `integers` = [1, 2, 3, 4, 5]
-- `threshold` = 2
-- `frequencies` = {1: 3, 2: 2, 3: 1, 4: 3, 5: 2}
+**Input:** `arr = [1, 3, 2, 4, 5]`, `maxSum = 3`
+**Output:** `3` (because the subsequence `[1, 3, 4]` has a sum of `8` and is strictly increasing, but it exceeds the constraint; however, `[1, 2, 3]` meets the constraint and is the longest such subsequence)
 
-**Output:**
-- The pair of integers with the largest product such that their frequencies do not exceed the threshold.
+### Constraints
 
-### Most Efficient Solution
+- The array `arr` contains at least one element.
+- The constraint value `maxSum` is non-negative.
+
+### Most Efficient Solution in Python
 
 ```python
-def maxProductPair(integers, threshold):
-    # Create a hash map to store the frequency of each integer
-    freq_map = {}
+def longest_increasing_subsequence_with_constraint(arr, maxSum):
+    n = len(arr)
+    dp = [[0] * (maxSum + 1) for _ in range(n)]
     
-    for num in integers:
-        if num in freq_map:
-            freq_map[num] += 1
-        else:
-            freq_map[num] = 1
+    # Initialize base case for single elements
+    for i in range(n):
+        if arr[i] <= maxSum:
+            dp[i][arr[i]] = 1
     
-    # Initialize variables to keep track of maximum product and corresponding pair
-    max_product = 0
-    max_pair = []
+    # Fill dp table in bottom-up manner
+    for i in range(1, n):
+        for j in range(1, maxSum + 1):
+            if j < arr[i]:
+                dp[i][j] = dp[i - 1][j]
+            else:
+                dp[i][j] = max(dp[i - 1][j], 
+                               (dp[i - 1][j - arr[i]] + 1 if j - arr[i] >= 0 else 0))
     
-    # Iterate over all pairs of unique integers in the hash map
-    for num1 in freq_map:
-        for num2 in freq_map:
-            if num1 == num2:
-                continue
-            
-            # Check if both elements' frequencies do not exceed the threshold
-            if freq_map[num1] <= threshold and freq_map[num2] <= threshold:
-                product = num1 * num2
-                if product > max_product:
-                    max_product = product
-                    max_pair = [num1, num2]
+    # Find the maximum length of valid subsequences
+    max_length = 0
+    for j in range(maxSum + 1):
+        if dp[n - 1][j] > max_length:
+            max_length = dp[n - 1][j]
     
-    return max_pair
+    return max_length
 
 # Example usage:
-integers = [1, 2, 3, 4, 5]
-threshold = 2
-frequencies = {1: 3, 2: 2, 3: 1, 4: 3, 5: 2}
-result = maxProductPair(integers, threshold)
-print(result)  # Output: [3, 4]
+arr = [1, 3, 2, 4, 5]
+maxSum = 3
+print(longest_increasing_subsequence_with_constraint(arr, maxSum)) # Output: 3
 ```
 
-### Analysis
+### Detailed Explanation of the Algorithm
 
-- **Time Complexity:**
-  - The outer loop iterates over unique elements in the hash map (O(n)).
-  - The inner loop also iterates over unique elements (O(n)).
-  - For each pair of elements, we perform constant time operations.
-  - Therefore, the overall time complexity is O(n * n) which simplifies to O(n^2).
+This problem can be solved using dynamic programming with a two-dimensional array `dp`. The dimensions of `dp` are `(n, maxSum + 1)`, where `n` is the length of the input array.
 
-- **Space Complexity:**
-  - We use a hash map to store frequencies which requires O(n) space.
+1. **Initialization**: We initialize each element in the first row and first column of `dp` based on whether each single element in `arr` does not exceed `maxSum`.
+   
+2. **Bottom-Up Fill**: For each element in `arr` and each possible sum up to `maxSum`, we fill up the table using two possibilities:
+   - If the current element does not exceed the current sum `j`, then we consider only excluding this element from the subsequence.
+   - If the current element does exceed the current sum `j`, then we consider including this element in a valid subsequence only if there's a valid subsequence without this element that sums up to `j - arr[i]`.
 
-### Explanation
+3. **Maximum Length**: Finally, we scan through all possible sums from 1 to `maxSum` and find the maximum length of valid subsequences stored in `dp` at index `(n - 1, j)` for any valid sum `j`.
 
-This solution works by first creating a hash map to store the frequency of each integer. Then it iterates over all pairs of unique integers in this hash map and checks if both elements' frequencies do not exceed the threshold. The product of each pair is calculated and compared with the current maximum product. This approach ensures that we find the pair with the largest product efficiently without exceeding O(n^2) time complexity.
+### Time and Space Complexity
 
-### Trade-offs
+- **Time Complexity**: The time complexity is O(n * maxSum), where n is the length of the input array and maxSum is the maximum allowed sum.
+- **Space Complexity**: The space complexity is O(n * maxSum), as we need to store a 2D array of size `(n, maxSum + 1)`.
 
-There are no significant trade-offs between time and space complexity in this solution since we need to check all pairs of elements to find the maximum product pair within a given frequency threshold.
+### Why This Approach is Optimal
+
+This approach ensures we consider all possible combinations of sums up to `maxSum` while maintaining an efficient space usage. The bottom-up filling ensures that each subproblem is solved only once and stored in memory for future reuse, which aligns with typical dynamic programming principles.
+
+If there were multiple approaches with different trade-offs, this method would be chosen because it directly addresses the problem constraints by ensuring that no subsequence exceeds its allowed sum while finding the longest possible increase. 
 
 ### Difficulty Rating
 
-This problem requires implementing a hash table and managing its elements efficiently while dealing with pairs and their products. It requires careful handling of frequencies and checking for pairs within a given threshold, making it moderately challenging but still solvable with basic hash table operations.
+The problem requires a clear understanding of dynamic programming principles along with managing both increasing order and sum constraints. The use of a 2D array adds complexity compared to simpler DP problems but remains manageable with proper initialization and iteration strategies.
