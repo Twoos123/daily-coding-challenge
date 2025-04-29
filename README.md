@@ -19,82 +19,116 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
 ### Problem Description
+**Reorder Linked List by Frequency of Nodes**
 
-**Longest Increasing Subsequence with Constraints**
-
-Given an array of integers `arr` and a constraint value `maxSum`, find the length of the longest increasing subsequence that does not exceed the sum of its elements by `maxSum`. The subsequence must be strictly increasing, meaning that each element in the subsequence must be greater than the previous one.
+Given a singly linked list where each node contains a value and a frequency (how many times the value appears in the list), reorder the list such that nodes with higher frequencies come first. If two or more nodes have the same frequency, their original order should be preserved.
 
 ### Example Input/Output
-
-**Input:** `arr = [1, 3, 2, 4, 5]`, `maxSum = 3`
-**Output:** `3` (because the subsequence `[1, 3, 4]` has a sum of `8` and is strictly increasing, but it exceeds the constraint; however, `[1, 2, 3]` meets the constraint and is the longest such subsequence)
-
-### Constraints
-
-- The array `arr` contains at least one element.
-- The constraint value `maxSum` is non-negative.
-
-### Most Efficient Solution in Python
-
-```python
-def longest_increasing_subsequence_with_constraint(arr, maxSum):
-    n = len(arr)
-    dp = [[0] * (maxSum + 1) for _ in range(n)]
-    
-    # Initialize base case for single elements
-    for i in range(n):
-        if arr[i] <= maxSum:
-            dp[i][arr[i]] = 1
-    
-    # Fill dp table in bottom-up manner
-    for i in range(1, n):
-        for j in range(1, maxSum + 1):
-            if j < arr[i]:
-                dp[i][j] = dp[i - 1][j]
-            else:
-                dp[i][j] = max(dp[i - 1][j], 
-                               (dp[i - 1][j - arr[i]] + 1 if j - arr[i] >= 0 else 0))
-    
-    # Find the maximum length of valid subsequences
-    max_length = 0
-    for j in range(maxSum + 1):
-        if dp[n - 1][j] > max_length:
-            max_length = dp[n - 1][j]
-    
-    return max_length
-
-# Example usage:
-arr = [1, 3, 2, 4, 5]
-maxSum = 3
-print(longest_increasing_subsequence_with_constraint(arr, maxSum)) # Output: 3
+**Input:**
+```
+Head: 1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4
+Frequencies:
+- Node with value 1: 1
+- Node with value 2: 2
+- Node with value 3: 3
+- Node with value 4: 1
+```
+**Output:**
+```
+Reordered List:
+3 -> 3 -> 3 -> 2 -> 2 -> 1 -> 4
 ```
 
-### Detailed Explanation of the Algorithm
+### Constraints
+- The linked list only contains unique values.
+- The frequency of each value is provided separately.
+- The frequencies are non-negative integers.
+- The original order of nodes with the same frequency is preserved.
 
-This problem can be solved using dynamic programming with a two-dimensional array `dp`. The dimensions of `dp` are `(n, maxSum + 1)`, where `n` is the length of the input array.
+### Analysis of Complexity
 
-1. **Initialization**: We initialize each element in the first row and first column of `dp` based on whether each single element in `arr` does not exceed `maxSum`.
-   
-2. **Bottom-Up Fill**: For each element in `arr` and each possible sum up to `maxSum`, we fill up the table using two possibilities:
-   - If the current element does not exceed the current sum `j`, then we consider only excluding this element from the subsequence.
-   - If the current element does exceed the current sum `j`, then we consider including this element in a valid subsequence only if there's a valid subsequence without this element that sums up to `j - arr[i]`.
+**Time Complexity:**
+The time complexity of this problem can be broken down into two main steps:
+1. **Counting Frequencies:** This involves creating a frequency map where each key is a node's value and its value is the frequency of the node.
+   - This step can be done in O(n) time where n is the number of nodes in the linked list.
 
-3. **Maximum Length**: Finally, we scan through all possible sums from 1 to `maxSum` and find the maximum length of valid subsequences stored in `dp` at index `(n - 1, j)` for any valid sum `j`.
+2. **Reordering the List:** Once frequencies are counted, we need to reorder the list based on these frequencies.
+   - This involves using a data structure like a priority queue (e.g., Python's `heapq`) to keep track of nodes sorted by their frequencies.
+   - Reordering the list while preserving original order for nodes with equal frequencies involves a more complex approach like using multi-level priority queue or sorting directly while maintaining indices.
+   - The overall time complexity for reordering would be O(n log n) due to the sorting operation using a priority queue.
 
-### Time and Space Complexity
+However, we can optimize this further by using a `Counter` from Python's `collections` module which inherently handles frequency counting and then sorting by frequency. This would simplify our implementation and reduce overall complexity.
 
-- **Time Complexity**: The time complexity is O(n * maxSum), where n is the length of the input array and maxSum is the maximum allowed sum.
-- **Space Complexity**: The space complexity is O(n * maxSum), as we need to store a 2D array of size `(n, maxSum + 1)`.
+**Space Complexity:**
+The additional space complexity comes from creating a frequency map and potentially using an auxiliary data structure like a priority queue for sorting.
+- The space used for counting frequencies would be O(n), assuming that we store each unique value once.
+- If we use a priority queue to sort by frequency, this would add another O(n) space complexity.
 
-### Why This Approach is Optimal
+### Most Efficient Solution
 
-This approach ensures we consider all possible combinations of sums up to `maxSum` while maintaining an efficient space usage. The bottom-up filling ensures that each subproblem is solved only once and stored in memory for future reuse, which aligns with typical dynamic programming principles.
+#### Using `Counter` from Python's `collections` module
 
-If there were multiple approaches with different trade-offs, this method would be chosen because it directly addresses the problem constraints by ensuring that no subsequence exceeds its allowed sum while finding the longest possible increase. 
+```python
+from collections import Counter
 
-### Difficulty Rating
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
-The problem requires a clear understanding of dynamic programming principles along with managing both increasing order and sum constraints. The use of a 2D array adds complexity compared to simpler DP problems but remains manageable with proper initialization and iteration strategies.
+def reorderLinkedListByFrequency(head):
+    # Step 1: Count frequencies of nodes
+    freq_map = Counter()
+    current = head
+    
+    while current:
+        freq_map[current.val] += 1
+        current = current.next
+    
+    # Step 2: Reorder linked list based on frequencies while preserving original order for nodes with equal frequencies
+    nodes_sorted_by_freq = []
+    
+    for val, freq in freq_map.items():
+        for _ in range(freq):
+            nodes_sorted_by_freq.append(ListNode(val))
+    
+    # Combine sorted nodes into a single linked list
+    if not nodes_sorted_by_freq:
+        return None
+    
+    head_of_reordered_list = nodes_sorted_by_freq[0]
+    
+    tail_of_reordered_list = head_of_reordered_list
+    for i in range(1, len(nodes_sorted_by_freq)):
+        tail_of_reordered_list.next = nodes_sorted_by_freq[i]
+        tail_of_reordered_list = tail_of_reordered_list.next
+    
+    return head_of_reordered_list
+
+# Example usage:
+# Create initial linked list: 1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4
+head = ListNode(1)
+head.next = ListNode(2)
+head.next.next = ListNode(2)
+head.next.next.next = ListNode(3)
+head.next.next.next.next = ListNode(3)
+head.next.next.next.next.next = ListNode(4)
+
+# Reorder linked list by frequency:
+reordered_head = reorderLinkedListByFrequency(head)
+
+# Print reordered linked list:
+while reordered_head:
+    print(reordered_head.val)
+    reordered_head = reordered_head.next
+```
+
+### Explanation
+
+1. **Counting Frequencies:** We use Python's `Counter` class from `collections` which efficiently counts the frequency of each unique value in O(n) time.
+2. **Reordering Linked List:** We create a new linked list sorted by frequency by appending each value to the sorted list as many times as its frequency counts.
+
+By leveraging Python's built-in `Counter
