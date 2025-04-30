@@ -21,114 +21,74 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
-**Reorder Linked List by Frequency of Nodes**
+### Problem Description: Maximum Sum Segment with Consecutive Elements
 
-Given a singly linked list where each node contains a value and a frequency (how many times the value appears in the list), reorder the list such that nodes with higher frequencies come first. If two or more nodes have the same frequency, their original order should be preserved.
+Given an array of integers, find the maximum sum segment where the distance between consecutive elements is at most 6. The segment can start and end anywhere in the array.
 
-### Example Input/Output
-**Input:**
-```
-Head: 1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4
-Frequencies:
-- Node with value 1: 1
-- Node with value 2: 2
-- Node with value 3: 3
-- Node with value 4: 1
-```
-**Output:**
-```
-Reordered List:
-3 -> 3 -> 3 -> 2 -> 2 -> 1 -> 4
-```
+**Example Input/Output:**
 
-### Constraints
-- The linked list only contains unique values.
-- The frequency of each value is provided separately.
-- The frequencies are non-negative integers.
-- The original order of nodes with the same frequency is preserved.
+- **Input:** `[2, 3, -1, 5, -3, 4, 0, -1, 5, 4]`
+- **Output:** `14` (The sum of the segment `[4, 0, -1, 5, 4]` is 12, but there is a bigger sum segment `[5, -3, 4]` which is not valid because it doesn't meet the distance condition. However, `[4, 0, -1, 5, 4]` meets this condition and has a higher sum.)
 
-### Analysis of Complexity
-
-**Time Complexity:**
-The time complexity of this problem can be broken down into two main steps:
-1. **Counting Frequencies:** This involves creating a frequency map where each key is a node's value and its value is the frequency of the node.
-   - This step can be done in O(n) time where n is the number of nodes in the linked list.
-
-2. **Reordering the List:** Once frequencies are counted, we need to reorder the list based on these frequencies.
-   - This involves using a data structure like a priority queue (e.g., Python's `heapq`) to keep track of nodes sorted by their frequencies.
-   - Reordering the list while preserving original order for nodes with equal frequencies involves a more complex approach like using multi-level priority queue or sorting directly while maintaining indices.
-   - The overall time complexity for reordering would be O(n log n) due to the sorting operation using a priority queue.
-
-However, we can optimize this further by using a `Counter` from Python's `collections` module which inherently handles frequency counting and then sorting by frequency. This would simplify our implementation and reduce overall complexity.
-
-**Space Complexity:**
-The additional space complexity comes from creating a frequency map and potentially using an auxiliary data structure like a priority queue for sorting.
-- The space used for counting frequencies would be O(n), assuming that we store each unique value once.
-- If we use a priority queue to sort by frequency, this would add another O(n) space complexity.
+**Constraints:**
+1. The array can be empty.
+2. The array contains non-negative integers.
+3. The distance between consecutive elements in a valid segment must be at most 6.
+4. The sum of a valid segment is calculated by adding all elements within the segment.
 
 ### Most Efficient Solution
 
-#### Using `Counter` from Python's `collections` module
+To solve this problem efficiently, we can use a dynamic programming approach combined with a sliding window technique. We maintain two arrays: one for the maximum sum ending at each position (`max_sum_end`) and one for the maximum sum segment that meets the distance condition (`max_valid_sum`).
 
 ```python
-from collections import Counter
+def max_sum_segment_with_distance(arr):
+    n = len(arr)
+    
+    # Initialize arrays to store maximum sums
+    max_sum_end = [0] * n
+    max_valid_sum = [0] * n
+    
+    # Calculate maximum sum ending at each position (no distance constraint)
+    max_sum = float('-inf')  # Initialize max sum as negative infinity
+    for i in range(n):
+        if i == 0:
+            max_sum_end[i] = arr[i]
+        else:
+            max_sum_end[i] = max(max_sum_end[i-1] + arr[i], arr[i])
+        
+        # Update global max_sum if necessary
+        if max_sum_end[i] > max_sum:
+            max_sum = max_sum_end[i]
 
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
+    # Calculate maximum valid sum segment
+    max_valid_sum[0] = float('-inf')
+    
+    for i in range(1, n):
+        # Extend current valid segment by at most 6 steps
+        for j in range(max(0, i-6), i):
+            if i-j <= 6:
+                max_valid_sum[i] = max(max_valid_sum[i], max_sum_end[j] + sum(arr[j+1:i]))
+        
+        # Update global max_valid_sum if necessary
+        if max_valid_sum[i] > max_valid_sum[i-1]:
+            max_valid_sum[i] = max_valid_sum[i]
 
-def reorderLinkedListByFrequency(head):
-    # Step 1: Count frequencies of nodes
-    freq_map = Counter()
-    current = head
-    
-    while current:
-        freq_map[current.val] += 1
-        current = current.next
-    
-    # Step 2: Reorder linked list based on frequencies while preserving original order for nodes with equal frequencies
-    nodes_sorted_by_freq = []
-    
-    for val, freq in freq_map.items():
-        for _ in range(freq):
-            nodes_sorted_by_freq.append(ListNode(val))
-    
-    # Combine sorted nodes into a single linked list
-    if not nodes_sorted_by_freq:
-        return None
-    
-    head_of_reordered_list = nodes_sorted_by_freq[0]
-    
-    tail_of_reordered_list = head_of_reordered_list
-    for i in range(1, len(nodes_sorted_by_freq)):
-        tail_of_reordered_list.next = nodes_sorted_by_freq[i]
-        tail_of_reordered_list = tail_of_reordered_list.next
-    
-    return head_of_reordered_list
+    return max_valid_sum[-1]
 
-# Example usage:
-# Create initial linked list: 1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4
-head = ListNode(1)
-head.next = ListNode(2)
-head.next.next = ListNode(2)
-head.next.next.next = ListNode(3)
-head.next.next.next.next = ListNode(3)
-head.next.next.next.next.next = ListNode(4)
-
-# Reorder linked list by frequency:
-reordered_head = reorderLinkedListByFrequency(head)
-
-# Print reordered linked list:
-while reordered_head:
-    print(reordered_head.val)
-    reordered_head = reordered_head.next
+# Example usage
+array = [2, 3, -1, 5, -3, 4, 0, -1, 5, 4]
+result = max_sum_segment_with_distance(array)
+print("Maximum Sum Segment:", result)
 ```
 
-### Explanation
+### Complexity Analysis
 
-1. **Counting Frequencies:** We use Python's `Counter` class from `collections` which efficiently counts the frequency of each unique value in O(n) time.
-2. **Reordering Linked List:** We create a new linked list sorted by frequency by appending each value to the sorted list as many times as its frequency counts.
+1. **Time Complexity:** The time complexity is `O(n)` where `n` is the length of the array. This is because we iterate through the array twice: once to calculate `max_sum_end` and once to calculate `max_valid_sum`.
 
-By leveraging Python's built-in `Counter
+2. **Space Complexity:** The space complexity is also `O(n)` due to the use of two arrays (`max_sum_end` and `max_valid_sum`) each of size `n`.
+
+### Difficulty Rating
+
+This problem requires a good understanding of dynamic programming and how to apply it with a sliding window technique. The solution involves maintaining two arrays which may seem complex but is actually straightforward once understood clearly. The key insight here is using `max_sum_end` to efficiently calculate the maximum sum without considering distance constraints and then extending these sums while ensuring they meet the distance requirement. 
+
+This difficulty rating reflects that while it's not trivially easy, it's still within reach for developers who have a solid grasp on basic dynamic programming concepts and can apply them creatively with additional constraints like the sliding window approach.
