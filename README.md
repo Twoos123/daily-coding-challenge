@@ -21,74 +21,80 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description: Maximum Sum Segment with Consecutive Elements
+### Problem Description: **Find Kth Node from End of LinkedList**
 
-Given an array of integers, find the maximum sum segment where the distance between consecutive elements is at most 6. The segment can start and end anywhere in the array.
+Given the head of a singly linked list, find and return the Kth node from the end of the linked list.
 
-**Example Input/Output:**
+#### Example Input/Output
 
-- **Input:** `[2, 3, -1, 5, -3, 4, 0, -1, 5, 4]`
-- **Output:** `14` (The sum of the segment `[4, 0, -1, 5, 4]` is 12, but there is a bigger sum segment `[5, -3, 4]` which is not valid because it doesn't meet the distance condition. However, `[4, 0, -1, 5, 4]` meets this condition and has a higher sum.)
+- **Input**: Head of a singly linked list, K (an integer)
+- **Output**: Node at the Kth position from the end of the linked list
 
-**Constraints:**
-1. The array can be empty.
-2. The array contains non-negative integers.
-3. The distance between consecutive elements in a valid segment must be at most 6.
-4. The sum of a valid segment is calculated by adding all elements within the segment.
+#### Constraints
 
-### Most Efficient Solution
+- The linked list can be empty (i.e., head is `None`).
+- K is within the bounds of the length of the linked list.
 
-To solve this problem efficiently, we can use a dynamic programming approach combined with a sliding window technique. We maintain two arrays: one for the maximum sum ending at each position (`max_sum_end`) and one for the maximum sum segment that meets the distance condition (`max_valid_sum`).
+#### Analysis
+
+This problem requires traversing the linked list to find the Kth node from the end. The most efficient approach is to use two pointers, one that moves K steps ahead and another that moves at normal speed. When the ahead pointer reaches the end, the slower pointer will be at the Kth position from the end.
+
+### Solution in Python
 
 ```python
-def max_sum_segment_with_distance(arr):
-    n = len(arr)
-    
-    # Initialize arrays to store maximum sums
-    max_sum_end = [0] * n
-    max_valid_sum = [0] * n
-    
-    # Calculate maximum sum ending at each position (no distance constraint)
-    max_sum = float('-inf')  # Initialize max sum as negative infinity
-    for i in range(n):
-        if i == 0:
-            max_sum_end[i] = arr[i]
-        else:
-            max_sum_end[i] = max(max_sum_end[i-1] + arr[i], arr[i])
-        
-        # Update global max_sum if necessary
-        if max_sum_end[i] > max_sum:
-            max_sum = max_sum_end[i]
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
 
-    # Calculate maximum valid sum segment
-    max_valid_sum[0] = float('-inf')
+def findKthNodeFromEnd(head: ListNode, k: int) -> ListNode:
+    # Initialize two pointers, one k steps ahead and one at the start
+    ahead = head
+    for _ in range(k):
+        if ahead is None:
+            raise ValueError("K is larger than the length of the list")
+        ahead = ahead.next
     
-    for i in range(1, n):
-        # Extend current valid segment by at most 6 steps
-        for j in range(max(0, i-6), i):
-            if i-j <= 6:
-                max_valid_sum[i] = max(max_valid_sum[i], max_sum_end[j] + sum(arr[j+1:i]))
-        
-        # Update global max_valid_sum if necessary
-        if max_valid_sum[i] > max_valid_sum[i-1]:
-            max_valid_sum[i] = max_valid_sum[i]
+    # Move both pointers at the same pace until ahead pointer reaches the end
+    behind = head
+    while ahead is not None:
+        ahead = ahead.next
+        behind = behind.next
+    
+    return behind
 
-    return max_valid_sum[-1]
+# Example usage:
+head = ListNode(1)
+head.next = ListNode(2)
+head.next.next = ListNode(3)
+head.next.next.next = ListNode(4)
+head.next.next.next.next = ListNode(5)
 
-# Example usage
-array = [2, 3, -1, 5, -3, 4, 0, -1, 5, 4]
-result = max_sum_segment_with_distance(array)
-print("Maximum Sum Segment:", result)
+kth_node = findKthNodeFromEnd(head, 2)  # Output: Node with value 4
 ```
 
-### Complexity Analysis
+### Algorithm Explanation
 
-1. **Time Complexity:** The time complexity is `O(n)` where `n` is the length of the array. This is because we iterate through the array twice: once to calculate `max_sum_end` and once to calculate `max_valid_sum`.
+1. **Initialization**: The function initializes two pointers, `ahead` and `behind`, both pointing to the head of the list. The `ahead` pointer moves K steps ahead.
+2. **Validation**: If `ahead` reaches `None`, it means K is larger than the length of the list, so we raise an error.
+3. **Traversal**: Both pointers move at the same pace until `ahead` reaches the end of the list. At this point, `behind` will be K steps from the end.
+4. **Return**: The function returns the node at Kth position from the end.
 
-2. **Space Complexity:** The space complexity is also `O(n)` due to the use of two arrays (`max_sum_end` and `max_valid_sum`) each of size `n`.
+### Time and Space Complexity
+
+- **Time Complexity**: O(L), where L is the length of the linked list.
+  - The traversal takes linear time because each node is visited once.
+  
+- **Space Complexity**: O(1), as no additional space is used other than a constant amount for pointers.
+
+### Why This Approach is Optimal
+
+This approach is optimal because it uses a constant amount of space and has a linear time complexity. Using two pointers allows us to traverse the list in one pass, making it more efficient than other methods like recursive approaches that could potentially visit each node multiple times.
+
+### Trade-offs
+
+There are no significant trade-offs between time and space in this approach. However, for very large linked lists where memory constraints are critical, other methods might be necessary, but they would likely involve more complex implementations.
 
 ### Difficulty Rating
 
-This problem requires a good understanding of dynamic programming and how to apply it with a sliding window technique. The solution involves maintaining two arrays which may seem complex but is actually straightforward once understood clearly. The key insight here is using `max_sum_end` to efficiently calculate the maximum sum without considering distance constraints and then extending these sums while ensuring they meet the distance requirement. 
-
-This difficulty rating reflects that while it's not trivially easy, it's still within reach for developers who have a solid grasp on basic dynamic programming concepts and can apply them creatively with additional constraints like the sliding window approach.
+This problem is moderately challenging because it requires understanding how to use two pointers effectively for traversing a linked list and handling edge cases like invalid values for K.
