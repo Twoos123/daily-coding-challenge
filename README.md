@@ -21,67 +21,74 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
+**DIFFICULTY: 3**
+
 ### Problem Description
-**Kth Smallest Element in an Array using a Min Heap**
 
-Given an array of integers, implement an efficient algorithm to find the kth smallest element using a Min Heap.
+Given a string `s`, you need to find the longest substring that contains exactly `k` unique characters and has a length of at least `len`. You should return this substring. If no such substring exists, return an empty string.
 
-**Problem Statement:**
-You are given an array of integers and an integer `k`. Your task is to find the kth smallest element in this array using a Min Heap. The algorithm should ensure that it uses the Min Heap data structure optimally to minimize both time and space complexity.
+**Constraints:**
+- The input string `s` is not empty and contains only ASCII characters.
+- The integer `k` is within the range `[1, len(s)]`.
+- The integer `len` is within the range `[1, len(s)]`.
 
 ### Example Input/Output
 
-**Input:**
-- Array: `[3, 2, 1, 5, 6, 4]`
-- `k`: `3`
+**Input:** `s = "abcabcbb", k = 2, len = 2`
+**Output:** `"bc"`
 
-**Output:**
-- The 3rd smallest element: `2`
-
-### Constraints
-- The array contains distinct integers.
-- `k` is a valid index in the range `[1, n]`, where `n` is the length of the array.
-
-### Most Efficient Solution in Python
+### Solution in Python
 
 ```python
-import heapq
+def longest_substring_with_k_unique_chars(s, k, length):
+    if k > length:
+        return ""
 
-def kth_smallest_element(array, k):
-    # Convert the array into a min heap
-    min_heap = []
-    for num in array:
-        # Push each element into the min heap
-        heapq.heappush(min_heap, num)
+    char_set = set()
+    max_length = 0
+    max_substring = ""
+    left = right = 0
+
+    while right < len(s):
+        while len(char_set) < k and right < len(s):
+            char_set.add(s[right])
+            right += 1
+        
+        if len(char_set) == k and right - left >= length:
+            if right - left > max_length:
+                max_length = right - left
+                max_substring = s[left:right]
+        
+        while len(char_set) > k and left <= right:
+            char_set.remove(s[left])
+            left += 1
+        
+        if len(char_set) > k:
+            break
     
-    # Pop elements from the min heap until we reach the kth smallest element
-    for _ in range(k - 1):
-        heapq.heappop(min_heap)
-    
-    # The top of the heap will be the kth smallest element
-    return min_heap[0]
+    return max_substring
+
+# Example usage:
+s = "abcabcbb"
+k = 2
+length = 2
+print(longest_substring_with_k_unique_chars(s, k, length)) # Output: "bc"
 ```
 
-### Detailed Explanation
-The solution uses the `heapq` module in Python to implement a Min Heap. Here’s how it works:
-
-1. **Initialization**: The `min_heap` list is initialized to store elements from the input array.
-2. **Heapify**: Each element from the input array is pushed into the `min_heap` using `heapq.heappush`, which ensures that the heap property is maintained.
-3. **Extraction**: We then pop elements from the `min_heap` using `heapq.heappop` until we have processed `k - 1` elements. This effectively removes all elements smaller than or equal to the kth smallest element.
-4. **Result**: After extracting `k - 1` elements, the top of the remaining heap will be the kth smallest element.
-
 ### Analysis of Complexity
-**Time Complexity**:
-- **Building Min Heap**: The initial push operation into `min_heap` takes O(n log n) time where n is the length of the input array because each push operation takes log n time due to heap properties.
-- **Extraction Phase**: Extracting k - 1 elements from the heap takes O((k - 1) log n) time because each pop operation also involves maintaining heap properties.
-  
-Thus, the total time complexity is O(n log n + (k - 1) log n) ≈ O(n log n).
 
-**Space Complexity**:
-- The space required to store elements in terms of auxiliary space remains O(k) as we only need to store k elements in our heap.
+**Time Complexity:**
+- The two-pointer technique is used here to efficiently move the window.
+- The inner while loop iterates at most `O(n)` times where `n` is the length of the string.
+- The outer while loop iterates at most `O(n)` times.
+- Therefore, the overall time complexity is `O(n)`.
+
+**Space Complexity:**
+- We use a set to store unique characters.
+- The space required for the set is `O(min(k, n))`, which is bounded by the size of the input string or the value of `k`.
+- Additionally, we store the result substring which can be of size up to `O(n)`.
+- Therefore, the overall space complexity is `O(min(k, n))`.
 
 ### Why This Approach is Optimal
-This approach leverages Python's built-in `heapq` module which provides efficient implementation details such as maintaining heap properties with each operation. This ensures that both time and space complexities are minimized.
 
-### Difficulty Rating
-This problem requires understanding how to utilize a Min Heap efficiently while also handling edge cases related to finding a specific index within an ordered set. The use of Python's built-in module simplifies some complexities but still demands knowledge about heap operations and their implications on performance metrics like time and space complexities.
+This approach is optimal because it efficiently handles the constraints by using a sliding window technique along with a set to track unique characters. It ensures that we always have at most `k` unique characters in the current window and adjusts the window accordingly to meet both conditions of having exactly `k` unique characters and a length of at least `len`. This approach minimizes unnecessary checks and computations, making it efficient in terms of both time and space complexity.
