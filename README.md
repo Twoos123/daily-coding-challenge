@@ -21,74 +21,105 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-**DIFFICULTY: 3**
+### Problem Description: Reorder a Linked List using Two Stacks
 
-### Problem Description
+#### Problem Statement
+Given a linked list, reorder it such that all elements from the second half of the list come first, followed by elements from the first half. The reordering should be done using two stacks.
 
-Given a string `s`, you need to find the longest substring that contains exactly `k` unique characters and has a length of at least `len`. You should return this substring. If no such substring exists, return an empty string.
+#### Example Input/Output
 
-**Constraints:**
-- The input string `s` is not empty and contains only ASCII characters.
-- The integer `k` is within the range `[1, len(s)]`.
-- The integer `len` is within the range `[1, len(s)]`.
+```
+Input: 
+1 -> 2 -> 3 -> 4 -> 5
 
-### Example Input/Output
+Output:
+3 -> 4 -> 5 -> 1 -> 2
+```
 
-**Input:** `s = "abcabcbb", k = 2, len = 2`
-**Output:** `"bc"`
+#### Constraints
+- The linked list must be reordered in place.
+- The reordering should be done using two stacks.
+- The solution should be implemented efficiently, with both time and space complexity considered.
 
-### Solution in Python
+### Most Efficient Solution (Python)
 
 ```python
-def longest_substring_with_k_unique_chars(s, k, length):
-    if k > length:
-        return ""
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
 
-    char_set = set()
-    max_length = 0
-    max_substring = ""
-    left = right = 0
-
-    while right < len(s):
-        while len(char_set) < k and right < len(s):
-            char_set.add(s[right])
-            right += 1
-        
-        if len(char_set) == k and right - left >= length:
-            if right - left > max_length:
-                max_length = right - left
-                max_substring = s[left:right]
-        
-        while len(char_set) > k and left <= right:
-            char_set.remove(s[left])
-            left += 1
-        
-        if len(char_set) > k:
-            break
+def reorderList(head):
+    if not head or not head.next or not head.next.next:
+        return
     
-    return max_substring
+    # First half from head to mid
+    first_half_end = end_of_first_half(head)
+    
+    # Reverse second half of list
+    second_half_start = reverse_list(first_half_end.next)
+    
+    # Merge two sorted halves with help of two stacks
+    merge_two_halves(head, second_half_start)
+
+def end_of_first_half(head):
+    slow = fast = head
+    while fast.next and fast.next.next:
+        slow = slow.next
+        fast = fast.next.next
+    return slow
+
+def reverse_list(head):
+    prev_node = None
+    while head:
+        next_node = head.next
+        head.next = prev_node
+        prev_node = head
+        head = next_node
+    return prev_node
+
+def merge_two_halves(list1, list2):
+    while list2:
+        temp1, temp2 = list1, list2
+        list1 = list2.next
+        list2.next = temp1
+        temp1.next, temp2 = temp2, list1.next 
+        list2 = temp2.next 
 
 # Example usage:
-s = "abcabcbb"
-k = 2
-length = 2
-print(longest_substring_with_k_unique_chars(s, k, length)) # Output: "bc"
+# Create linked list: 1 -> 2 -> 3 -> 4 -> 5
+head = ListNode(1)
+head.next = ListNode(2)
+head.next.next = ListNode(3)
+head.next.next.next = ListNode(4)
+head.next.next.next.next = ListNode(5)
+
+reorderList(head)
+
+# Print reordered linked list:
+current_node = head 
+while current_node:
+     print(current_node.val, end=' ')
+     current_node = current_node.next 
 ```
 
 ### Analysis of Complexity
 
-**Time Complexity:**
-- The two-pointer technique is used here to efficiently move the window.
-- The inner while loop iterates at most `O(n)` times where `n` is the length of the string.
-- The outer while loop iterates at most `O(n)` times.
-- Therefore, the overall time complexity is `O(n)`.
+- **Time Complexity**:
+  - Reversing the second half of the list using `reverse_list` takes O(n) time.
+  - Merging two halves using `merge_two_halves` also takes O(n) time.
+  - Therefore, the overall time complexity is O(n).
 
-**Space Complexity:**
-- We use a set to store unique characters.
-- The space required for the set is `O(min(k, n))`, which is bounded by the size of the input string or the value of `k`.
-- Additionally, we store the result substring which can be of size up to `O(n)`.
-- Therefore, the overall space complexity is `O(min(k, n))`.
+- **Space Complexity**:
+  - We use two stacks (or equivalently, two pointers for reversing) which requires O(n) space.
 
-### Why This Approach is Optimal
+### Difficulty Rating
 
-This approach is optimal because it efficiently handles the constraints by using a sliding window technique along with a set to track unique characters. It ensures that we always have at most `k` unique characters in the current window and adjusts the window accordingly to meet both conditions of having exactly `k` unique characters and a length of at least `len`. This approach minimizes unnecessary checks and computations, making it efficient in terms of both time and space complexity.
+### Explanation
+
+The problem requires us to reorder a linked list using two stacks. This involves several steps:
+1. **Finding the End of First Half**: We use two pointers (slow and fast) to find the end of the first half in O(n) time.
+2. **Reversing Second Half**: We reverse the second half of the list using a standard reverse list algorithm also in O(n) time.
+3. **Merging Halves**: We merge these two halves while maintaining their order.
+
+The chosen solution is optimal because it leverages standard techniques for reversing and merging lists efficiently without additional data structures beyond what's required for the problem statement. The trade-off here is space complexity, which is necessary to reverse part of the list efficiently.
