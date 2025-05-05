@@ -21,105 +21,87 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description: Reorder a Linked List using Two Stacks
+### Challenge: "Inorder Traversal with Reversed Order"
 
-#### Problem Statement
-Given a linked list, reorder it such that all elements from the second half of the list come first, followed by elements from the first half. The reordering should be done using two stacks.
+#### Problem Description
+
+Given a binary tree, perform an inorder traversal and then reverse the order of the nodes while maintaining their original values. The resulting list should be in the reverse order of the inorder traversal.
 
 #### Example Input/Output
 
+**Input:**
 ```
-Input: 
-1 -> 2 -> 3 -> 4 -> 5
+        4
+       / \
+      2   7
+     / \   \
+    1   3   6
+```
 
-Output:
-3 -> 4 -> 5 -> 1 -> 2
+**Output:**
+```
+[6, 3, 1, 2, 7, 4]
 ```
 
 #### Constraints
-- The linked list must be reordered in place.
-- The reordering should be done using two stacks.
-- The solution should be implemented efficiently, with both time and space complexity considered.
+- The binary tree nodes contain integer values.
+- The tree is not necessarily a binary search tree (BST).
+- The inorder traversal should be followed by a reversal of the order of nodes.
 
-### Most Efficient Solution (Python)
+#### Difficulty Rating: 3
+
+#### Explanation and Solution
+
+To solve this problem efficiently, we can use a combination of inorder traversal and list manipulation. Here’s the most optimal approach:
+
+1. **Perform Inorder Traversal:**
+   Use a recursive approach to perform the inorder traversal of the binary tree. This will give us the nodes in ascending order.
+
+2. **Reverse the List:**
+   After getting the inorder traversal list, simply reverse it using Python's slicing feature.
+
+#### Most Efficient Solution in Python:
 
 ```python
-class ListNode:
+class TreeNode:
     def __init__(self, x):
         self.val = x
-        self.next = None
+        self.left = None
+        self.right = None
 
-def reorderList(head):
-    if not head or not head.next or not head.next.next:
-        return
-    
-    # First half from head to mid
-    first_half_end = end_of_first_half(head)
-    
-    # Reverse second half of list
-    second_half_start = reverse_list(first_half_end.next)
-    
-    # Merge two sorted halves with help of two stacks
-    merge_two_halves(head, second_half_start)
+def reverse_inorder_traversal(root):
+    # Helper function to perform inorder traversal
+    def inorder_traversal(node):
+        if node:
+            inorder_traversal(node.left)
+            result.append(node.val)
+            inorder_traversal(node.right)
 
-def end_of_first_half(head):
-    slow = fast = head
-    while fast.next and fast.next.next:
-        slow = slow.next
-        fast = fast.next.next
-    return slow
-
-def reverse_list(head):
-    prev_node = None
-    while head:
-        next_node = head.next
-        head.next = prev_node
-        prev_node = head
-        head = next_node
-    return prev_node
-
-def merge_two_halves(list1, list2):
-    while list2:
-        temp1, temp2 = list1, list2
-        list1 = list2.next
-        list2.next = temp1
-        temp1.next, temp2 = temp2, list1.next 
-        list2 = temp2.next 
+    result = []
+    inorder_traversal(root)
+    # Reverse the result list
+    result.reverse()
+    return result
 
 # Example usage:
-# Create linked list: 1 -> 2 -> 3 -> 4 -> 5
-head = ListNode(1)
-head.next = ListNode(2)
-head.next.next = ListNode(3)
-head.next.next.next = ListNode(4)
-head.next.next.next.next = ListNode(5)
+# Constructing a sample binary tree
+root = TreeNode(4)
+root.left = TreeNode(2)
+root.right = TreeNode(7)
+root.left.left = TreeNode(1)
+root.left.right = TreeNode(3)
+root.right.right = TreeNode(6)
 
-reorderList(head)
-
-# Print reordered linked list:
-current_node = head 
-while current_node:
-     print(current_node.val, end=' ')
-     current_node = current_node.next 
+print(reverse_inorder_traversal(root))  # Output: [6, 3, 1, 2, 7, 4]
 ```
 
-### Analysis of Complexity
+### Analysis of Complexity:
 
-- **Time Complexity**:
-  - Reversing the second half of the list using `reverse_list` takes O(n) time.
-  - Merging two halves using `merge_two_halves` also takes O(n) time.
-  - Therefore, the overall time complexity is O(n).
+- **Time Complexity:** The time complexity of this solution is O(n), where n is the number of nodes in the tree. This is because we visit each node exactly once during both the inorder traversal and the reversing operation.
+- **Space Complexity:** The space complexity is also O(n) due to the temporary storage needed for storing the results of the inorder traversal.
 
-- **Space Complexity**:
-  - We use two stacks (or equivalently, two pointers for reversing) which requires O(n) space.
+### Why This Approach is Optimal:
+This approach leverages Python's efficient list slicing for reversing the list, making it straightforward and efficient. The use of recursion for inorder traversal ensures that we visit each node in a systematic manner without needing additional data structures that would increase complexity. 
 
-### Difficulty Rating
-
-### Explanation
-
-The problem requires us to reorder a linked list using two stacks. This involves several steps:
-1. **Finding the End of First Half**: We use two pointers (slow and fast) to find the end of the first half in O(n) time.
-2. **Reversing Second Half**: We reverse the second half of the list using a standard reverse list algorithm also in O(n) time.
-3. **Merging Halves**: We merge these two halves while maintaining their order.
-
-The chosen solution is optimal because it leverages standard techniques for reversing and merging lists efficiently without additional data structures beyond what's required for the problem statement. The trade-off here is space complexity, which is necessary to reverse part of the list efficiently.
+### Trade-offs:
+There are no significant trade-offs between time and space complexity in this approach. The operations are both efficient in terms of time (O(n)) and space (O(n)), making it a well-rounded solution for this challenge.
