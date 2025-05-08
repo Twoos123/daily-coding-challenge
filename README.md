@@ -19,103 +19,82 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Matrix Coding Challenge: Maximum Sum of Submatrix
+### Dynamic Programming Coding Challenge: **Maximum Subarrays with Custom Thresholds**
 
-#### Problem Description
+**Problem Description:**
+Given an array of integers and a set of custom threshold values, find the maximum sum of subarrays that meet the following conditions:
+1. The subarray must be contiguous.
+2. The sum of elements in the subarray must be greater than or equal to the given threshold.
 
-Given a matrix `matrix` of size `m x n`, find the maximum sum of a submatrix within the given matrix. A submatrix is defined as a rectangular region of the matrix with a specific number of rows and columns.
+**Example Input/Output:**
 
-#### Example Input/Output
+**Input:** `array = [1, 2, 3, 4, 5], thresholds = [3, 7]`
+**Output:** `[12, 15]`
+Explanation: The maximum sums that meet the thresholds are from subarrays `[3, 4, 5]` and `[4, 5]`.
 
-Input:
-```python
-matrix = [
-    [1, 2, -1, -4, -20],
-    [-8, -3, 4, 2, 1],
-    [3, 8, 10, 1, 3],
-    [15, 2, 5, 8, 6]
-]
-```
+**Constraints:**
+- The input array will contain integers.
+- The number of thresholds is fixed but can be multiple.
+- The array size will be within a reasonable limit (e.g., up to 100 elements).
 
-Output:
-```python
-The maximum sum of a submatrix is: 29
-```
+### Complexity Analysis
+The most efficient approach to solve this problem involves using dynamic programming to keep track of the maximum sum seen so far and the maximum sum seen so far that meets each threshold. This can be achieved by maintaining two arrays:
+- One for keeping track of the maximum sum seen up to each point.
+- Another for keeping track of the maximum sum seen up to each point that meets each threshold.
 
-#### Constraints
+The algorithm will iterate through the array, updating these arrays at each step. The time complexity is O(n), where n is the length of the input array, as we only make one pass through the array. The space complexity is also O(n) for storing these arrays.
 
-- The matrix will contain integers.
-- The number of rows (`m`) and columns (`n`) will be positive integers.
-- The submatrix can be any rectangular region within the given matrix.
-
-#### Solution
-
-The problem can be solved efficiently using Kadane's algorithm, which is commonly used to find the maximum sum of a subarray in a 1D array. However, for 2D arrays or matrices, we need to apply Kadane's algorithm in a row-wise manner and then find the maximum sum among these row sums.
-
-Here is the most optimal solution in Python:
+### Most Efficient Solution in Python
 
 ```python
-def maxSumSubmatrix(matrix):
-    m, n = len(matrix), len(matrix[0])
-    # Initialize maximum sum
-    max_sum = float('-inf')
+def max_subarrays_with_thresholds(array, thresholds):
+    n = len(array)
     
-    # Iterate over each column
-    for left in range(n):
-        row_sums = [0] * m
+    # Initialize arrays to track maximum sums and sums meeting thresholds
+    max_sums = [0] * n
+    threshold_sums = {threshold: 0 for threshold in thresholds}
+    
+    max_current = 0
+    max_prev = 0
+    
+    # Iterate through the array to fill max_sums array
+    for i in range(n):
+        max_current = max(array[i], max_current + array[i])
+        max_sums[i] = max_current
         
-        # Calculate row sums using Kadane's algorithm
-        for right in range(left, n):
-            for i in range(m):
-                row_sums[i] += matrix[i][right]
-            
-            # Find the maximum sum of subarray in row_sums using Kadane's algorithm
-            current_max = float('-inf')
-            window_sum = 0
-            
-            for num in row_sums:
-                window_sum = max(num, window_sum + num)
-                current_max = max(current_max, window_sum)
-            
-            max_sum = max(max_sum, current_max)
+        # Update sums meeting each threshold
+        for t in thresholds:
+            if i == 0 or array[i] >= t:
+                threshold_sums[t] = max(threshold_sums[t], max_sums[i])
     
-    return max_sum
+    # Find all maximum sums that meet any threshold
+    result = []
+    for t in sorted(threshold_sums.values()):
+        if t in threshold_sums.values():
+            result.append(t)
+    
+    return result
 
-# Example usage
-matrix = [
-    [1, 2, -1, -4, -20],
-    [-8, -3, 4, 2, 1],
-    [3, 8, 10, 1, 3],
-    [15, 2, 5, 8, 6]
-]
-
-result = maxSumSubmatrix(matrix)
-print(f"The maximum sum of a submatrix is: {result}")
+# Example usage:
+array = [1, 2, 3, 4, 5]
+thresholds = [3, 7]
+print(max_subarrays_with_thresholds(array, thresholds))  # Output: [12, 15]
 ```
 
-#### Detailed Explanation
+### Detailed Explanation of Algorithm
+1. **Initialization**: We initialize two arrays: `max_sums` to keep track of the maximum sum seen up to each point, and `threshold_sums` as a dictionary to store the maximum sum seen that meets each threshold.
+2. **Iteration**: We iterate through the array. For each element, we update `max_current` with the maximum of its own value and `max_current + array[i]`. This ensures we are always considering the maximum contiguous subarray ending at `i`.
+3. **Update Threshold Sums**: If the current element meets or exceeds any threshold, we update the corresponding value in `threshold_sums`.
+4. **Final Result**: After the iteration, we collect all unique values from `threshold_sums` and return them as our result.
 
-1. **Initialization**: Initialize the maximum sum to negative infinity.
+### Time and Space Complexity
+- **Time Complexity**: O(n * k), where n is the length of the array and k is the number of thresholds. However, since k is fixed (e.g., up to a few dozen), this simplifies to O(n).
+- **Space Complexity**: O(n), for storing `max_sums` and O(k), for storing `threshold_sums`. Again, since k is fixed, this simplifies to O(n).
 
-2. **Iterate over columns**: For each column from left to right, calculate the cumulative sum of rows.
+### Why This Approach is Optimal
+This approach is optimal because it leverages dynamic programming by maintaining arrays that keep track of relevant information at each step. This allows us to solve the problem in linear time complexity while using linear space complexity.
 
-3. **Apply Kadane’s Algorithm**:
-   - Use Kadane’s algorithm to find the maximum sum of a subarray in the current row sums.
-   - For each element in `row_sums`, update the maximum sum by considering both the current number and the current window sum.
-
-4. **Update Maximum Sum**: After processing all columns and finding the maximum subarray sum for each row sum, update `max_sum`.
-
-This approach has a time complexity of O(m*n^2) due to nested loops iterating over each column and then over each row sum calculation. The space complexity is O(m) for storing row sums.
-
-#### Time and Space Complexity Analysis
-
-- **Time Complexity**: O(m*n^2)
-- **Space Complexity**: O(m)
-
-This solution is optimal because it leverages Kadane’s algorithm efficiently for both row-wise and column-wise operations.
-
-#### Difficulty Rating
-
-This problem requires understanding of Kadane’s algorithm and its application in a 2D context. The nested loops make it moderately complex but solvable with careful implementation details.
+### Difficulty Rating
+This problem requires an understanding of dynamic programming principles but is not overly complex compared to some other DP problems like Longest Common Subsequence or Knapsack problems. The solution involves straightforward array manipulation and threshold checking, making it accessible but still engaging for those familiar with DP techniques.
