@@ -21,80 +21,80 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Dynamic Programming Coding Challenge: **Maximum Subarrays with Custom Thresholds**
+### Coding Challenge: "Maximum Subarray Sum with Rotations"
 
-**Problem Description:**
-Given an array of integers and a set of custom threshold values, find the maximum sum of subarrays that meet the following conditions:
-1. The subarray must be contiguous.
-2. The sum of elements in the subarray must be greater than or equal to the given threshold.
+#### Problem Description
+
+Given an array `arr` of integers and an integer `k`, find the maximum sum of a subarray after rotating the array `k` times. The array can be rotated in either clockwise or counterclockwise direction.
 
 **Example Input/Output:**
+- Input: `arr = [1, 2, -1, 3, 5], k = 3`
+- Output: `9` (Maximum sum subarray is `[3, 5]` after rotating the array)
+  
+#### Constraints:
+- The array `arr` contains at least one element.
+- The integer `k` is non-negative.
 
-**Input:** `array = [1, 2, 3, 4, 5], thresholds = [3, 7]`
-**Output:** `[12, 15]`
-Explanation: The maximum sums that meet the thresholds are from subarrays `[3, 4, 5]` and `[4, 5]`.
+#### Task
 
-**Constraints:**
-- The input array will contain integers.
-- The number of thresholds is fixed but can be multiple.
-- The array size will be within a reasonable limit (e.g., up to 100 elements).
+Implement a solution using Dynamic Programming (DP) with arrays that efficiently calculates the maximum sum of a subarray after rotating the array `k` times.
 
-### Complexity Analysis
-The most efficient approach to solve this problem involves using dynamic programming to keep track of the maximum sum seen so far and the maximum sum seen so far that meets each threshold. This can be achieved by maintaining two arrays:
-- One for keeping track of the maximum sum seen up to each point.
-- Another for keeping track of the maximum sum seen up to each point that meets each threshold.
+### Analysis of Complexity
 
-The algorithm will iterate through the array, updating these arrays at each step. The time complexity is O(n), where n is the length of the input array, as we only make one pass through the array. The space complexity is also O(n) for storing these arrays.
+- **Time Complexity:** The approach involves calculating prefix sums and suffix sums for the given array before and after rotations. This can be done in O(n) time where n is the length of the array.
+- **Space Complexity:** We need to store prefix sums and suffix sums which requires additional space proportional to the length of the array. Thus, the space complexity is also O(n).
 
 ### Most Efficient Solution in Python
 
 ```python
-def max_subarrays_with_thresholds(array, thresholds):
-    n = len(array)
+def maxSubarraySumRotated(arr, k):
+    n = len(arr)
+    prefix_sums = [0] * (n + 1)
+    suffix_sums = [0] * (n + 1)
     
-    # Initialize arrays to track maximum sums and sums meeting thresholds
-    max_sums = [0] * n
-    threshold_sums = {threshold: 0 for threshold in thresholds}
+    # Calculate prefix sums
+    for i in range(1, n + 1):
+        prefix_sums[i] = prefix_sums[i - 1] + arr[i - 1]
     
-    max_current = 0
-    max_prev = 0
+    # Calculate suffix sums
+    for i in range(n, 0, -1):
+        suffix_sums[i] = suffix_sums[i + 1] + arr[i - 1]
     
-    # Iterate through the array to fill max_sums array
-    for i in range(n):
-        max_current = max(array[i], max_current + array[i])
-        max_sums[i] = max_current
-        
-        # Update sums meeting each threshold
-        for t in thresholds:
-            if i == 0 or array[i] >= t:
-                threshold_sums[t] = max(threshold_sums[t], max_sums[i])
+    max_sum = float('-inf')
     
-    # Find all maximum sums that meet any threshold
-    result = []
-    for t in sorted(threshold_sums.values()):
-        if t in threshold_sums.values():
-            result.append(t)
+    # Rotate the array and find maximum subarray sum
+    for i in range(k + 1):
+        current_sum = prefix_sums[i] + suffix_sums[n - (n - i)] - arr[i - 1]
+        max_sum = max(max_sum, current_sum)
     
-    return result
-
-# Example usage:
-array = [1, 2, 3, 4, 5]
-thresholds = [3, 7]
-print(max_subarrays_with_thresholds(array, thresholds))  # Output: [12, 15]
+    return max_sum
 ```
 
-### Detailed Explanation of Algorithm
-1. **Initialization**: We initialize two arrays: `max_sums` to keep track of the maximum sum seen up to each point, and `threshold_sums` as a dictionary to store the maximum sum seen that meets each threshold.
-2. **Iteration**: We iterate through the array. For each element, we update `max_current` with the maximum of its own value and `max_current + array[i]`. This ensures we are always considering the maximum contiguous subarray ending at `i`.
-3. **Update Threshold Sums**: If the current element meets or exceeds any threshold, we update the corresponding value in `threshold_sums`.
-4. **Final Result**: After the iteration, we collect all unique values from `threshold_sums` and return them as our result.
+### Detailed Explanation of the Algorithm
 
-### Time and Space Complexity
-- **Time Complexity**: O(n * k), where n is the length of the array and k is the number of thresholds. However, since k is fixed (e.g., up to a few dozen), this simplifies to O(n).
-- **Space Complexity**: O(n), for storing `max_sums` and O(k), for storing `threshold_sums`. Again, since k is fixed, this simplifies to O(n).
+1. **Prefix Sums Calculation:**
+   - We calculate prefix sums by iterating over the array from left to right and storing the cumulative sum for each position.
+   - This step allows us to efficiently calculate sums involving elements before a certain position.
+
+2. **Suffix Sums Calculation:**
+   - We calculate suffix sums by iterating over the array from right to left and storing the cumulative sum for each position.
+   - This step allows us to efficiently calculate sums involving elements after a certain position.
+
+3. **Rotation and Maximum Subarray Sum Calculation:**
+   - We rotate the array by iterating over possible rotations (`k + 1` times).
+   - For each rotation, we compute the sum of elements using previously calculated prefix and suffix sums.
+   - We keep track of the maximum subarray sum encountered during these rotations.
 
 ### Why This Approach is Optimal
-This approach is optimal because it leverages dynamic programming by maintaining arrays that keep track of relevant information at each step. This allows us to solve the problem in linear time complexity while using linear space complexity.
+
+- **Efficient Sum Calculations:** Using prefix and suffix sums allows us to avoid redundant calculations of subarray sums by leveraging pre-computed values.
+- **Linear Time Complexity:** The overall time complexity remains O(n) because we only need to traverse the array once for both prefix and suffix calculations.
+- **Linear Space Complexity:** Additional space complexity is also linear with respect to the length of the input array, making this solution efficient in terms of both time and space.
+
+### Trade-Offs
+
+- While our solution has optimal time complexity (O(n)), it requires additional space for storing prefix and suffix sums which is also O(n). This trade-off is necessary for achieving linear time complexity without compromising on efficiency.
 
 ### Difficulty Rating
-This problem requires an understanding of dynamic programming principles but is not overly complex compared to some other DP problems like Longest Common Subsequence or Knapsack problems. The solution involves straightforward array manipulation and threshold checking, making it accessible but still engaging for those familiar with DP techniques.
+
+The problem requires an understanding of dynamic programming concepts and how to leverage prefix and suffix sums effectively. It involves managing additional arrays for calculations but remains manageable with clear explanations and steps provided above.
