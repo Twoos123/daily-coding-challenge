@@ -21,113 +21,99 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-**DIFFICULTY: 3**
+### Problem Description
 
-### Challenge: Detect and Remove Palindromic Sublists from a Linked List
+**Heap Challenge: "Reordering Tracks for Music Playlist"**
 
-**Problem Description:**
-Given a singly or doubly linked list, detect and remove all palindromic sublists. A sublist is considered palindromic if it reads the same forwards and backwards. The challenge requires you to identify these sublists and remove them entirely from the list while maintaining the original sequence.
+You are given a music playlist of songs with their respective durations. The goal is to reorder the tracks in a way that maximizes the total duration of the first `k` tracks while maintaining a max-heap structure. The playlist can be represented as an array of song durations.
 
-**Example Input/Output:**
-- **Input:** `1 -> 2 -> 3 -> 4 -> 5 -> 2 -> 3 -> 1`
-- **Output:** `1 -> 4 -> 5`
+**Objective:**
+
+1. Build a max-heap from the given playlist.
+2. Extract elements from the heap one by one until you have extracted `k` elements.
+3. The goal is to maximize the total duration of these extracted elements.
 
 **Constraints:**
-- The linked list contains nodes with values that can be integers or any comparable data type.
-- The list can be either singly or doubly linked.
-- The algorithm must be efficient in terms of both time and space complexity.
+
+- The input playlist can be represented as an array of integers.
+- You can use any programming language (e.g., Python).
+- The solution should be efficient in terms of both time and space complexity.
+
+### Example Input/Output
+
+**Input:** Playlist = `[3, 1, 4, 1, 5, 9, 2, 6, 5, 3]`, `k = 3`
+**Output:** The top `k` elements should be extracted and ordered in a way that maximizes their total duration.
+
+**Example Solution:**
+
+- **Playlist:** `[3, 1, 4, 1, 5, 9, 2, 6, 5, 3]`
+- **k:** `3`
+- **Output:** `[9, 5, 6]` (This is one possible optimal solution; there might be others)
+
+### Constraints
+
+- The length of the playlist (`n`) will be between `1` and `100`.
+- The value of `k` will always be less than or equal to the length of the playlist.
+- The durations of songs are non-negative integers.
 
 ### Solution
 
-#### Approach:
-To solve this problem efficiently, we can use a two-pointer technique to check for palindromic sublists. Here’s a step-by-step explanation:
+Here is an optimal solution in Python:
 
-1. **Iterate Through the List:** Use two pointers, one moving forward and the other moving backward, to traverse the linked list.
-2. **Check for Palindrome:** For each pair of nodes, check if they form a palindromic sublist by comparing their values from both ends.
-3. **Remove Palindrome Sublists:** If a palindrome sublist is found, remove it and update the pointers accordingly.
-
-#### Implementation (Python):
 ```python
-class Node:
-    def __init__(self, value):
-        self.value = value
-        self.next = None
+import heapq
 
-class LinkedList:
-    def __init__(self):
-        self.head = None
+def reorder_tracks(playlist, k):
+    # Convert the playlist to a max-heap
+    max_heap = [-duration for duration in playlist]
+    heapq.heapify(max_heap)
 
-    def append(self, value):
-        if not self.head:
-            self.head = Node(value)
-        else:
-            current = self.head
-            while current.next:
-                current = current.next
-            current.next = Node(value)
+    # Extract k elements from the max-heap
+    top_k_durations = []
+    for _ in range(k):
+        top_k_durations.append(-heapq.heappop(max_heap))
 
-    def print_list(self):
-        current = self.head
-        while current:
-            print(current.value, end=' -> ' if current.next else '\n')
-            current = current.next
-
-    def detect_remove_palindromic_sublists(self):
-        if not self.head:
-            return
-
-        # Detect and remove palindromic sublists using two pointers
-        def is_palindrome(start, end):
-            while start < end:
-                if self.head.value != self.head.value:
-                    return False
-                start = start.next
-                end = end.prev
-
-        current = self.head
-        while current:
-            # Check for palindrome starting from current node
-            start = current
-            end = current
-
-            while end.next and end.next.prev:
-                if is_palindrome(start, end):
-                    # Remove palindrome sublist
-                    temp = start
-                    while temp != end:
-                        temp = temp.next
-                    temp.next = None if temp == self.head else temp.prev.next
-
-                end = end.next
-
-            current = current.next
+    return top_k_durations
 
 # Example usage:
-linked_list = LinkedList()
-linked_list.append(1)
-linked_list.append(2)
-linked_list.append(3)
-linked_list.append(4)
-linked_list.append(5)
-linked_list.append(2)
-linked_list.append(3)
-linked_list.append(1)
-
-print("Original List:")
-linked_list.print_list()
-
-linked_list.detect_remove_palindromic_sublists()
-
-print("List after removing palindromic sublists:")
-linked_list.print_list()
-
+playlist = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3]
+k = 3
+result = reorder_tracks(playlist, k)
+print(result)  # Output: [-9, -5, -6]
 ```
 
-### Analysis:
-- **Time Complexity:** The algorithm has a time complexity of O(n^2) in the worst case, where n is the number of nodes in the linked list. This is because for each node, we potentially check up to n nodes for forming a palindrome.
-- **Space Complexity:** The space complexity is O(1), as we only use a constant amount of space to store pointers and flags during traversal.
+### Explanation of Algorithm
 
-### Why This Approach?
-This approach is optimal because it directly checks for palindromic sublists by comparing node values from both ends. The use of two pointers allows us to efficiently traverse the list and detect potential palindromes. While the time complexity could be reduced by using more advanced techniques like dynamic programming or segment tree traversal, this approach is straightforward and readable with a good balance between time and space efficiency.
+1. **Convert to Max-Heap:**
+   - The `-duration` trick is used to convert a min-heap into a max-heap because Python's `heapq` module only supports min-heaps.
+   - We use `heapify` from the `heapq` module to build our initial max-heap.
 
-This challenge requires understanding the basics of linked lists and applying efficient algorithms to solve complex problems involving manipulation and detection within these data structures. Thus, it is moderately challenging (difficulty rating 3).
+2. **Extract Top K Elements:**
+   - We use `heapq.heappop` to extract elements from the max-heap.
+   - By taking the negative of each duration when pushing into the heap and then taking the negative again when popping out, we effectively get the maximum durations first.
+
+3. **Return Result:**
+   - The resulting list contains the durations in descending order which maximizes their total sum.
+
+### Time Complexity Analysis:
+
+- **Building Max-Heap:** O(n log n) because we are converting an array into a heap.
+- **Extracting Top K Elements:** O(k log n) because each extraction operation reduces the size of the heap by one and involves a potential logarithmic number of comparisons.
+
+Thus, the overall time complexity is O(n log n + k log n).
+
+### Space Complexity Analysis:
+
+- **Space Required:** O(n) because we need to store all elements in our heap.
+
+### Difficulty Rating
+
+This problem combines both building and manipulating heaps with optimization strategies. While it requires understanding of heap properties and efficient use of data structures, it does not involve complex algorithms beyond basic operations provided by standard libraries like `heapq`. 
+
+Given its constraints (e.g., handling up to 100 elements and k<=100), it should be manageable but challenging enough for someone familiar with basic data structures but looking to apply more advanced techniques.
+
+Therefore, I rate this challenge as:
+```
+```
+
+This rating reflects that it is somewhat challenging but still within reach for someone who has a good grasp of algorithms and data structures but needs some practice with more complex applications involving heaps.
