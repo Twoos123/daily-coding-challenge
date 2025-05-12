@@ -21,99 +21,79 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Challenge: Detecting Cycles in a Linked List
 
-**Heap Challenge: "Reordering Tracks for Music Playlist"**
+**Problem Description:**
+Given the head of a singly linked list, write a function to determine whether the linked list contains a cycle. A cycle is defined as a node that points back to a previous node in the list.
 
-You are given a music playlist of songs with their respective durations. The goal is to reorder the tracks in a way that maximizes the total duration of the first `k` tracks while maintaining a max-heap structure. The playlist can be represented as an array of song durations.
+**Example Input/Output:**
+```
+// Example linked list with a cycle:
+// 1 -> 2 -> 3 -> 4 -> 5 -> 2 (cycle starts at node 2)
+// Function should return True
 
-**Objective:**
-
-1. Build a max-heap from the given playlist.
-2. Extract elements from the heap one by one until you have extracted `k` elements.
-3. The goal is to maximize the total duration of these extracted elements.
+// Example linked list without a cycle:
+// 1 -> 2 -> 3 -> NULL
+// Function should return False
+```
 
 **Constraints:**
+- The linked list nodes may contain integer data.
+- The list may contain cycles.
+- The function should return a boolean indicating whether a cycle exists.
 
-- The input playlist can be represented as an array of integers.
-- You can use any programming language (e.g., Python).
-- The solution should be efficient in terms of both time and space complexity.
-
-### Example Input/Output
-
-**Input:** Playlist = `[3, 1, 4, 1, 5, 9, 2, 6, 5, 3]`, `k = 3`
-**Output:** The top `k` elements should be extracted and ordered in a way that maximizes their total duration.
-
-**Example Solution:**
-
-- **Playlist:** `[3, 1, 4, 1, 5, 9, 2, 6, 5, 3]`
-- **k:** `3`
-- **Output:** `[9, 5, 6]` (This is one possible optimal solution; there might be others)
-
-### Constraints
-
-- The length of the playlist (`n`) will be between `1` and `100`.
-- The value of `k` will always be less than or equal to the length of the playlist.
-- The durations of songs are non-negative integers.
-
-### Solution
-
-Here is an optimal solution in Python:
+**Most Efficient Solution:**
 
 ```python
-import heapq
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
 
-def reorder_tracks(playlist, k):
-    # Convert the playlist to a max-heap
-    max_heap = [-duration for duration in playlist]
-    heapq.heapify(max_heap)
+def hasCycle(head: ListNode) -> bool:
+    """
+    Detects whether a singly linked list contains a cycle.
 
-    # Extract k elements from the max-heap
-    top_k_durations = []
-    for _ in range(k):
-        top_k_durations.append(-heapq.heappop(max_heap))
+    Args:
+        head (ListNode): The head of the linked list.
 
-    return top_k_durations
-
-# Example usage:
-playlist = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3]
-k = 3
-result = reorder_tracks(playlist, k)
-print(result)  # Output: [-9, -5, -6]
+    Returns:
+        bool: True if the linked list contains a cycle, False otherwise.
+    """
+    
+    # Phase 1: Detecting cycle using Floyd's Tortoise and Hare algorithm
+    # Initialize two pointers, slow and fast, both starting at the head
+    slow = head
+    fast = head
+    
+    while fast and fast.next:
+        # Move slow one step at a time
+        slow = slow.next
+        
+        # Move fast two steps at a time
+        fast = fast.next.next
+        
+        # If slow and fast meet at some point, it means there is a cycle
+        if slow == fast:
+            return True
+    
+    # If no cycle is detected after traversing the entire list, return False
+    return False
 ```
 
-### Explanation of Algorithm
+**Detailed Explanation:**
 
-1. **Convert to Max-Heap:**
-   - The `-duration` trick is used to convert a min-heap into a max-heap because Python's `heapq` module only supports min-heaps.
-   - We use `heapify` from the `heapq` module to build our initial max-heap.
+1. **Algorithm**: The solution uses Floyd's Tortoise and Hare algorithm, which is an efficient method for detecting cycles in linked lists.
+2. **Time Complexity**: The time complexity of this algorithm is O(n), where n is the number of nodes in the linked list. This is because each node is visited at most twice (once by the slow pointer and once by the fast pointer).
+3. **Space Complexity**: The space complexity is O(1), as only a constant amount of space is used for the two pointers (slow and fast).
 
-2. **Extract Top K Elements:**
-   - We use `heapq.heappop` to extract elements from the max-heap.
-   - By taking the negative of each duration when pushing into the heap and then taking the negative again when popping out, we effectively get the maximum durations first.
+**Why This Approach is Optimal:**
+- Floyd's Tortoise and Hare algorithm is particularly efficient because it avoids the need for recursive calls or explicit node tracking, making it both space and time efficient.
+- It leverages the property that if there's a cycle, certain distances between nodes will eventually match due to the properties of linked lists.
 
-3. **Return Result:**
-   - The resulting list contains the durations in descending order which maximizes their total sum.
+### Difficulty Rating: 4 (Moderate)
+This problem requires understanding of basic linked list traversal and a clever use of pointers to detect cycles efficiently. It's challenging enough to require careful attention but not so complex as to be overly difficult for someone familiar with data structures and algorithms.
 
-### Time Complexity Analysis:
+---
 
-- **Building Max-Heap:** O(n log n) because we are converting an array into a heap.
-- **Extracting Top K Elements:** O(k log n) because each extraction operation reduces the size of the heap by one and involves a potential logarithmic number of comparisons.
-
-Thus, the overall time complexity is O(n log n + k log n).
-
-### Space Complexity Analysis:
-
-- **Space Required:** O(n) because we need to store all elements in our heap.
-
-### Difficulty Rating
-
-This problem combines both building and manipulating heaps with optimization strategies. While it requires understanding of heap properties and efficient use of data structures, it does not involve complex algorithms beyond basic operations provided by standard libraries like `heapq`. 
-
-Given its constraints (e.g., handling up to 100 elements and k<=100), it should be manageable but challenging enough for someone familiar with basic data structures but looking to apply more advanced techniques.
-
-Therefore, I rate this challenge as:
-```
-```
-
-This rating reflects that it is somewhat challenging but still within reach for someone who has a good grasp of algorithms and data structures but needs some practice with more complex applications involving heaps.
+To implement this challenge in your preferred programming language, simply translate the provided Python code into your chosen language while maintaining the same algorithmic approach.
