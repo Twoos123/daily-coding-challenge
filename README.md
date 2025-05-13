@@ -21,79 +21,89 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: Detecting Cycles in a Linked List
+# Matrix Coding Challenge: Spiral Traversal
 
-**Problem Description:**
-Given the head of a singly linked list, write a function to determine whether the linked list contains a cycle. A cycle is defined as a node that points back to a previous node in the list.
+## Problem Description
 
-**Example Input/Output:**
+Given a square matrix `matrix` of size `n x n`, perform a spiral traversal starting from the top-left corner. The traversal should proceed in a clockwise direction: right, down, left, up. You need to return the visited elements in order.
+
+### Example Input/Output
+
+**Input:**
+```python
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
 ```
-// Example linked list with a cycle:
-// 1 -> 2 -> 3 -> 4 -> 5 -> 2 (cycle starts at node 2)
-// Function should return True
-
-// Example linked list without a cycle:
-// 1 -> 2 -> 3 -> NULL
-// Function should return False
+**Output:**
+```
+[1, 2, 3, 6, 9, 8, 7, 4, 5]
 ```
 
-**Constraints:**
-- The linked list nodes may contain integer data.
-- The list may contain cycles.
-- The function should return a boolean indicating whether a cycle exists.
+## Constraints
 
-**Most Efficient Solution:**
+- The input matrix is guaranteed to be a square matrix.
+- The size of the matrix (`n`) will be at least 1.
+
+## Solution
+
+The most efficient approach to solve this problem is to use a simple four-pointer approach that keeps track of the boundaries of the remaining unvisited elements in the matrix. This method ensures that we visit each element exactly once and in the correct order.
 
 ```python
-class ListNode:
-    def __init__(self, x):
-        self.val = x
-        self.next = None
+def spiralTraversal(matrix):
+    if not matrix or not matrix[0]:
+        return []
 
-def hasCycle(head: ListNode) -> bool:
-    """
-    Detects whether a singly linked list contains a cycle.
-
-    Args:
-        head (ListNode): The head of the linked list.
-
-    Returns:
-        bool: True if the linked list contains a cycle, False otherwise.
-    """
+    n = len(matrix)
+    result = []
+    top, bottom, left, right = 0, n -1, 0, n -1
     
-    # Phase 1: Detecting cycle using Floyd's Tortoise and Hare algorithm
-    # Initialize two pointers, slow and fast, both starting at the head
-    slow = head
-    fast = head
-    
-    while fast and fast.next:
-        # Move slow one step at a time
-        slow = slow.next
+    while top <= bottom and left <= right:
+        # Traverse from left to right
+        for i in range(left, right + 1):
+            result.append(matrix[top][i])
+        top += 1
         
-        # Move fast two steps at a time
-        fast = fast.next.next
+        # Traverse from top to bottom
+        for i in range(top, bottom + 1):
+            result.append(matrix[i][right])
+        right -= 1
         
-        # If slow and fast meet at some point, it means there is a cycle
-        if slow == fast:
-            return True
+        # Traverse from right to left
+        if top <= bottom:
+            for i in range(right, left -1, -1):
+                result.append(matrix[bottom][i])
+            bottom -= 1
+        
+        # Traverse from bottom to top
+        if left <= right:
+            for i in range(bottom, top -1, -1):
+                result.append(matrix[i][left])
+            left += 1
     
-    # If no cycle is detected after traversing the entire list, return False
-    return False
+    return result
+
+# Example usage:
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+print(spiralTraversal(matrix)) # Output: [1, 2, 3, 6, 9, 8, 7, 4, 5]
 ```
 
-**Detailed Explanation:**
+## Analysis of Time and Space Complexity
 
-1. **Algorithm**: The solution uses Floyd's Tortoise and Hare algorithm, which is an efficient method for detecting cycles in linked lists.
-2. **Time Complexity**: The time complexity of this algorithm is O(n), where n is the number of nodes in the linked list. This is because each node is visited at most twice (once by the slow pointer and once by the fast pointer).
-3. **Space Complexity**: The space complexity is O(1), as only a constant amount of space is used for the two pointers (slow and fast).
+- **Time Complexity:** 
+  The algorithm visits each cell in the matrix exactly once. The four-pointer approach ensures that we traverse each row and column exactly once for each direction (right-to-left, top-to-bottom, left-to-right, bottom-to-top). Therefore, the time complexity is O(n^2).
 
-**Why This Approach is Optimal:**
-- Floyd's Tortoise and Hare algorithm is particularly efficient because it avoids the need for recursive calls or explicit node tracking, making it both space and time efficient.
-- It leverages the property that if there's a cycle, certain distances between nodes will eventually match due to the properties of linked lists.
+- **Space Complexity:** 
+  The space complexity is O(n^2) because we need to store the result of all visited elements.
 
-### Difficulty Rating: 4 (Moderate)
-This problem requires understanding of basic linked list traversal and a clever use of pointers to detect cycles efficiently. It's challenging enough to require careful attention but not so complex as to be overly difficult for someone familiar with data structures and algorithms.
+## Difficulty Rating
 
----
+DIFFICULTY: 3
 
-To implement this challenge in your preferred programming language, simply translate the provided Python code into your chosen language while maintaining the same algorithmic approach.
+This problem requires understanding of basic matrix operations and traversal techniques. While it's not extremely complex like some LeetCode problems, it still demands careful analysis and implementation details to ensure correctness and efficiency. The algorithm is straightforward but requires attention to boundary conditions and traversal order.
