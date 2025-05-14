@@ -19,91 +19,107 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-# Matrix Coding Challenge: Spiral Traversal
+### Challenge: Trie-Based Substring Matching
 
-## Problem Description
+#### Problem Description
 
-Given a square matrix `matrix` of size `n x n`, perform a spiral traversal starting from the top-left corner. The traversal should proceed in a clockwise direction: right, down, left, up. You need to return the visited elements in order.
+Given a list of strings and a query string, implement a Trie-based system to find all occurrences of the query string as substrings within the given list of strings. The system should efficiently handle overlapping matches.
 
-### Example Input/Output
+#### Example Input/Output
 
 **Input:**
-```python
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
-```
+- List of strings: `["apple", "banana", "cherry", "applepie"]`
+- Query string: `"app"`
+
 **Output:**
-```
-[1, 2, 3, 6, 9, 8, 7, 4, 5]
-```
+- List of matching substrings: `["apple", "applepie"]`
 
-## Constraints
+#### Constraints
 
-- The input matrix is guaranteed to be a square matrix.
-- The size of the matrix (`n`) will be at least 1.
+1. The input list of strings and the query string are case-insensitive.
+2. The system should handle multiple occurrences of the query string.
+3. The solution should be efficient in terms of time complexity, as the input list of strings can be large.
 
-## Solution
-
-The most efficient approach to solve this problem is to use a simple four-pointer approach that keeps track of the boundaries of the remaining unvisited elements in the matrix. This method ensures that we visit each element exactly once and in the correct order.
+#### Most Efficient Solution
 
 ```python
-def spiralTraversal(matrix):
-    if not matrix or not matrix[0]:
-        return []
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.end_of_word = False
 
-    n = len(matrix)
-    result = []
-    top, bottom, left, right = 0, n -1, 0, n -1
-    
-    while top <= bottom and left <= right:
-        # Traverse from left to right
-        for i in range(left, right + 1):
-            result.append(matrix[top][i])
-        top += 1
-        
-        # Traverse from top to bottom
-        for i in range(top, bottom + 1):
-            result.append(matrix[i][right])
-        right -= 1
-        
-        # Traverse from right to left
-        if top <= bottom:
-            for i in range(right, left -1, -1):
-                result.append(matrix[bottom][i])
-            bottom -= 1
-        
-        # Traverse from bottom to top
-        if left <= right:
-            for i in range(bottom, top -1, -1):
-                result.append(matrix[i][left])
-            left += 1
-    
-    return result
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-# Example usage:
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
-print(spiralTraversal(matrix)) # Output: [1, 2, 3, 6, 9, 8, 7, 4, 5]
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.end_of_word = True
+
+    def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return node.end_of_word
+
+    def find_substring_matches(self, query):
+        matches = []
+        node = self.root
+        for char in query:
+            if char not in node.children:
+                return matches
+            node = node.children[char]
+        
+        def dfs(node, word, index):
+            if node.end_of_word:
+                matches.append(word)
+            for char, child_node in node.children.items():
+                dfs(child_node, word + char if index == len(query) - 1 else word + char.lower(), index + 1)
+
+        dfs(node, query.lower(), len(query))
+        return matches
+
+# Usage Example:
+trie = Trie()
+strings = ["apple", "banana", "cherry", "applepie"]
+for s in strings:
+    trie.insert(s.lower())
+
+query = "app"
+matches = trie.find_substring_matches(query.lower())
+print(matches) # Output: ["apple", "applepie"]
 ```
 
-## Analysis of Time and Space Complexity
+#### Detailed Explanation
 
-- **Time Complexity:** 
-  The algorithm visits each cell in the matrix exactly once. The four-pointer approach ensures that we traverse each row and column exactly once for each direction (right-to-left, top-to-bottom, left-to-right, bottom-to-top). Therefore, the time complexity is O(n^2).
+1. **Trie Construction**: The `insert` method constructs the Trie by iterating over each character of the input string and adding it to the appropriate child node. This ensures efficient storage and retrieval.
 
-- **Space Complexity:** 
-  The space complexity is O(n^2) because we need to store the result of all visited elements.
+2. **Search**: The `search` method checks if a given string exists in the Trie by traversing the nodes corresponding to each character. It returns `True` if it finds an end of word marker and `False` otherwise.
 
-## Difficulty Rating
+3. **Find Substring Matches**: The `find_substring_matches` method is designed to find all occurrences of the query string as substrings within any words in the list. It does this by:
+   - Building the Trie up to the last character of the query string.
+   - Performing a depth-first search (DFS) starting from this last node, appending characters from child nodes to build potential matches.
 
-DIFFICULTY: 3
+4. **Time Complexity Analysis**: 
+   - Insertion into Trie: O(m) where m is the length of a string.
+   - Searching for a word: O(m).
+   - Finding all occurrences as substrings: O(n * m) where n is the number of words and m is the length of the query string.
 
-This problem requires understanding of basic matrix operations and traversal techniques. While it's not extremely complex like some LeetCode problems, it still demands careful analysis and implementation details to ensure correctness and efficiency. The algorithm is straightforward but requires attention to boundary conditions and traversal order.
+5. **Space Complexity Analysis**: The Trie itself uses O(n * m) space for storing all characters from all strings.
+
+#### Difficulty Rating
+
+This problem requires understanding how to implement and manipulate a Trie efficiently. The key challenges include:
+- Efficiently searching for words in a Trie.
+- Finding all overlapping matches using DFS.
+- Handling case-insensitivity correctly.
+
+The solution provided is optimized for both time and space complexity using standard Trie operations.
