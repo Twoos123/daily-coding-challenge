@@ -19,107 +19,95 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: Trie-Based Substring Matching
+### Problem Description
 
-#### Problem Description
+**Challenge: "Reverse Every k Nodes in a Linked List"**
 
-Given a list of strings and a query string, implement a Trie-based system to find all occurrences of the query string as substrings within the given list of strings. The system should efficiently handle overlapping matches.
+Given a singly linked list and an integer `k`, reverse every `k` nodes in the list. For example, if `k` is 3, the list `1 -> 2 -> 3 -> 4 -> 5 -> 6` should be transformed into `3 -> 2 -> 1 -> 4 -> 5 -> 6`.
 
-#### Example Input/Output
+### Example Input/Output
 
 **Input:**
-- List of strings: `["apple", "banana", "cherry", "applepie"]`
-- Query string: `"app"`
+- Linked List: `1 -> 2 -> 3 -> 4 -> 5 -> 6`
+- `k`: 3
 
 **Output:**
-- List of matching substrings: `["apple", "applepie"]`
+- Reversed Linked List: `3 -> 2 -> 1 -> 4 -> 5 -> 6`
 
-#### Constraints
+### Constraints
 
-1. The input list of strings and the query string are case-insensitive.
-2. The system should handle multiple occurrences of the query string.
-3. The solution should be efficient in terms of time complexity, as the input list of strings can be large.
+- `k` is a positive integer.
+- The linked list does not contain any cycles.
+- The linked list is non-empty.
+
+### Solution
 
 #### Most Efficient Solution
 
+To solve this problem efficiently, we can use a two-pointer approach where we maintain two pointers, one for the current node and one for the next group of nodes to be reversed. This approach ensures that we only traverse the list once, making it time-efficient.
+
 ```python
-class TrieNode:
-    def __init__(self):
-        self.children = {}
-        self.end_of_word = False
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
 
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-        node.end_of_word = True
-
-    def search(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                return False
-            node = node.children[char]
-        return node.end_of_word
-
-    def find_substring_matches(self, query):
-        matches = []
-        node = self.root
-        for char in query:
-            if char not in node.children:
-                return matches
-            node = node.children[char]
+def reverseKGroup(head, k):
+    dummy = ListNode(0)
+    dummy.next = head
+    prev_tail = dummy
+    
+    while True:
+        # Find the next k-th node from tail pointer
+        tail = prev_tail
+        for _ in range(k):
+            if tail.next is None:
+                return dummy.next
         
-        def dfs(node, word, index):
-            if node.end_of_word:
-                matches.append(word)
-            for char, child_node in node.children.items():
-                dfs(child_node, word + char if index == len(query) - 1 else word + char.lower(), index + 1)
+        # Reverse the current k-th group of nodes
+        curr = tail.next
+        for i in range(k - 1):
+            next_node = curr.next
+            curr.next = next_node.next
+            next_node.next = tail.next
+            tail.next = next_node
+        
+        prev_tail = curr  # Update tail pointer
+    
+    return dummy.next
 
-        dfs(node, query.lower(), len(query))
-        return matches
+# Example usage:
+# Create linked list: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+head = ListNode(1)
+head.next = ListNode(2)
+head.next.next = ListNode(3)
+head.next.next.next = ListNode(4)
+head.next.next.next.next = ListNode(5)
+head.next.next.next.next.next = ListNode(6)
 
-# Usage Example:
-trie = Trie()
-strings = ["apple", "banana", "cherry", "applepie"]
-for s in strings:
-    trie.insert(s.lower())
+# Reverse every k-th node in the linked list with k=3
+k = 3
+new_head = reverseKGroup(head, k)
 
-query = "app"
-matches = trie.find_substring_matches(query.lower())
-print(matches) # Output: ["apple", "applepie"]
+# Print the resulting linked list
+while new_head:
+    print(new_head.val, end=' ')
+    new_head = new_head.next
+
+# Output should be:
+# 3 2 1 4 5 6
 ```
 
-#### Detailed Explanation
+#### Analysis of Complexity
 
-1. **Trie Construction**: The `insert` method constructs the Trie by iterating over each character of the input string and adding it to the appropriate child node. This ensures efficient storage and retrieval.
+**Time Complexity:** O(n*k), where n is the number of nodes in the linked list. This is because we traverse the list up to `k` times in each iteration of reversing groups of nodes.
 
-2. **Search**: The `search` method checks if a given string exists in the Trie by traversing the nodes corresponding to each character. It returns `True` if it finds an end of word marker and `False` otherwise.
+**Space Complexity:** O(1), since we only use a constant amount of space for pointers and variables. The additional space required for reverse operations is within the linked list itself, which does not count towards space complexity.
 
-3. **Find Substring Matches**: The `find_substring_matches` method is designed to find all occurrences of the query string as substrings within any words in the list. It does this by:
-   - Building the Trie up to the last character of the query string.
-   - Performing a depth-first search (DFS) starting from this last node, appending characters from child nodes to build potential matches.
+This approach is optimal because it minimizes the number of traversals through the linked list by reusing pointers effectively.
 
-4. **Time Complexity Analysis**: 
-   - Insertion into Trie: O(m) where m is the length of a string.
-   - Searching for a word: O(m).
-   - Finding all occurrences as substrings: O(n * m) where n is the number of words and m is the length of the query string.
+**Difficulty Rating:** 4
 
-5. **Space Complexity Analysis**: The Trie itself uses O(n * m) space for storing all characters from all strings.
-
-#### Difficulty Rating
-
-This problem requires understanding how to implement and manipulate a Trie efficiently. The key challenges include:
-- Efficiently searching for words in a Trie.
-- Finding all overlapping matches using DFS.
-- Handling case-insensitivity correctly.
-
-The solution provided is optimized for both time and space complexity using standard Trie operations.
+This problem requires a good understanding of linked lists and efficient traversal techniques. The two-pointer approach helps in minimizing the number of iterations over the linked list, making it a challenging yet solvable problem with an optimal solution.
