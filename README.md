@@ -21,93 +21,91 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Problem Description: Rebalancing Heaps
 
-**Challenge: "Reverse Every k Nodes in a Linked List"**
+**Challenge:**
+You are given a min-heap and a max-heap, each containing `n` elements. The elements in both heaps are initially distinct. You need to rebalance both heaps such that each heap contains exactly `n/2` elements from the original set. The rebalancing process should be performed efficiently.
 
-Given a singly linked list and an integer `k`, reverse every `k` nodes in the list. For example, if `k` is 3, the list `1 -> 2 -> 3 -> 4 -> 5 -> 6` should be transformed into `3 -> 2 -> 1 -> 4 -> 5 -> 6`.
+**Constraints:**
+- The elements in both heaps are integers.
+- The initial elements in each heap are distinct.
+- The rebalanced heaps must contain exactly `n/2` elements from the original set.
 
-### Example Input/Output
-
-**Input:**
-- Linked List: `1 -> 2 -> 3 -> 4 -> 5 -> 6`
-- `k`: 3
-
-**Output:**
-- Reversed Linked List: `3 -> 2 -> 1 -> 4 -> 5 -> 6`
-
-### Constraints
-
-- `k` is a positive integer.
-- The linked list does not contain any cycles.
-- The linked list is non-empty.
-
-### Solution
-
-#### Most Efficient Solution
-
-To solve this problem efficiently, we can use a two-pointer approach where we maintain two pointers, one for the current node and one for the next group of nodes to be reversed. This approach ensures that we only traverse the list once, making it time-efficient.
+**Example Input/Output:**
 
 ```python
-class ListNode:
-    def __init__(self, x):
-        self.val = x
-        self.next = None
+min_heap = [1, 3, 5, 7, 9]
+max_heap = [2, 4, 6, 8, 10]
 
-def reverseKGroup(head, k):
-    dummy = ListNode(0)
-    dummy.next = head
-    prev_tail = dummy
-    
-    while True:
-        # Find the next k-th node from tail pointer
-        tail = prev_tail
-        for _ in range(k):
-            if tail.next is None:
-                return dummy.next
-        
-        # Reverse the current k-th group of nodes
-        curr = tail.next
-        for i in range(k - 1):
-            next_node = curr.next
-            curr.next = next_node.next
-            next_node.next = tail.next
-            tail.next = next_node
-        
-        prev_tail = curr  # Update tail pointer
-    
-    return dummy.next
+# Rebalance Heaps
+rebalanced_min_heap, rebalanced_max_heap = rebalance_heaps(min_heap, max_heap)
 
-# Example usage:
-# Create linked list: 1 -> 2 -> 3 -> 4 -> 5 -> 6
-head = ListNode(1)
-head.next = ListNode(2)
-head.next.next = ListNode(3)
-head.next.next.next = ListNode(4)
-head.next.next.next.next = ListNode(5)
-head.next.next.next.next.next = ListNode(6)
-
-# Reverse every k-th node in the linked list with k=3
-k = 3
-new_head = reverseKGroup(head, k)
-
-# Print the resulting linked list
-while new_head:
-    print(new_head.val, end=' ')
-    new_head = new_head.next
-
-# Output should be:
-# 3 2 1 4 5 6
+print("Rebalanced Min Heap:", rebalanced_min_heap)
+print("Rebalanced Max Heap:", rebalanced_max_heap)
 ```
 
-#### Analysis of Complexity
+**Optimal Solution:**
+To solve this problem efficiently, we can use a combination of heap operations and sorting to ensure that we balance the heaps correctly.
 
-**Time Complexity:** O(n*k), where n is the number of nodes in the linked list. This is because we traverse the list up to `k` times in each iteration of reversing groups of nodes.
+1. **Combine Elements into a Single List:**
+   - First, combine all elements from both heaps into a single list.
+   - Sort this list in ascending order.
 
-**Space Complexity:** O(1), since we only use a constant amount of space for pointers and variables. The additional space required for reverse operations is within the linked list itself, which does not count towards space complexity.
+2. **Rebalance Heaps:**
+   - Divide the sorted list into two parts at the middle index (`n/2`).
+   - Use `heapify` to build a min-heap and a max-heap from these two parts.
 
-This approach is optimal because it minimizes the number of traversals through the linked list by reusing pointers effectively.
+3. **Complexity Analysis:**
+   - **Time Complexity:** 
+     - Combining elements into a single list and sorting takes $O(n \log n)$.
+     - Dividing the list into two parts is $O(n)$.
+     - Building both heaps using `heapify` takes $O(n \log n)$.
+     - Therefore, the overall time complexity is $O(n \log n)$.
+   - **Space Complexity:** 
+     - We need to store all elements in memory, so space complexity is $O(n)$.
 
-**Difficulty Rating:** 4
+### Implementation:
+```python
+import heapq
 
-This problem requires a good understanding of linked lists and efficient traversal techniques. The two-pointer approach helps in minimizing the number of iterations over the linked list, making it a challenging yet solvable problem with an optimal solution.
+def rebalance_heaps(min_heap, max_heap):
+    # Combine elements into a single list
+    combined = min_heap + max_heap
+    
+    # Sort the combined list in ascending order
+    combined.sort()
+    
+    # Rebalance Heaps by dividing the sorted list into two parts at the middle index (n/2)
+    mid = len(combined) // 2
+    
+    # Use heapify to build a min-heap and a max-heap from these two parts
+    rebalanced_min_heap = combined[:mid]
+    rebalanced_max_heap = combined[mid:]
+    
+    return rebalanced_min_heap, rebalanced_max_heap
+
+# Example Usage:
+min_heap = [1, 3, 5, 7, 9]
+max_heap = [2, 4, 6, 8, 10]
+
+rebalanced_min_heap, rebalanced_max_heap = rebalance_heaps(min_heap, max_heap)
+
+print("Rebalanced Min Heap:", rebalanced_min_heap)
+print("Rebalanced Max Heap:", rebalanced_max_heap)
+```
+
+### Detailed Explanation:
+1. **Combining Elements:** We start by combining all elements from both heaps into a single list. This step is necessary because we need to ensure that we have access to all elements to rebalance them correctly.
+
+2. **Sorting:** Next, we sort this combined list in ascending order. This step takes $O(n \log n)$ time using standard sorting algorithms like Timsort in Python.
+
+3. **Rebalancing Heaps:** After sorting, we divide the list into two parts at the middle index (`n/2`). This ensures that each part will contain `n/2` elements from the original set.
+
+4. **Building Heaps:** Finally, we use `heapify` to build a min-heap from the first part and a max-heap from the second part. The `heapify` function is used to transform an array into a heap, maintaining the heap property in $O(n \log n)$ time.
+
+### Analysis:
+- **Time Complexity:** The overall time complexity is dominated by sorting ($O(n \log n)$) and building heaps ($O(n \log n)$), resulting in an overall time complexity of $O(n \log n)$.
+- **Space Complexity:** We need to store all elements in memory temporarily during sorting, leading to a space complexity of $O(n)$.
+
+### Difficulty Rating:
+The difficulty rating is 3 due to the need to combine elements into a single list, sort it efficiently, and then rebalance using heap operations. While
