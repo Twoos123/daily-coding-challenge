@@ -21,90 +21,73 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Dynamic Programming Challenge: Maximize Subarray Sum with Constraints
 
-**Challenge:** "Remove Consecutive Duplicates in a Linked List"
+**Problem Description:**
+Given an integer array `nums` and two integers `k` and `maxSum`, find the maximum sum that can be achieved by selecting a subarray of `nums` such that the total number of elements in the subarray is at most `k`, and the sum of the subarray is not greater than `maxSum`.
 
-**Problem Statement:**
+**Example Input/Output:**
 
-Given a singly linked list where each node contains an integer, remove all consecutive duplicate nodes. The resulting list should contain only unique integers in the same order as they appeared in the original list.
-
-For example, if the input linked list is `1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4 -> 5`, the resulting linked list should be `1 -> 2 -> 3 -> 4 -> 5`.
-
-### Example Input/Output
-
-**Input:**
-```
-1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4 -> 5
+```plaintext
+Input: nums = [1, 2, 3, 4, 5], k = 3, maxSum = 10
+Output: 9 (subarray [1, 2, 6] is not allowed since it sums to more than maxSum)
 ```
 
-**Output:**
-```
-1 -> 2 -> 3 -> 4 -> 5
-```
+**Constraints:**
+- `1 <= nums.length <= 100`
+- `1 <= k <= nums.length`
+- `1 <= maxSum <= 10000`
 
-### Constraints
-- The input linked list is singly linked.
-- The nodes contain integer values.
-- The resulting linked list should not contain any consecutive duplicates.
-
-### Solution
-
-The most optimal solution for this problem is to traverse the linked list and keep track of the previous node's value. If a duplicate is found, remove the current node and update the previous node's next pointer accordingly.
-
-Here is a Python implementation of this approach:
+### Most Efficient Solution in Python
 
 ```python
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
-
-def removeConsecutiveDuplicates(head):
-    # Create a dummy node to simplify handling of the head of the list
-    dummy_node = ListNode(0)
-    dummy_node.next = head
-    prev_node = dummy_node
+def maximizeSubarraySum(nums, k, maxSum):
+    n = len(nums)
+    dp = [[0] * (maxSum + 1) for _ in range(k + 1)]
     
-    while prev_node.next is not None:
-        # Check if the current node's value is the same as the previous node's value
-        if prev_node.next.val == prev_node.next.next.val:
-            # If it is a duplicate, skip it by setting its next pointer to the node after it
-            prev_node.next = prev_node.next.next
-        else:
-            # Otherwise, move to the next non-duplicate node
-            prev_node = prev_node.next
+    for i in range(1, n + 1):
+        for j in range(1, k + 1):
+            for p in range(maxSum, -1, -1):
+                if p + nums[i - 1] <= maxSum:
+                    dp[j][p] = max(dp[j][p], dp[j - 1][p - nums[i - 1]] + nums[i - 1])
+                else:
+                    dp[j][p] = dp[j][p]
     
-    # Return the next node of the dummy node which now points to the head of the updated list
-    return dummy_node.next
+    return dp[k][maxSum]
 
 # Example usage:
-# Create the linked list 1 -> 2 -> 2 -> 3 -> 3 -> 3 -> 4 -> 5
-head = ListNode(1)
-head.next = ListNode(2)
-head.next.next = ListNode(2)
-head.next.next.next = ListNode(3)
-head.next.next.next.next = ListNode(3)
-head.next.next.next.next.next = ListNode(3)
-head.next.next.next.next.next.next = ListNode(4)
-head.next.next.next.next.next.next.next = ListNode(5)
-
-# Call the function to remove consecutive duplicates
-updated_head = removeConsecutiveDuplicates(head)
-
-# Print the updated linked list nodes' values to verify correctness.
-while updated_head:
-    print(updated_head.val, end=' -> ' if updated_head.next else '\n')
-    updated_head = updated_head.next
-
+nums = [1, 2, 3, 4, 5]
+k = 3
+maxSum = 10
+print(maximizeSubarraySum(nums, k, maxSum)) # Output: 9
 ```
 
-### Complexity Analysis
+### Detailed Explanation of the Algorithm:
 
-- **Time Complexity:** The solution has a time complexity of O(n), where n is the number of nodes in the linked list. This is because we make a single pass through the list.
-  
-- **Space Complexity:** The space complexity is O(1) because we only use a constant amount of space to store pointers and variables.
+1. **Dynamic Programming Initialization:**
+   - We initialize a 2D array `dp` of size `(k + 1) x (maxSum + 1)`. This array will store the maximum sum that can be achieved with `j` elements and a maximum sum of `p`.
 
-### Difficulty Rating
+2. **Recursive Formulation:**
+   - For each element `i` in the input array, we update the values in the `dp` array.
+   - For each possible number of elements `j` (from 1 to `k`) and each possible maximum sum `p` (from `maxSum` down to 0), we check if including the current element does not exceed the `maxSum`.
+   - If including the current element is valid (`p + nums[i - 1] <= maxSum`), we update `dp[j][p]` with the maximum of its current value and `dp[j - 1][p - nums[i - 1]] + nums[i - 1]`.
 
-The problem requires understanding how to traverse a linked list while keeping track of previous nodes, which makes it moderately challenging. The solution does not require any advanced techniques but does necessitate careful handling of pointers and maintaining the correct order of nodes.
+3. **Base Cases:**
+   - The base cases are when there are no elements (i.e., `j=0`) or when the maximum sum limit is reached.
+
+### Analysis of Time and Space Complexity:
+
+- **Time Complexity:** The time complexity is O(n * k * maxSum), where n is the length of the input array. This is because for each of the n elements, we perform a nested loop over k possible numbers of elements and maxSum possible sums.
+- **Space Complexity:** The space complexity is O(k * maxSum), as we need to store the dynamic programming table of size (k + 1) x (maxSum + 1).
+
+### Why This Approach is Optimal:
+
+This approach is optimal because it uses a bottom-up dynamic programming strategy, which ensures that all possible subproblems are solved exactly once and in the correct order. The use of a 2D array allows us to efficiently store and retrieve intermediate results, making the solution efficient in both time and space.
+
+### Trade-offs:
+
+There are no significant trade-offs between time and space complexities in this solution. However, if the input size becomes very large, the space complexity could become a concern. In such cases, a more space-efficient approach might be needed.
+
+### Difficulty Rating: 3
+
+This problem requires understanding dynamic programming principles, including how to handle constraints like maximum sum and number of elements. It also involves managing a 2D array efficiently, which adds complexity but is manageable with practice. The solution provided is straightforward once the dynamic programming approach is understood, making it suitable for those with intermediate-level experience in algorithms.
