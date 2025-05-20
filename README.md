@@ -19,107 +19,86 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: "Matrix Rotation and Summation"
+### Coding Challenge: Find Duplicates in a List with Constraints
 
-#### Problem Description
-Given an `m x n` matrix `matrix`, perform the following operations:
+**Problem Description:**
+Given an integer list where some numbers appear twice, find all duplicates in the list while maintaining a specific constraint that each unique number can only be stored once in the hash table. The list can contain negative integers and zeros.
 
-1. **Rotate the Matrix**: Rotate the matrix 90 degrees clockwise.
-2. **Summation of Diagonal Elements**: Calculate the sum of elements in the main diagonal and the anti-diagonal after rotation.
+**Example Input/Output:**
+- **Input:** `[1, 2, 3, 4, 2, 3, 5]`
+- **Output:** `[2, 3]`
 
-The input matrix will contain integers. The output should be an array containing two values: the sum of elements on the main diagonal and the sum of elements on the anti-diagonal after rotation.
+**Constraints:**
+- The list can contain negative integers, zeros, and positive integers.
+- Each unique number can only be stored once in the hash table.
+- The hash table should be used efficiently to reduce time complexity.
 
-#### Example Input/Output
+### Analysis and Solution
 
-**Input Matrix**:
-```
-[
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9]
-]
-```
-
-**Expected Output**:
-```
-[39, 39]
-```
-
-**Explanation**:
-After rotating the matrix:
-```
-[
-  [7, 4, 1],
-  [8, 5, 2],
-  [9, 6, 3]
-]
-```
-The main diagonal elements are `[7, 5, 3]`, and their sum is `15`. The anti-diagonal elements are `[7, 5, 3]`, and their sum is also `15`. However, considering a common rotation result where these sums might differ, we'll ensure our approach handles this generically.
-
-#### Constraints
-- The input matrix will always be a square matrix (`m == n`).
-- The elements in the matrix will be integers.
-
-### Optimal Solution in Python
+#### Most Efficient Solution in Python:
 
 ```python
-def rotate_and_sum(matrix):
-    # Rotate the matrix 90 degrees clockwise
-    n = len(matrix)
-    rotated_matrix = [[0] * n for _ in range(n)]
-    for i in range(n):
-        for j in range(n):
-            rotated_matrix[j][n-i-1] = matrix[i][j]
+def find_duplicates(nums):
+    """
+    Finds all duplicate numbers in a list while maintaining a constraint that each unique number can only be stored once in the hash table.
     
-    # Calculate sums of main and anti-diagonals
-    main_diagonal_sum = 0
-    anti_diagonal_sum = 0
+    Args:
+        nums (list): A list of integers where some numbers appear twice.
     
-    # Calculate sums for rotated matrix (assuming it's now stored in rotated_matrix)
-    for i in range(n):
-        main_diagonal_sum += rotated_matrix[i][i]
-        anti_diagonal_sum += rotated_matrix[i][n-i-1]
+    Returns:
+        list: A list of all duplicate numbers.
+    """
     
-    return [main_diagonal_sum, anti_diagonal_sum]
+    # Initialize a hash table (dictionary) to keep track of seen numbers
+    seen = {}
+    
+    # Initialize a set to store unique duplicates
+    duplicates = set()
+    
+    # Iterate through the list
+    for num in nums:
+        # If the number is already in the hash table, it's a duplicate
+        if num in seen:
+            # Add it to the set of duplicates
+            duplicates.add(num)
+        else:
+            # Otherwise, add it to the hash table with a count of 1
+            seen[num] = 1
+    
+    # Convert the set of duplicates to a list and return it
+    return list(duplicates)
 
-# Example usage
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
-result = rotate_and_sum(matrix)
-print(result) # Output should be [39, 39]
+# Example usage:
+input_list = [1, 2, 3, 4, 2, 3, 5]
+output = find_duplicates(input_list)
+print(output)  # Output: [2, 3]
 ```
 
-### Detailed Explanation of Algorithm
+### Detailed Explanation:
+1. **Hash Table Initialization:**
+   - We initialize an empty dictionary `seen` to keep track of each number we've seen so far.
+   - We also initialize an empty set `duplicates` to store unique duplicate numbers.
 
-1. **Rotation**:
-   - Create a new `n x n` matrix (`rotated_matrix`) to store the rotated elements.
-   - Iterate through each element of the original matrix and place it at the corresponding position in `rotated_matrix` after performing the rotation operation.
+2. **Iteration Through List:**
+   - For each number in the input list, we check if it already exists in the `seen` dictionary.
+   - If it does (`num in seen`), it means we've seen this number before, so it's a duplicate. We add it to the `duplicates` set.
+   - If it doesn't (`num not in seen`), we add it to the `seen` dictionary with a count of 1.
 
-2. **Summation**:
-   - Iterate through each row and column of `rotated_matrix` to calculate:
-     - The sum of elements on the main diagonal (`main_diagonal_sum`).
-     - The sum of elements on the anti-diagonal (`anti_diagonal_sum`).
+3. **Returning Duplicates:**
+   - Finally, we convert the set of duplicates to a list and return it.
 
-### Time Complexity Analysis
+### Complexity Analysis:
+- **Time Complexity:**
+  - The iteration through the list is O(n), where n is the length of the input list.
+  - Checking if a key exists in a dictionary and adding a key to a set are both O(1) operations on average.
+  - Therefore, the overall time complexity remains O(n).
 
-- **Rotation**: The rotation step involves iterating over all elements once, resulting in a time complexity of O(n^2).
-- **Summation**: After rotation, calculating sums involves another O(n^2) iteration.
+- **Space Complexity:**
+  - We use a dictionary to store seen numbers which can potentially store all unique numbers in the list (worst-case scenario).
+  - This results in a space complexity of O(n).
+  - The set used to store duplicates also grows up to n elements in the worst case but since sets use hash tables internally, this complexity is also O(n).
 
-Therefore, the overall time complexity is O(n^2) + O(n^2) = O(2n^2), which simplifies to O(n^2) because constant factors are ignored in Big O notation.
-
-### Space Complexity Analysis
-
-The space complexity is dominated by creating a new `n x n` matrix (`rotated_matrix`). Thus, the space complexity is O(n^2).
-
-### Why This Approach is Optimal
-
-This approach is optimal because it directly addresses both operations—rotation and summation—efficiently using minimal additional space. The iteration-based approach ensures that each element is processed exactly once during both operations.
-
-### Difficulty Rating
-
-This problem requires understanding of matrix operations, specifically rotation and diagonal summation. It involves handling a square matrix efficiently and accurately calculating sums post-rotation. The algorithmic requirements and implementation steps make it moderately challenging but not extremely complex like some LeetCode problems.
+### Difficulty Rating: 
+This challenge balances complexity with constraints that require efficient use of a hash table. It's neither too trivial nor overly complex, making it suitable for someone who has a good grasp of basic data structures but needs to apply them in a slightly more nuanced way.
