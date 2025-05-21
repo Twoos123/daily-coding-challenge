@@ -21,84 +21,107 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: Find Duplicates in a List with Constraints
+### Matrix Operations Challenge
 
 **Problem Description:**
-Given an integer list where some numbers appear twice, find all duplicates in the list while maintaining a specific constraint that each unique number can only be stored once in the hash table. The list can contain negative integers and zeros.
+Given a 2D matrix `matrix` and two integers `R` and `C`, perform the following operations:
+1. **Rotate Matrix**: Rotate the matrix clockwise by 90 degrees.
+2. **Submatrix Sum**: For each submatrix of size `R x C`, calculate the sum of its elements.
+3. **Filter Submatrices**: Filter out submatrices where the sum is greater than or equal to a given threshold `threshold`.
 
 **Example Input/Output:**
-- **Input:** `[1, 2, 3, 4, 2, 3, 5]`
-- **Output:** `[2, 3]`
 
-**Constraints:**
-- The list can contain negative integers, zeros, and positive integers.
-- Each unique number can only be stored once in the hash table.
-- The hash table should be used efficiently to reduce time complexity.
+```
+Input:
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+R = 2
+C = 2
+threshold = 15
 
-### Analysis and Solution
-
-#### Most Efficient Solution in Python:
-
-```python
-def find_duplicates(nums):
-    """
-    Finds all duplicate numbers in a list while maintaining a constraint that each unique number can only be stored once in the hash table.
-    
-    Args:
-        nums (list): A list of integers where some numbers appear twice.
-    
-    Returns:
-        list: A list of all duplicate numbers.
-    """
-    
-    # Initialize a hash table (dictionary) to keep track of seen numbers
-    seen = {}
-    
-    # Initialize a set to store unique duplicates
-    duplicates = set()
-    
-    # Iterate through the list
-    for num in nums:
-        # If the number is already in the hash table, it's a duplicate
-        if num in seen:
-            # Add it to the set of duplicates
-            duplicates.add(num)
-        else:
-            # Otherwise, add it to the hash table with a count of 1
-            seen[num] = 1
-    
-    # Convert the set of duplicates to a list and return it
-    return list(duplicates)
-
-# Example usage:
-input_list = [1, 2, 3, 4, 2, 3, 5]
-output = find_duplicates(input_list)
-print(output)  # Output: [2, 3]
+Output:
+Submatrices with sum >= threshold:
+- Submatrix starting at (0, 0): Sum = 5 (elements [1, 2])
+- Submatrix starting at (0, 1): Sum = 6 (elements [2, 3])
+- Submatrix starting at (1, 0): Sum = 7 (elements [4, 5])
+- Submatrix starting at (1, 1): Sum = 8 (elements [5, 6])
 ```
 
-### Detailed Explanation:
-1. **Hash Table Initialization:**
-   - We initialize an empty dictionary `seen` to keep track of each number we've seen so far.
-   - We also initialize an empty set `duplicates` to store unique duplicate numbers.
+**Constraints:**
+- The input matrix is a list of lists where each inner list represents a row in the matrix.
+- All inner lists have the same length.
+- R and C should be such that they form a valid submatrix within the given matrix.
+- Threshold is an integer that determines which submatrices to include.
 
-2. **Iteration Through List:**
-   - For each number in the input list, we check if it already exists in the `seen` dictionary.
-   - If it does (`num in seen`), it means we've seen this number before, so it's a duplicate. We add it to the `duplicates` set.
-   - If it doesn't (`num not in seen`), we add it to the `seen` dictionary with a count of 1.
+### Solution
 
-3. **Returning Duplicates:**
-   - Finally, we convert the set of duplicates to a list and return it.
+```python
+def rotate_matrix(matrix):
+    # Transpose the matrix
+    matrix[:] = list(map(list, zip(*matrix)))
+    
+    # Reverse each row to get clockwise rotation
+    for row in matrix:
+        row.reverse()
 
-### Complexity Analysis:
-- **Time Complexity:**
-  - The iteration through the list is O(n), where n is the length of the input list.
-  - Checking if a key exists in a dictionary and adding a key to a set are both O(1) operations on average.
-  - Therefore, the overall time complexity remains O(n).
+def submatrix_sum(matrix, R, C):
+    # Helper function to check if a submatrix fits within bounds
+    def check_submatrix(row_start, col_start):
+        return row_start + R <= len(matrix) and col_start + C <= len(matrix[0])
 
-- **Space Complexity:**
-  - We use a dictionary to store seen numbers which can potentially store all unique numbers in the list (worst-case scenario).
-  - This results in a space complexity of O(n).
-  - The set used to store duplicates also grows up to n elements in the worst case but since sets use hash tables internally, this complexity is also O(n).
+    # Calculate sum for each possible submatrix and store them in a list
+    sums = []
+    for row_start in range(len(matrix)):
+        for col_start in range(len(matrix[0])):
+            if check_submatrix(row_start, col_start):
+                submatrix_sum = sum(matrix[row_start + i][col_start + j] for i in range(R) for j in range(C))
+                sums.append((row_start, col_start, submatrix_sum))
 
-### Difficulty Rating: 
-This challenge balances complexity with constraints that require efficient use of a hash table. It's neither too trivial nor overly complex, making it suitable for someone who has a good grasp of basic data structures but needs to apply them in a slightly more nuanced way.
+    return sums
+
+def filter_submatrices(sums, threshold):
+    # Filter out submatrices where the sum is greater than or equal to the threshold
+    return [(row_start, col_start, submatrix_sum) for row_start, col_start, submatrix_sum in sums if submatrix_sum >= threshold]
+
+# Main function to perform all operations
+def main(matrix, R, C, threshold):
+    rotate_matrix(matrix)
+    
+    # Calculate sums of all possible submatrices
+    sums = submatrix_sum(matrix, R, C)
+    
+    # Filter submatrices based on the given threshold
+    filtered_sums = filter_submatrices(sums, threshold)
+
+    return filtered_sums
+
+# Example usage
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+R = 2
+C = 2
+threshold = 15
+
+result = main(matrix, R, C, threshold)
+print(result)
+```
+
+### Analysis of Complexity:
+1. **Time Complexity:**
+   - The `rotate_matrix` function modifies the input matrix in-place and thus has a time complexity of O(n^2), where n is the number of elements in the matrix.
+   - The `submatrix_sum` function iterates over all possible submatrices of size `R x C`. The number of such submatrices is O(n * m), where n is the number of rows and m is the number of columns in the original matrix.
+   - The `filter_submatrices` function has a time complexity proportional to the number of submatrices found which is also O(n * m).
+   Therefore, the overall time complexity for the main function is O(n^2 + n * m).
+
+2. **Space Complexity:**
+   - The space complexity for storing and processing submatrices is also O(n * m) as we need to store information about each submatrix.
+   
+### Difficulty Rating:
+This challenge requires understanding matrix operations like rotation and submatrix calculation along with filtering based on a threshold value. It involves basic algorithms but requires careful handling of multiple aspects making it moderately challenging.
