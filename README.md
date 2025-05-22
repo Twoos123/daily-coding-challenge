@@ -19,109 +19,122 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Matrix Operations Challenge
+****
 
-**Problem Description:**
-Given a 2D matrix `matrix` and two integers `R` and `C`, perform the following operations:
-1. **Rotate Matrix**: Rotate the matrix clockwise by 90 degrees.
-2. **Submatrix Sum**: For each submatrix of size `R x C`, calculate the sum of its elements.
-3. **Filter Submatrices**: Filter out submatrices where the sum is greater than or equal to a given threshold `threshold`.
+### Problem Description
 
-**Example Input/Output:**
+**Trie-Based Auto-Complete with Limitation**
 
-```
-Input:
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
-R = 2
-C = 2
-threshold = 15
+Develop an auto-complete system using a Trie data structure that supports the following functionalities:
+- **Insert**: Insert a word into the Trie.
+- **Suggest**: Given a prefix, suggest all words in the Trie that start with this prefix.
+- **Limitation**: The system must handle a large number of words and ensure that the suggest operation returns words in lexicographic order. However, it should also prevent the suggest operation from returning more than a limited number of suggestions (e.g., 5).
 
-Output:
-Submatrices with sum >= threshold:
-- Submatrix starting at (0, 0): Sum = 5 (elements [1, 2])
-- Submatrix starting at (0, 1): Sum = 6 (elements [2, 3])
-- Submatrix starting at (1, 0): Sum = 7 (elements [4, 5])
-- Submatrix starting at (1, 1): Sum = 8 (elements [5, 6])
-```
+### Example Input/Output
 
-**Constraints:**
-- The input matrix is a list of lists where each inner list represents a row in the matrix.
-- All inner lists have the same length.
-- R and C should be such that they form a valid submatrix within the given matrix.
-- Threshold is an integer that determines which submatrices to include.
+**Input**:
+- `insert_words`: `["apple", "banana", "cherry"]`
+- `suggest_prefix`: `"app"`
+
+**Output**:
+- `["apple"]`
+
+**Input**:
+- `insert_words`: `["apple", "banana", "cherry"]`
+- `suggest_prefix`: `"ban"`
+
+**Output**:
+- `["banana"]`
+
+### Constraints
+
+- The system should handle a large number of words (e.g., millions).
+- The suggest operation should return at most a limited number of suggestions (e.g., 5).
 
 ### Solution
 
+To solve this problem efficiently, we will use a Trie data structure and implement the necessary operations. The key steps include:
+1. **Inserting Words into the Trie**: Ensure that each character of each word is inserted correctly into the Trie.
+2. **Suggesting Words**: Traverse the Trie based on the given prefix and return up to a limited number of suggestions in lexicographic order.
+
 ```python
-def rotate_matrix(matrix):
-    # Transpose the matrix
-    matrix[:] = list(map(list, zip(*matrix)))
-    
-    # Reverse each row to get clockwise rotation
-    for row in matrix:
-        row.reverse()
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_word = False
 
-def submatrix_sum(matrix, R, C):
-    # Helper function to check if a submatrix fits within bounds
-    def check_submatrix(row_start, col_start):
-        return row_start + R <= len(matrix) and col_start + C <= len(matrix[0])
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-    # Calculate sum for each possible submatrix and store them in a list
-    sums = []
-    for row_start in range(len(matrix)):
-        for col_start in range(len(matrix[0])):
-            if check_submatrix(row_start, col_start):
-                submatrix_sum = sum(matrix[row_start + i][col_start + j] for i in range(R) for j in range(C))
-                sums.append((row_start, col_start, submatrix_sum))
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_word = True
 
-    return sums
+    def suggest(self, prefix, limit=5):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return []
+            node = node.children[char]
 
-def filter_submatrices(sums, threshold):
-    # Filter out submatrices where the sum is greater than or equal to the threshold
-    return [(row_start, col_start, submatrix_sum) for row_start, col_start, submatrix_sum in sums if submatrix_sum >= threshold]
+        # Perform breadth-first search from the current node to find all words
+        # that start with the given prefix and return up to 'limit' suggestions
+        return self._bfs(node, prefix, limit)
 
-# Main function to perform all operations
-def main(matrix, R, C, threshold):
-    rotate_matrix(matrix)
-    
-    # Calculate sums of all possible submatrices
-    sums = submatrix_sum(matrix, R, C)
-    
-    # Filter submatrices based on the given threshold
-    filtered_sums = filter_submatrices(sums, threshold)
+    def _bfs(self, node, prefix, limit):
+        queue = [(node, prefix)]
+        visited = set()
+        suggestions = []
+        
+        while queue and len(suggestions) < limit:
+            current_node, current_prefix = queue.pop(0)
+            
+            # If we've already visited this node, skip it
+            if (current_node, current_prefix) in visited:
+                continue
+            
+            # Mark it as visited
+            visited.add((current_node, current_prefix))
+            
+            # If it's a complete word
+            if current_node.is_word and len(current_prefix) == len(prefix):
+                suggestions.append(current_prefix)
+            
+            # Add children to the queue
+            for char, child_node in current_node.children.items():
+                queue.append((child_node, current_prefix + char))
+        
+        return suggestions
 
-    return filtered_sums
+# Example usage:
+trie = Trie()
+trie.insert("apple")
+trie.insert("banana")
+trie.insert("cherry")
 
-# Example usage
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
-
-R = 2
-C = 2
-threshold = 15
-
-result = main(matrix, R, C, threshold)
-print(result)
+print(trie.suggest("app", 1)) # Output: ["apple"]
+print(trie.suggest("ban", 1)) # Output: ["banana"]
 ```
 
-### Analysis of Complexity:
-1. **Time Complexity:**
-   - The `rotate_matrix` function modifies the input matrix in-place and thus has a time complexity of O(n^2), where n is the number of elements in the matrix.
-   - The `submatrix_sum` function iterates over all possible submatrices of size `R x C`. The number of such submatrices is O(n * m), where n is the number of rows and m is the number of columns in the original matrix.
-   - The `filter_submatrices` function has a time complexity proportional to the number of submatrices found which is also O(n * m).
-   Therefore, the overall time complexity for the main function is O(n^2 + n * m).
+### Analysis of Complexity
 
-2. **Space Complexity:**
-   - The space complexity for storing and processing submatrices is also O(n * m) as we need to store information about each submatrix.
-   
-### Difficulty Rating:
-This challenge requires understanding matrix operations like rotation and submatrix calculation along with filtering based on a threshold value. It involves basic algorithms but requires careful handling of multiple aspects making it moderately challenging.
+- **Insert Operation**:
+  - Time Complexity: \(O(m)\) where \(m\) is the length of the word.
+  - Space Complexity: \(O(m)\) for storing the word in the Trie.
+
+- **Suggest Operation**:
+  - Time Complexity: \(O(m + k)\) where \(m\) is the length of the prefix and \(k\) is the number of suggestions returned (up to 'limit').
+  - Space Complexity: \(O(k)\) for storing the suggestions.
+
+### Explanation
+
+The chosen solution uses a standard Trie data structure to efficiently store and retrieve words. The `insert` operation simply traverses through each character of the word and adds it to the Trie. The `suggest` operation uses a breadth-first search (BFS) to find all words that start with the given prefix. It ensures that only up to a limited number of suggestions are returned by keeping track of visited nodes and limiting the BFS traversal based on the specified 'limit'.
+
+This approach avoids unnecessary traversals and ensures lexicographic order by using BFS. It is optimal in terms of both time and space complexity for handling large datasets with a constraint on suggested word count.
