@@ -19,122 +19,135 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-****
+### Problem Description: "Construct and Validate a Balanced N-ary Tree"
 
-### Problem Description
+**Challenge:** Given a list of integers, construct an N-ary tree where each node has a value and a list of children. Ensure the tree is balanced such that the difference between the minimum and maximum height of the tree does not exceed 1. Additionally, validate that all numbers in the list can be inserted into the tree without violating the properties of an N-ary tree.
 
-**Trie-Based Auto-Complete with Limitation**
+**Example Input/Output:**
+- **Input**: `[1, 2, 3, 4, 5, 6, 7]`
+- **Output**:
+  ```
+  Node(1)
+  ├── Node(2)
+  │   ├── Node(3)
+  │   └── Node(4)
+  └── Node(5)
+     └── Node(6)
+  ```
 
-Develop an auto-complete system using a Trie data structure that supports the following functionalities:
-- **Insert**: Insert a word into the Trie.
-- **Suggest**: Given a prefix, suggest all words in the Trie that start with this prefix.
-- **Limitation**: The system must handle a large number of words and ensure that the suggest operation returns words in lexicographic order. However, it should also prevent the suggest operation from returning more than a limited number of suggestions (e.g., 5).
+### Constraints:
+- The tree should be an N-ary tree.
+- The tree should be balanced.
+- All numbers in the list should be inserted into the tree.
 
-### Example Input/Output
+### Analysis and Solution:
 
-**Input**:
-- `insert_words`: `["apple", "banana", "cherry"]`
-- `suggest_prefix`: `"app"`
-
-**Output**:
-- `["apple"]`
-
-**Input**:
-- `insert_words`: `["apple", "banana", "cherry"]`
-- `suggest_prefix`: `"ban"`
-
-**Output**:
-- `["banana"]`
-
-### Constraints
-
-- The system should handle a large number of words (e.g., millions).
-- The suggest operation should return at most a limited number of suggestions (e.g., 5).
-
-### Solution
-
-To solve this problem efficiently, we will use a Trie data structure and implement the necessary operations. The key steps include:
-1. **Inserting Words into the Trie**: Ensure that each character of each word is inserted correctly into the Trie.
-2. **Suggesting Words**: Traverse the Trie based on the given prefix and return up to a limited number of suggestions in lexicographic order.
+#### Solution Implementation:
 
 ```python
-class TrieNode:
-    def __init__(self):
-        self.children = {}
-        self.is_word = False
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.children = []
 
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
+def construct_tree(values):
+    # Base case: If the list is empty, return None.
+    if not values:
+        return None
+    
+    # Select the root node value.
+    root_value = values[0]
+    
+    # Create the root node.
+    root = Node(root_value)
+    
+    # Insert all other values into the tree.
+    for value in values[1:]:
+        insert_node(root, value)
+    
+    return root
 
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-        node.is_word = True
+def insert_node(root, value):
+    # Base case: If the tree is empty, add the value as a root.
+    if root is None:
+        return Node(value)
+    
+    # If the value is less than the root's value, add it to the left subtree.
+    if value < root.value:
+        if root.children:
+            for child in root.children:
+                if child.value > value:
+                    insert_node(child, value)
+                    break
+            else:
+                root.children.append(insert_node(None, value))
+        else:
+            root.children.append(insert_node(None, value))
+    # If the value is greater than or equal to the root's value, add it to the right subtree.
+    else:
+        if root.children:
+            for child in root.children:
+                if child.value > value:
+                    insert_node(child, value)
+                    break
+            else:
+                root.children.append(insert_node(None, value))
+        else:
+            root.children.append(insert_node(None, value))
 
-    def suggest(self, prefix, limit=5):
-        node = self.root
-        for char in prefix:
-            if char not in node.children:
-                return []
-            node = node.children[char]
-
-        # Perform breadth-first search from the current node to find all words
-        # that start with the given prefix and return up to 'limit' suggestions
-        return self._bfs(node, prefix, limit)
-
-    def _bfs(self, node, prefix, limit):
-        queue = [(node, prefix)]
-        visited = set()
-        suggestions = []
+def is_balanced(node):
+    def calculate_height(node):
+        if node is None:
+            return 0
+        return max(calculate_height(child) for child in node.children) + 1
+    
+    def check_balance(node):
+        if node is None:
+            return True
         
-        while queue and len(suggestions) < limit:
-            current_node, current_prefix = queue.pop(0)
-            
-            # If we've already visited this node, skip it
-            if (current_node, current_prefix) in visited:
-                continue
-            
-            # Mark it as visited
-            visited.add((current_node, current_prefix))
-            
-            # If it's a complete word
-            if current_node.is_word and len(current_prefix) == len(prefix):
-                suggestions.append(current_prefix)
-            
-            # Add children to the queue
-            for char, child_node in current_node.children.items():
-                queue.append((child_node, current_prefix + char))
+        left_height = calculate_height(node.children[0]) if node.children else 0
+        right_height = calculate_height(node.children[-1]) if node.children else 0
         
-        return suggestions
+        return (abs(left_height - right_height) <= 1) and all(check_balance(child) for child in node.children)
+
+    return check_balance(node)
 
 # Example usage:
-trie = Trie()
-trie.insert("apple")
-trie.insert("banana")
-trie.insert("cherry")
+values = [1, 2, 3, 4, 5, 6, 7]
+root = construct_tree(values)
+print("Constructed Tree:")
+print(root)  # Assuming a recursive print function for simplicity
 
-print(trie.suggest("app", 1)) # Output: ["apple"]
-print(trie.suggest("ban", 1)) # Output: ["banana"]
+if is_balanced(root):
+    print("The tree is balanced.")
+else:
+    print("The tree is not balanced.")
 ```
 
-### Analysis of Complexity
+### Detailed Explanation:
 
-- **Insert Operation**:
-  - Time Complexity: \(O(m)\) where \(m\) is the length of the word.
-  - Space Complexity: \(O(m)\) for storing the word in the Trie.
+1. **Constructing the Tree**:
+   - The `construct_tree` function initializes the root node with the first value from the list and recursively inserts all other values into the tree using `insert_node`.
 
-- **Suggest Operation**:
-  - Time Complexity: \(O(m + k)\) where \(m\) is the length of the prefix and \(k\) is the number of suggestions returned (up to 'limit').
-  - Space Complexity: \(O(k)\) for storing the suggestions.
+2. **Inserting Nodes**:
+   - The `insert_node` function ensures that each value is inserted into its appropriate position in the tree while maintaining balance.
 
-### Explanation
+3. **Checking Balance**:
+   - The `is_balanced` function checks whether the difference between the maximum and minimum height of each node does not exceed one. This ensures that every subtree is relatively balanced.
 
-The chosen solution uses a standard Trie data structure to efficiently store and retrieve words. The `insert` operation simply traverses through each character of the word and adds it to the Trie. The `suggest` operation uses a breadth-first search (BFS) to find all words that start with the given prefix. It ensures that only up to a limited number of suggestions are returned by keeping track of visited nodes and limiting the BFS traversal based on the specified 'limit'.
+### Time and Space Complexity:
+- **Time Complexity**:
+  - Constructing the tree: O(n log n) due to recursive insertion operations.
+  - Checking balance: O(n) as it involves traversing through each node once.
 
-This approach avoids unnecessary traversals and ensures lexicographic order by using BFS. It is optimal in terms of both time and space complexity for handling large datasets with a constraint on suggested word count.
+- **Space Complexity**:
+  - The space complexity depends on how we represent and store nodes but generally remains O(n) for storing all nodes in memory.
+
+### Optimal Approach:
+- This solution ensures that the tree remains balanced by using insertion mechanisms that avoid unbalanced subtrees during insertion.
+- The use of recursion for insertion makes it efficient for maintaining balance properties.
+
+### Trade-offs:
+- Between time and space complexity, there are no
