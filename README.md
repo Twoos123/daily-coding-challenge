@@ -21,133 +21,96 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description: "Construct and Validate a Balanced N-ary Tree"
+### Coding Challenge: Trie-Based String Matching
 
-**Challenge:** Given a list of integers, construct an N-ary tree where each node has a value and a list of children. Ensure the tree is balanced such that the difference between the minimum and maximum height of the tree does not exceed 1. Additionally, validate that all numbers in the list can be inserted into the tree without violating the properties of an N-ary tree.
+**Problem Description:**
+Given a set of strings and a query string, find all strings in the set that match the query string as a prefix. Implement this using a Trie data structure and optimize for both time and space complexity.
 
 **Example Input/Output:**
-- **Input**: `[1, 2, 3, 4, 5, 6, 7]`
-- **Output**:
-  ```
-  Node(1)
-  ├── Node(2)
-  │   ├── Node(3)
-  │   └── Node(4)
-  └── Node(5)
-     └── Node(6)
-  ```
+- **Input:** Set of strings = ["apple", "banana", "cherry", "date"], Query String = "ap"
+- **Output:** ["apple"]
 
-### Constraints:
-- The tree should be an N-ary tree.
-- The tree should be balanced.
-- All numbers in the list should be inserted into the tree.
+**Constraints:**
+- The input set of strings can be large.
+- The query string can be any prefix of the strings in the set.
 
-### Analysis and Solution:
-
-#### Solution Implementation:
+### Most Efficient Solution in Python
 
 ```python
-class Node:
-    def __init__(self, value):
-        self.value = value
-        self.children = []
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
 
-def construct_tree(values):
-    # Base case: If the list is empty, return None.
-    if not values:
-        return None
-    
-    # Select the root node value.
-    root_value = values[0]
-    
-    # Create the root node.
-    root = Node(root_value)
-    
-    # Insert all other values into the tree.
-    for value in values[1:]:
-        insert_node(root, value)
-    
-    return root
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-def insert_node(root, value):
-    # Base case: If the tree is empty, add the value as a root.
-    if root is None:
-        return Node(value)
-    
-    # If the value is less than the root's value, add it to the left subtree.
-    if value < root.value:
-        if root.children:
-            for child in root.children:
-                if child.value > value:
-                    insert_node(child, value)
-                    break
-            else:
-                root.children.append(insert_node(None, value))
-        else:
-            root.children.append(insert_node(None, value))
-    # If the value is greater than or equal to the root's value, add it to the right subtree.
-    else:
-        if root.children:
-            for child in root.children:
-                if child.value > value:
-                    insert_node(child, value)
-                    break
-            else:
-                root.children.append(insert_node(None, value))
-        else:
-            root.children.append(insert_node(None, value))
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end_of_word = True
 
-def is_balanced(node):
-    def calculate_height(node):
-        if node is None:
-            return 0
-        return max(calculate_height(child) for child in node.children) + 1
-    
-    def check_balance(node):
-        if node is None:
-            return True
-        
-        left_height = calculate_height(node.children[0]) if node.children else 0
-        right_height = calculate_height(node.children[-1]) if node.children else 0
-        
-        return (abs(left_height - right_height) <= 1) and all(check_balance(child) for child in node.children)
+    def search_prefix(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return []
+            node = node.children[char]
+        # Perform DFS from this node to find all matching words
+        return self._dfs(node, prefix)
 
-    return check_balance(node)
+    def _dfs(self, node, prefix):
+        result = []
+        if node.is_end_of_word:
+            result.append(prefix)
+        for char in node.children:
+            result.extend(self._dfs(node.children[char], prefix + char))
+        return result
 
-# Example usage:
-values = [1, 2, 3, 4, 5, 6, 7]
-root = construct_tree(values)
-print("Constructed Tree:")
-print(root)  # Assuming a recursive print function for simplicity
+# Example usage
+trie = Trie()
+strings = ["apple", "banana", "cherry", "date"]
+for string in strings:
+    trie.insert(string)
 
-if is_balanced(root):
-    print("The tree is balanced.")
-else:
-    print("The tree is not balanced.")
+query_prefix = "ap"
+result = trie.search_prefix(query_prefix)
+print(result)  # Output: ['apple']
+
 ```
 
-### Detailed Explanation:
+### Detailed Explanation of the Algorithm
 
-1. **Constructing the Tree**:
-   - The `construct_tree` function initializes the root node with the first value from the list and recursively inserts all other values into the tree using `insert_node`.
+1. **Trie Construction:**
+   - We create a Trie node class with children and an `is_end_of_word` flag.
+   - The Trie class initializes with a root node.
+   - The `insert` method traverses the Trie, creating new nodes if necessary, and marks the end of a word when it encounters the end of the string.
 
-2. **Inserting Nodes**:
-   - The `insert_node` function ensures that each value is inserted into its appropriate position in the tree while maintaining balance.
+2. **Prefix Search:**
+   - The `search_prefix` method first checks if each character in the prefix exists in the Trie.
+   - If all characters in the prefix exist, it performs a depth-first search (DFS) starting from this node to find all words that match or extend the prefix.
 
-3. **Checking Balance**:
-   - The `is_balanced` function checks whether the difference between the maximum and minimum height of each node does not exceed one. This ensures that every subtree is relatively balanced.
+3. **DFS Function:**
+   - The `_dfs` function recursively traverses through children of each node and appends matching words (i.e., words that are already marked as ends of words) to the result list.
 
-### Time and Space Complexity:
-- **Time Complexity**:
-  - Constructing the tree: O(n log n) due to recursive insertion operations.
-  - Checking balance: O(n) as it involves traversing through each node once.
+### Time and Space Complexity Analysis
 
-- **Space Complexity**:
-  - The space complexity depends on how we represent and store nodes but generally remains O(n) for storing all nodes in memory.
+- **Insert Operation:** The time complexity for inserting a word into the Trie is O(m), where m is the length of the word due to the linear traversal through each character.
+- **Prefix Search:** 
+  - The time complexity for searching a prefix in the Trie and performing DFS is initially O(m) to check each character in the prefix.
+  - The subsequent DFS traversal can potentially visit up to m+1 nodes (including the prefix itself), leading to a total time complexity of O(m) for finding matching words.
+- **Space Complexity:** Both space used by nodes created during insertion and space used during DFS traversal are bounded by O(m*n), where n is the number of words in the set. However, this worst-case scenario assumes every suffix of every word matches exactly one prefix character, which is unlikely.
 
-### Optimal Approach:
-- This solution ensures that the tree remains balanced by using insertion mechanisms that avoid unbalanced subtrees during insertion.
-- The use of recursion for insertion makes it efficient for maintaining balance properties.
+### Optimality and Trade-offs
 
-### Trade-offs:
-- Between time and space complexity, there are no
+This approach is optimal because it leverages the inherent structure of a Trie to efficiently search for matching prefixes by directly traversing through nodes corresponding to prefix characters.
+
+The trade-off here is between time spent on initial prefix checking vs. potential increased space usage during DFS traversal. However, given typical use cases where prefix lengths are generally short compared to word lengths, this implementation remains efficient and scalable.
+
+### Difficulty Rating: 3
+
+This problem combines elements of Trie construction and traversal with a practical application of finding matching prefixes efficiently. While it requires understanding and implementation details specific to Tries, it does not involve complex algorithms beyond what is standard for this data structure. Hence, it's rated as moderately challenging.
