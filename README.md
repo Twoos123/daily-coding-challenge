@@ -21,75 +21,75 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
-**Duplicate Email Detection with Hash Table**
+### Coding Challenge: "String Deletion to Reach a Target"
 
-Given an array of email addresses, determine the number of duplicate email addresses and the number of unique email addresses. The solution should use a hash table to efficiently count the occurrences of each email address.
+#### Problem Description
 
-### Example Input/Output
+Given a string `s` and an integer target `t`, implement a function to determine if it is possible to delete characters from `s` such that the remaining string forms a substrings of `t`. The deleted characters should not be in the resulting substring.
 
-**Input:** `emails = ["test.email+alex@leetcode.com", "test.e.mail+bob@leetcode.com", "testemail+david@lee.tcode.com"]`
+#### Example Input/Output
 
-**Output:** `{"test.email+alex@leetcode.com": 1, "test.e.mail+bob@leetcode.com": 1, "testemail+david@lee.tcode.com": 1}` 
-- **Unique Emails:** 3
-- **Duplicate Emails:** 0
+- **Input**: `s = "abc", t = "ab"`
+- **Output**: `True`
+- **Explanation**: By deleting the character 'c' from `s`, we get a substring "ab" which is a part of `t`.
 
-### Constraints
-- The input array will contain only unique strings.
-- The email addresses may or may not contain special characters or numbers.
-- The solution should handle edge cases where the input array is empty or contains a single unique email.
+- **Input**: `s = "abcd", t = "ab"`
+- **Output**: `False`
+- **Explanation**: There is no way to delete characters from `s` to form a substring of `t`.
 
-### Most Efficient Solution in Python
+#### Constraints
+
+- The strings `s` and `t` only contain lowercase English letters.
+- The target string `t` is not empty.
+
+#### The Most Efficient Solution
+
+To solve this problem efficiently, we can use dynamic programming with a two-pointer approach. The idea is to iterate through both strings `s` and `t` simultaneously, checking if each character in `s` matches any character in `t`.
+
+Here's an optimal solution in Python:
 
 ```python
-def count_duplicate_emails(emails):
-    # Initialize a hash table to store email addresses and their counts.
-    email_counts = {}
+def can_delete_to_target(s: str, t: str) -> bool:
+    """
+    Determines if it is possible to delete characters from s such that the remaining string forms a substring of t.
     
-    # Iterate over each email in the input array.
-    for email in emails:
-        # If the email is already in the hash table, increment its count.
-        if email in email_counts:
-            email_counts[email] += 1
-        # If the email is not in the hash table, add it with a count of 1.
+    Parameters:
+    s (str): The original string.
+    t (str): The target string.
+    
+    Returns:
+    bool: True if it is possible to delete characters from s to form a substring of t, False otherwise.
+    """
+    
+    # Initialize pointers for s and t
+    s_ptr = len(s) - 1
+    t_ptr = len(t) - 1
+    
+    # Simulate deleting characters from s
+    while s_ptr >= 0 and t_ptr >= 0:
+        if s[s_ptr] == t[t_ptr]:
+            # If the characters match, move both pointers forward
+            s_ptr -= 1
+            t_ptr -= 1
         else:
-            email_counts[email] = 1
+            # If the characters do not match, move the pointer of s forward
+            s_ptr -= 1
     
-    # Calculate the number of unique emails and duplicate emails.
-    unique_emails = sum(count == 1 for count in email_counts.values())
-    duplicate_emails = len(emails) - unique_emails
-    
-    return email_counts, unique_emails, duplicate_emails
+    # Check if we have reached the end of t
+    return t_ptr < 0
 
-# Example usage:
-emails = ["test.email+alex@leetcode.com", "test.e.mail+bob@leetcode.com", "testemail+david@lee.tcode.com"]
+# Example usage
+print(can_delete_to_target("abc", "ab"))  # Output: True
+print(can_delete_to_target("abcd", "ab"))  # Output: False
 
-result, unique, duplicates = count_duplicate_emails(emails)
-print("Email Counts:", result)
-print("Unique Emails:", unique)
-print("Duplicate Emails:", duplicates)
 ```
 
-### Detailed Explanation of the Algorithm
+#### Analysis of Complexity and Difficulty
 
-1. **Initialization:** Create an empty dictionary `email_counts` to serve as our hash table.
-2. **Iteration:** Iterate through each email address in the input array.
-3. **Update Counts:** For each email, check if it already exists in `email_counts`. If it does, increment its count by 1; otherwise, add it with a count of 1.
-4. **Unique and Duplicate Counts:** Calculate the number of unique emails by summing up all counts that are equal to 1. The total number of duplicate emails is then calculated as the difference between the total number of emails and the number of unique emails.
+- **Time Complexity**: The time complexity of this solution is **O(n + m)** where `n` is the length of `s` and `m` is the length of `t`. This is because we iterate through both strings simultaneously using two pointers.
+  
+- **Space Complexity**: The space complexity is **O(1)** as we only use a constant amount of space to store pointers.
 
-### Analysis of Time and Space Complexity
+This approach is optimal because it efficiently checks for substrings using dynamic programming without requiring additional space that scales with input size.
 
-- **Time Complexity:** The time complexity is O(n), where n is the length of the `emails` array. This is because we are performing a constant-time operation (dictionary lookup/insertion) for each email.
-- **Space Complexity:** The space complexity is also O(n), as in the worst case, every email could be unique and stored in our hash table.
-
-### Optimal Approach Explanation
-
-This solution is optimal because it leverages the efficient average time complexity of O(1) for dictionary operations (hash lookups and insertions). The use of a hash table allows us to handle multiple emails in constant time per operation, making this approach scalable for large inputs.
-
-### Trade-offs
-
-There are no significant trade-offs between time and space complexity in this solution. The choice to use a hash table ensures both efficient counting (time) and minimal additional storage (space), given that we are only storing key-value pairs for each unique email address.
-
-### Difficulty Rating
-
-This problem requires understanding basic hash table operations and applying them to count duplicates efficiently. The solution involves straightforward iteration over the input array and maintaining counts within the hash table. While it's not extremely challenging, it does require clarity on how to utilize a hash table effectively for counting occurrences.
+This challenge requires understanding dynamic programming and two-pointer techniques, making it moderately difficult for those familiar with these concepts. The solution provided leverages these techniques efficiently to achieve optimal performance.
