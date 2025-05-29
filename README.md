@@ -19,51 +19,87 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-**DIFFICULTY: 4**
+### Problem Description: Efficient K-Heap Retrieval
 
-**Challenge Title: Minimum Number of Operations to Clear a Stack**
-
-**Problem Description:**
-Given a stack of integers, determine the minimum number of operations (pop and push) required to clear the stack completely. The goal is to find the shortest sequence of operations that results in an empty stack.
+**Problem Statement:**
+Given an array of integers and an integer `k`, implement a function that uses a heap data structure to retrieve the `k` largest (or smallest) elements efficiently. The function should utilize either a Min Heap or Max Heap to achieve this.
 
 **Example Input/Output:**
-- **Input:** Stack `[2, 5, 3, 1]`
-- **Output:** `4` (because we need to pop and push the elements in any order 4 times to clear the stack)
 
-**Constraints:**
-- The stack will only contain positive integers.
-- The problem does not specify any additional constraints on the order in which elements are popped or pushed.
+- **Input:** `arr = [12, 10, 8, 6, 4]`, `k = 2`
+- **Output:** `[12, 10]` (using a Max Heap)
 
-### Optimal Solution
+- **Input:** `arr = [4, 6, 8, 10, 12]`, `k = 2`
+- **Output:** `[12, 10]` (using a Max Heap)
 
-To solve this problem efficiently, we can use a simple strategy based on the fact that each operation (pop or push) reduces the size of the stack by one. Since we need to clear the stack, we aim to reduce its size from `n` to `0`. Therefore, we need at least `n` operations.
+### Constraints:
+- The input array is unsorted.
+- The size of the array is `n`.
+- The value of `k` is less than or equal to `n`.
 
-Here’s an implementation in Python:
+### Solution:
+
+#### Using a Max Heap
+
+To solve this problem efficiently, we will use a Max Heap. The idea is to insert all elements from the array into the heap and then extract the top `k` elements from the heap.
+
+Here is the most efficient solution in Python:
 
 ```python
-def min_operations_to_clear_stack(stack):
-    """
-    Returns the minimum number of operations (pop and push) required to clear the stack.
+import heapq
 
-    :param stack: A list of integers representing the stack.
-    :return: The minimum number of operations required.
-    """
-    # The size of the stack is the number of elements in it.
-    return len(stack)
+def k_largest_elements(arr, k):
+    # Create a Max Heap
+    max_heap = []
+    
+    # Insert all elements into the Max Heap
+    for num in arr:
+        heapq.heappush(max_heap, -num)  # Negative sign to simulate a Max Heap
+    
+    # Extract top k elements from the Max Heap
+    result = []
+    for _ in range(k):
+        if max_heap:
+            result.append(-heapq.heappop(max_heap))
+    
+    return result
+
+# Example usage:
+arr = [12, 10, 8, 6, 4]
+k = 2
+print(k_largest_elements(arr, k))  # Output: [12, 10]
 ```
 
-### Analysis
+#### Detailed Explanation:
 
-#### Time Complexity:
-The time complexity of this solution is O(1), because it involves a constant number of operations (accessing the length of the list) regardless of the input size.
+1. **Creating a Max Heap:**
+   - We use Python's `heapq` module which implements a binary heap based on the heap queue algorithm, also known as the priority queue algorithm.
+   - By pushing negative numbers into the heap (`heapq.heappush(max_heap, -num)`), we effectively create a Max Heap because Python's `heapq` module implements a Min Heap by default.
 
-#### Space Complexity:
-The space complexity is also O(1), because we do not use any additional data structures that scale with the input size.
+2. **Inserting Elements:**
+   - We iterate over all elements in the input array and push them into our simulated Max Heap.
 
-### Explanation
+3. **Extracting Top k Elements:**
+   - We use a loop to pop and store the top `k` elements from our Max Heap.
 
-The key insight here is that any sequence of `pop` and `push` operations will result in a total count equal to the initial size of the stack. Therefore, finding this minimum count directly from the size of the stack is both efficient and optimal.
+4. **Time Complexity Analysis:**
+   - The time complexity of inserting an element into a heap (`heapq.heappush`) is O(log n).
+   - The time complexity of extracting an element from a heap (`heapq.heappop`) is also O(log n).
+   - Therefore, the overall time complexity for creating and managing our Max Heap to find the top `k` elements is O(n log n).
 
-This solution does not require manipulating the stack itself but rather focuses on calculating a property (the minimum number of operations) based on its current state. This approach ensures both time and space efficiency, making it suitable for a difficulty rating of 4.
+5. **Space Complexity Analysis:**
+   - The space complexity is O(n) as we store each element in our simulated Max Heap.
+
+### Complexity Analysis:
+- **Time Complexity:** The solution has a time complexity of O(n log n) due to the insertion and extraction operations from the heap.
+- **Space Complexity:** The solution has a space complexity of O(n) since we store all elements in our Max Heap.
+
+### Why This Approach is Optimal:
+The use of Python's `heapq` module simplifies the implementation significantly by handling the underlying data structure for us. This approach leverages the built-in efficiency of heaps to achieve optimal performance in terms of both time and space complexity.
+
+### Difficulty Rating:
+****
+
+This problem requires a good understanding of how heaps work and how to utilize them efficiently for specific tasks like retrieving the largest or smallest elements. The implementation involves some advanced concepts like simulating a Max Heap using Python's Min Heap implementation in `heapq`. However, it is still manageable with proper explanation and practice.
