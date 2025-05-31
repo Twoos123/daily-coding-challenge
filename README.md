@@ -21,99 +21,92 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem
+****
 
-**Problem Description:**
-Given a 2D matrix where each cell contains a number, find the maximum sum of a submatrix that can be rotated by 90 degrees (either clockwise or anticlockwise) and still be valid. The rotation should be performed in such a way that the cells in each row and column maintain their relative order. The sum of the submatrix should be maximized.
+### Problem Description
 
-**Example Input/Output:**
-Input:
+**Cycle Detection in Directed Graph**
+
+Given a directed graph, detect whether it contains a cycle using Depth-First Search (DFS).
+
+### Example Input/Output
+
+**Input:**
+```python
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D'],
+    'C': ['D'],
+    'D': ['C']
+}
 ```
-1 2 3
-4 5 6
-7 8 9
+
+**Output:**
+```python
+True  # The graph contains a cycle.
 ```
 
-Output:
-The maximum sum is 30 (the sum of the submatrix with cells {9, 8, 7, 6, 5, 4}).
+### Constraints
 
-**Constraints:**
-- The input matrix is square (i.e., has the same number of rows and columns).
-- Each cell in the matrix contains a non-negative integer.
+1. The graph is represented as an adjacency list.
+2. The graph can contain both directed and undirected edges, but the problem focuses on directed graphs.
 
-### Solution
+### The Most Efficient Solution in Python
 
-To solve this problem, we need to find the maximum sum of a submatrix that can be rotated by 90 degrees. One approach is to iterate through all possible submatrices of the given square matrix and calculate their sums after rotation. However, this brute-force approach would be inefficient with a high time complexity.
+#### Detailed Explanation
 
-A more efficient solution involves leveraging the properties of matrix rotation and sum calculation.
-
-1. **Rotate Matrix:**
-   - Rotate the matrix by 90 degrees to get a new matrix where rows become columns and vice versa.
-   - This step ensures that the relative order within each row and column is maintained.
-
-2. **Sum Calculation:**
-   - Calculate the sum of each row or column in the rotated matrix.
-   - The sum of any subrectangle in the rotated matrix will be the same as in the original matrix due to its properties.
-
-3. **Maximize Sum:**
-   - Iterate through all possible submatrices in both the original and rotated matrices.
-   - Keep track of the maximum sum found.
-
-Here's an optimized solution in Python:
+To detect a cycle in a directed graph using DFS, we can use a recursive approach with a flag to track whether we are currently visiting a node or if we have already visited it. If we encounter a node that we are currently visiting, it indicates a cycle.
 
 ```python
-def max_sum_rotated(matrix):
-    n = len(matrix)
-    max_sum = float('-inf')
-    
-    # Rotate matrix by 90 degrees clockwise
-    rotated_matrix = [[matrix[j][i] for j in range(n)] for i in range(n)]
-    
-    def sum_submatrix(matrix, x, y, w, h):
-        # Calculate sum of subrectangle [x, y, w, h]
-        return sum(sum(row[x:x+w]) for row in matrix[y:y+h])
+def is_cyclic(graph):
+    visited = set()
+    recursion_stack = set()
 
-    # Iterate through all possible submatrices
-    for i in range(n):
-        for j in range(n):
-            for w in range(1, n + 1):
-                for h in range(1, n + 1):
-                    if i + w <= n and j + h <= n:
-                        # Calculate sum for both original and rotated matrices
-                        sum_original = sum_submatrix(matrix, i, j, w, h)
-                        sum_rotated = sum_submatrix(rotated_matrix, j, i, h, w)
-                        
-                        # Update max_sum if needed
-                        max_sum = max(max_sum, sum_original, sum_rotated)
+    def dfs(node):
+        visited.add(node)
+        recursion_stack.add(node)
 
-    return max_sum
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                if dfs(neighbor):
+                    return True
+            elif neighbor in recursion_stack:
+                return True
+
+        recursion_stack.remove(node)
+        return False
+
+    for node in graph:
+        if node not in visited:
+            if dfs(node):
+                return True
+
+    return False
 
 # Example usage:
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D'],
+    'C': ['D'],
+    'D': ['C']
+}
 
-print(max_sum_rotated(matrix)) # Output should be 30
+print(is_cyclic(graph))  # Output: True
 ```
 
-### Analysis
+#### Analysis of Complexity
 
-#### Time Complexity:
-- The time complexity of rotating a square matrix is O(n^2).
-- The inner loop for calculating the sum of submatrices has a time complexity of O(n^2) as well.
-- Therefore, the overall time complexity is O(n^4) due to repeated calculations for different submatrices.
+- **Time Complexity:** O(V + E), where V is the number of vertices (nodes) and E is the number of edges. This is because each node and edge is visited once.
+- **Space Complexity:** O(V), which is used for storing the visited and recursion stack sets.
 
-#### Space Complexity:
-- The space complexity is O(n^2) for storing the rotated matrix.
+#### Why This Approach is Optimal
 
-### Why this approach is optimal:
+This approach is optimal because it leverages the properties of DFS to efficiently detect cycles in a graph. It avoids unnecessary traversals by keeping track of visited nodes and nodes currently being visited, thus ensuring that each edge is visited only once.
 
-This approach is optimal because it leverages properties of matrix rotation and sum calculation to reduce the number of necessary computations. However, it still has a high time complexity due to its brute-force nature. For improved efficiency with high-dimensional matrices (e.g., beyond small sizes like 10x10), more advanced techniques like dynamic programming or prefix sums might be necessary but are beyond the scope of this explanation.
+#### Trade-offs
 
-### Difficulty Rating
+There are no significant trade-offs between time and space complexity in this approach. The time complexity of O(V + E) ensures that the algorithm's running time scales linearly with the size of the graph, while the space complexity of O(V) ensures that the memory usage remains reasonable even for large graphs.
 
-DIFFICULTY: 4
+### Conclusion
 
-This problem requires an understanding of matrix operations and rotations while maintaining time complexity considerations. While it's doable with straightforward techniques like those shown above, it's not trivial due to its time complexity requirements and the need for maintaining relative order post-rotation.
+This problem requires an understanding of DFS and its application in detecting cycles within graphs. The provided solution is efficient, scalable, and easy to implement, making it suitable for both beginners and intermediate programmers.
