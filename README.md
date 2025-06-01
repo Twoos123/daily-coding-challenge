@@ -19,94 +19,47 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-****
+### Coding Challenge: **Reverse Substrings Between Two Indices**
 
-### Problem Description
+**Problem Description:**
+Given a string `s` and two indices `left` and `right`, reverse the substrings between these indices and return the modified string. If there are multiple substrings between `left` and `right`, each should be reversed individually.
 
-**Cycle Detection in Directed Graph**
+**Example Input/Output:**
+- **Input:** `s = "abcdefg"`, `left = 2`, `right = 5`
+- **Output:** "abedcfa"
 
-Given a directed graph, detect whether it contains a cycle using Depth-First Search (DFS).
+**Constraints:**
+- The indices `left` and `right` are guaranteed to be within the range of the string.
+- The string `s` contains only valid characters.
 
-### Example Input/Output
-
-**Input:**
+**Solution in Python:**
 ```python
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D'],
-    'C': ['D'],
-    'D': ['C']
-}
-```
-
-**Output:**
-```python
-True  # The graph contains a cycle.
-```
-
-### Constraints
-
-1. The graph is represented as an adjacency list.
-2. The graph can contain both directed and undirected edges, but the problem focuses on directed graphs.
-
-### The Most Efficient Solution in Python
-
-#### Detailed Explanation
-
-To detect a cycle in a directed graph using DFS, we can use a recursive approach with a flag to track whether we are currently visiting a node or if we have already visited it. If we encounter a node that we are currently visiting, it indicates a cycle.
-
-```python
-def is_cyclic(graph):
-    visited = set()
-    recursion_stack = set()
-
-    def dfs(node):
-        visited.add(node)
-        recursion_stack.add(node)
-
-        for neighbor in graph[node]:
-            if neighbor not in visited:
-                if dfs(neighbor):
-                    return True
-            elif neighbor in recursion_stack:
-                return True
-
-        recursion_stack.remove(node)
-        return False
-
-    for node in graph:
-        if node not in visited:
-            if dfs(node):
-                return True
-
-    return False
+def reverse_substrings(s, left, right):
+    s = list(s)
+    while left < right:
+        s[left], s[right] = s[right], s[left]
+        left += 1
+        right -= 1
+    return "".join(s)
 
 # Example usage:
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D'],
-    'C': ['D'],
-    'D': ['C']
-}
-
-print(is_cyclic(graph))  # Output: True
+s = "abcdefg"
+left = 2
+right = 5
+print(reverse_substrings(s, left, right)) # Output: "abedcfa"
 ```
 
-#### Analysis of Complexity
+**Analysis of the Most Efficient Solution:**
 
-- **Time Complexity:** O(V + E), where V is the number of vertices (nodes) and E is the number of edges. This is because each node and edge is visited once.
-- **Space Complexity:** O(V), which is used for storing the visited and recursion stack sets.
+1. **Time Complexity:** The solution involves iterating over the range from `left` to `right` and swapping characters at these indices. This process is performed in a single pass through the substring, resulting in a time complexity of O((right - left)).
 
-#### Why This Approach is Optimal
+2. **Space Complexity:** The solution converts the input string into a list to allow for in-place swapping of characters. This conversion requires additional space proportional to the length of the input string, resulting in a space complexity of O(n), where n is the length of the input string.
 
-This approach is optimal because it leverages the properties of DFS to efficiently detect cycles in a graph. It avoids unnecessary traversals by keeping track of visited nodes and nodes currently being visited, thus ensuring that each edge is visited only once.
+3. **Optimality Explanation:** The chosen solution is optimal because it directly addresses the problem by iterating over the specified range and swapping characters in a single pass. This approach is both efficient in terms of time and space.
 
-#### Trade-offs
+4. **Trade-offs:** There are no significant trade-offs between time and space complexity in this approach. The conversion to a list allows for efficient swapping operations within the range specified by `left` and `right`.
 
-There are no significant trade-offs between time and space complexity in this approach. The time complexity of O(V + E) ensures that the algorithm's running time scales linearly with the size of the graph, while the space complexity of O(V) ensures that the memory usage remains reasonable even for large graphs.
-
-### Conclusion
-
-This problem requires an understanding of DFS and its application in detecting cycles within graphs. The provided solution is efficient, scalable, and easy to implement, making it suitable for both beginners and intermediate programmers.
+### Difficulty Rating
+This problem requires understanding how to manipulate strings efficiently using basic operations like swapping characters. It also requires handling indices correctly to ensure that all specified substrings are reversed correctly. The difficulty level is rated 4 because it involves more complex string manipulation compared to simpler operations like reversing an entire string but is still manageable with basic understanding of Python and string manipulation techniques.
