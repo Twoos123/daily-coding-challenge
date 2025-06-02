@@ -19,47 +19,81 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: **Reverse Substrings Between Two Indices**
+### Problem Description: Hash Table - Unique Substring Count
 
-**Problem Description:**
-Given a string `s` and two indices `left` and `right`, reverse the substrings between these indices and return the modified string. If there are multiple substrings between `left` and `right`, each should be reversed individually.
+Given a string `s` and a character `c`, count the number of unique substrings in `s` that contain at least one occurrence of `c`. You should implement this using a hash table to efficiently track and count these substrings.
 
-**Example Input/Output:**
-- **Input:** `s = "abcdefg"`, `left = 2`, `right = 5`
-- **Output:** "abedcfa"
+### Example Input/Output
 
-**Constraints:**
-- The indices `left` and `right` are guaranteed to be within the range of the string.
-- The string `s` contains only valid characters.
+**Input:**
+- `s = "abaccabaa"` 
+- `c = 'a'`
 
-**Solution in Python:**
+**Output:**
+- `6`
+
+### Constraints
+
+- The string `s` can be very long (up to 10^4 characters).
+- The character `c` is a single character.
+
+### Most Efficient Solution in Python
+
 ```python
-def reverse_substrings(s, left, right):
-    s = list(s)
-    while left < right:
-        s[left], s[right] = s[right], s[left]
-        left += 1
-        right -= 1
-    return "".join(s)
+def count_unique_substrings(s, c):
+    n = len(s)
+    count = 0  # To count unique substrings containing 'c'
 
-# Example usage:
-s = "abcdefg"
-left = 2
-right = 5
-print(reverse_substrings(s, left, right)) # Output: "abedcfa"
+    hash_set = set()  # Hash set to track unique substrings
+
+    for i in range(n):  # Iterate through the string
+        start = i
+        while start < n and s[start] == c:
+            end = start + 1
+            temp_str = ""
+            while end < n and s[end] != c:
+                temp_str += s[end]
+                end += 1
+            if temp_str:
+                hash_set.add(temp_str)
+            start += 1
+    
+    return len(hash_set)
 ```
 
-**Analysis of the Most Efficient Solution:**
+### Detailed Explanation of the Algorithm
 
-1. **Time Complexity:** The solution involves iterating over the range from `left` to `right` and swapping characters at these indices. This process is performed in a single pass through the substring, resulting in a time complexity of O((right - left)).
+1. **Initialization**:
+   - Initialize a set `hash_set` to store unique substrings containing `c`.
+   - Initialize a counter `count` to zero.
 
-2. **Space Complexity:** The solution converts the input string into a list to allow for in-place swapping of characters. This conversion requires additional space proportional to the length of the input string, resulting in a space complexity of O(n), where n is the length of the input string.
+2. **Iterate Through String**:
+   - Iterate through each character in the string.
+   - When `s[i] == c`, start a substring by continuously adding characters until you encounter another occurrence of `c` or reach the end of the string.
 
-3. **Optimality Explanation:** The chosen solution is optimal because it directly addresses the problem by iterating over the specified range and swapping characters in a single pass. This approach is both efficient in terms of time and space.
+3. **Tracking Substrings**:
+   - For each substring ending at an index where `s[end] != c`, add it to `hash_set`.
 
-4. **Trade-offs:** There are no significant trade-offs between time and space complexity in this approach. The conversion to a list allows for efficient swapping operations within the range specified by `left` and `right`.
+4. **Return Result**:
+   - The size of `hash_set` gives you the number of unique substrings containing at least one occurrence of `c`.
 
-### Difficulty Rating
-This problem requires understanding how to manipulate strings efficiently using basic operations like swapping characters. It also requires handling indices correctly to ensure that all specified substrings are reversed correctly. The difficulty level is rated 4 because it involves more complex string manipulation compared to simpler operations like reversing an entire string but is still manageable with basic understanding of Python and string manipulation techniques.
+### Time and Space Complexity Analysis
+
+- **Time Complexity:**
+  - The solution has a time complexity of O(n), where n is the length of the string. This is because we are iterating through the string once and potentially adding elements to the set for each character.
+
+- **Space Complexity:**
+  - The space complexity is also O(n) due to storing all unique substrings in `hash_set`. However, since we are using a set which automatically removes duplicates, only O(k) space would be used where k is the number of unique substrings.
+
+### Optimal Approach Explanation
+
+Using a hash table (implemented here using Python's built-in set) allows us to efficiently track and count unique substrings by avoiding duplicate entries directly. The time complexity remains linear as we only iterate through each character once or twice for each substring found.
+
+### Trade-offs Between Time and Space
+
+While both time and space complexities are linear in terms of input size (O(n)), using a hash set ensures that we do not store duplicate entries which could otherwise inflate our space usage beyond what is necessary. This approach ensures that we achieve both optimal time and space complexities given our constraints.
+
+### Difficulty Rating (Machine-Readable Format)
+This problem requires understanding how to efficiently use hash tables to count unique substrings but does not involve complex collision resolution techniques or advanced algorithms, making it moderately challenging.
