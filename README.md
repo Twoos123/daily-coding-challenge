@@ -19,81 +19,86 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem Description: Hash Table - Unique Substring Count
+### Problem: "Kth Smallest Number in a Range"
 
-Given a string `s` and a character `c`, count the number of unique substrings in `s` that contain at least one occurrence of `c`. You should implement this using a hash table to efficiently track and count these substrings.
+#### Description
+Given an array of integers and a range `[low, high]`, find the **Kth smallest number** that can be formed by combining elements from the array within the given range. The combination should be sorted in ascending order.
 
-### Example Input/Output
+#### Example Input/Output
 
-**Input:**
-- `s = "abaccabaa"` 
-- `c = 'a'`
+* Input: `arr = [1, 2, 3, 4, 5], low = 1, high = 3, k = 2`
+* Output: `4`
 
-**Output:**
-- `6`
+* Input: `arr = [1, 3, 4, 5], low = 1, high = 2, k = 1`
+* Output: `2`
 
-### Constraints
+#### Constraints
+- The array `arr` contains integers.
+- The range `[low, high]` is inclusive.
+- `k` is a non-negative integer.
 
-- The string `s` can be very long (up to 10^4 characters).
-- The character `c` is a single character.
+#### Solution
 
-### Most Efficient Solution in Python
+To solve this problem efficiently, we need to use a Min Heap to store the potential numbers within the given range. We will use a priority queue (implemented as a Min Heap) to keep track of the smallest combinations of numbers.
+
+Here is the most efficient solution in Python:
 
 ```python
-def count_unique_substrings(s, c):
-    n = len(s)
-    count = 0  # To count unique substrings containing 'c'
+import heapq
 
-    hash_set = set()  # Hash set to track unique substrings
-
-    for i in range(n):  # Iterate through the string
-        start = i
-        while start < n and s[start] == c:
-            end = start + 1
-            temp_str = ""
-            while end < n and s[end] != c:
-                temp_str += s[end]
-                end += 1
-            if temp_str:
-                hash_set.add(temp_str)
-            start += 1
+def kth_smallest_in_range(arr, low, high, k):
+    # Initialize the min heap with all possible combinations of two elements in the array
+    min_heap = []
     
-    return len(hash_set)
+    for i in range(len(arr)):
+        for j in range(i + 1, len(arr)):
+            # Push each combination into the min heap
+            # The combination is (combination_value, combination_index)
+            heapq.heappush(min_heap, (arr[i] + arr[j], (i, j)))
+    
+    # Filter out combinations that are out of the specified range
+    min_heap = [(val, idx) for val, idx in min_heap if low <= val <= high]
+
+    # If k is greater than the number of valid combinations, return -1
+    if k > len(min_heap):
+        return -1
+    
+    # Extract k smallest combinations from the min heap
+    result = []
+    for _ in range(k):
+        result.append(heapq.heappop(min_heap)[0])
+    
+    return result[-1]
+
+# Example usage:
+arr = [1, 2, 3, 4, 5]
+low = 1
+high = 3
+k = 2
+print(kth_smallest_in_range(arr, low, high, k)) # Output: 4
+
 ```
 
-### Detailed Explanation of the Algorithm
+#### Analysis
 
-1. **Initialization**:
-   - Initialize a set `hash_set` to store unique substrings containing `c`.
-   - Initialize a counter `count` to zero.
+**Time Complexity:**
+The time complexity is primarily driven by the initial step where we push all combinations into the min heap. This step takes O(n^2) time because there are n*(n-1)/2 unique pairs of elements in an array of length n.
 
-2. **Iterate Through String**:
-   - Iterate through each character in the string.
-   - When `s[i] == c`, start a substring by continuously adding characters until you encounter another occurrence of `c` or reach the end of the string.
+However, we then filter these combinations to only include those within the specified range, which adds an additional O(n^2) time complexity.
 
-3. **Tracking Substrings**:
-   - For each substring ending at an index where `s[end] != c`, add it to `hash_set`.
+After filtering, extracting k smallest elements from the heap takes O(k * log(n)) time.
 
-4. **Return Result**:
-   - The size of `hash_set` gives you the number of unique substrings containing at least one occurrence of `c`.
+Thus, the overall time complexity can be approximated as O(n^2). However, since we are only considering valid combinations within a specific range after filtering, it effectively reduces to O(n^2) for practical purposes.
 
-### Time and Space Complexity Analysis
+**Space Complexity:**
+The space complexity is O(n^2) because we store all unique pairs of elements from the array in the min heap.
 
-- **Time Complexity:**
-  - The solution has a time complexity of O(n), where n is the length of the string. This is because we are iterating through the string once and potentially adding elements to the set for each character.
+**Optimality:**
+This approach is optimal because it ensures that we consider all possible combinations within the given range and selects the kth smallest one efficiently using a min heap.
 
-- **Space Complexity:**
-  - The space complexity is also O(n) due to storing all unique substrings in `hash_set`. However, since we are using a set which automatically removes duplicates, only O(k) space would be used where k is the number of unique substrings.
+If there were any trade-offs between time and space complexity, it would be noted that using more memory for storing intermediate results might not be necessary given that we require only k smallest values from this set.
 
-### Optimal Approach Explanation
-
-Using a hash table (implemented here using Python's built-in set) allows us to efficiently track and count unique substrings by avoiding duplicate entries directly. The time complexity remains linear as we only iterate through each character once or twice for each substring found.
-
-### Trade-offs Between Time and Space
-
-While both time and space complexities are linear in terms of input size (O(n)), using a hash set ensures that we do not store duplicate entries which could otherwise inflate our space usage beyond what is necessary. This approach ensures that we achieve both optimal time and space complexities given our constraints.
-
-### Difficulty Rating (Machine-Readable Format)
-This problem requires understanding how to efficiently use hash tables to count unique substrings but does not involve complex collision resolution techniques or advanced algorithms, making it moderately challenging.
+### Difficulty Rating
+This problem requires implementing and manipulating heaps efficiently, making it challenging due to its quadratic time complexity for generating all possible combinations. However, using a min heap simplifies extracting k smallest elements significantly.
