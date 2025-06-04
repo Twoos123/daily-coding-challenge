@@ -19,86 +19,102 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem: "Kth Smallest Number in a Range"
+### Problem Description
 
-#### Description
-Given an array of integers and a range `[low, high]`, find the **Kth smallest number** that can be formed by combining elements from the array within the given range. The combination should be sorted in ascending order.
+**Challenge: Topological Sorting with Cycles**
 
-#### Example Input/Output
+Given a directed acyclic graph (DAG) with cycles, determine if it is possible to perform a valid topological sorting. If possible, output the sorted list of nodes; otherwise, indicate that a valid topological sort is impossible.
 
-* Input: `arr = [1, 2, 3, 4, 5], low = 1, high = 3, k = 2`
-* Output: `4`
+### Example Input/Output
 
-* Input: `arr = [1, 3, 4, 5], low = 1, high = 2, k = 1`
-* Output: `2`
-
-#### Constraints
-- The array `arr` contains integers.
-- The range `[low, high]` is inclusive.
-- `k` is a non-negative integer.
-
-#### Solution
-
-To solve this problem efficiently, we need to use a Min Heap to store the potential numbers within the given range. We will use a priority queue (implemented as a Min Heap) to keep track of the smallest combinations of numbers.
-
-Here is the most efficient solution in Python:
-
-```python
-import heapq
-
-def kth_smallest_in_range(arr, low, high, k):
-    # Initialize the min heap with all possible combinations of two elements in the array
-    min_heap = []
-    
-    for i in range(len(arr)):
-        for j in range(i + 1, len(arr)):
-            # Push each combination into the min heap
-            # The combination is (combination_value, combination_index)
-            heapq.heappush(min_heap, (arr[i] + arr[j], (i, j)))
-    
-    # Filter out combinations that are out of the specified range
-    min_heap = [(val, idx) for val, idx in min_heap if low <= val <= high]
-
-    # If k is greater than the number of valid combinations, return -1
-    if k > len(min_heap):
-        return -1
-    
-    # Extract k smallest combinations from the min heap
-    result = []
-    for _ in range(k):
-        result.append(heapq.heappop(min_heap)[0])
-    
-    return result[-1]
-
-# Example usage:
-arr = [1, 2, 3, 4, 5]
-low = 1
-high = 3
-k = 2
-print(kth_smallest_in_range(arr, low, high, k)) # Output: 4
-
+**Input:**
+```plaintext
+Graph:
+A -> B -> C -> D
+A -> E -> F
+G -> H
 ```
 
-#### Analysis
+**Output:**
+```plaintext
+False (since a valid topological sort is impossible due to cycles)```
 
-**Time Complexity:**
-The time complexity is primarily driven by the initial step where we push all combinations into the min heap. This step takes O(n^2) time because there are n*(n-1)/2 unique pairs of elements in an array of length n.
+### Constraints
 
-However, we then filter these combinations to only include those within the specified range, which adds an additional O(n^2) time complexity.
+- The input graph can contain both directed edges and cycles.
+- The number of nodes (n) and edges (e) are relatively small (e.g., n <= 100, e <= 500).
+- The graph does not contain self-loops or multiple edges between the same pair of nodes.
 
-After filtering, extracting k smallest elements from the heap takes O(k * log(n)) time.
+### Most Efficient Solution
 
-Thus, the overall time complexity can be approximated as O(n^2). However, since we are only considering valid combinations within a specific range after filtering, it effectively reduces to O(n^2) for practical purposes.
+#### Approach: Detecting Cycles Using DFS
 
-**Space Complexity:**
-The space complexity is O(n^2) because we store all unique pairs of elements from the array in the min heap.
+To determine if a valid topological sort is possible, we need to check for cycles in the graph. A DAG without cycles can always be topologically sorted. However, if the graph contains cycles, it cannot be sorted in a valid manner.
 
-**Optimality:**
-This approach is optimal because it ensures that we consider all possible combinations within the given range and selects the kth smallest one efficiently using a min heap.
+We will use Depth-First Search (DFS) to detect cycles. During DFS, if we encounter a node that has already been visited but not yet processed (i.e., not yet added to the recursion stack), it indicates a cycle.
 
-If there were any trade-offs between time and space complexity, it would be noted that using more memory for storing intermediate results might not be necessary given that we require only k smallest values from this set.
+Here is the optimal solution in Python:
+
+```python
+from collections import defaultdict
+
+def validTopologicalSort(graph):
+    # Step 1: Detecting Cycles using DFS
+    def is_cyclic_util(node, visited, recursion_stack):
+        visited[node] = True
+        recursion_stack[node] = True
+        
+        for neighbor in graph[node]:
+            if not visited[neighbor]:
+                if is_cyclic_util(neighbor, visited, recursion_stack):
+                    return True
+            elif recursion_stack[neighbor]:
+                # If neighbor is in recursion stack, then there is cycle.
+                return True
+        
+        recursion_stack[node] = False
+        return False
+    
+    # Step 2: Checking for Cycles
+    visited = {node: False for node in graph}
+    recursion_stack = {node: False for node in graph}
+    
+    for node in graph:
+        if not visited[node]:
+            if is_cyclic_util(node, visited, recursion_stack):
+                return False
+    
+    return True
+
+# Example usage:
+graph = {
+    'A': ['B', 'E'],
+    'B': ['C'],
+    'C': ['D'],
+    'D': [],
+    'E': ['F'],
+    'F': [],
+    'G': ['H']
+}
+print(validTopologicalSort(graph)) # Output: False
+
+# Example without cycle (valid topological sort possible)
+graph_without_cycle = {
+    'A': ['B'],
+    'B': ['C'],
+    'C': ['D'],
+    'D': []
+}
+print(validTopologicalSort(graph_without_cycle)) # Output: True
+```
+
+### Analysis of Complexity:
+
+- **Time Complexity:** O(E + V), where E is the number of edges and V is the number of vertices. This is because we perform DFS traversal once over all nodes.
+- **Space Complexity:** O(V), due to the recursion stack used during DFS.
 
 ### Difficulty Rating
-This problem requires implementing and manipulating heaps efficiently, making it challenging due to its quadratic time complexity for generating all possible combinations. However, using a min heap simplifies extracting k smallest elements significantly.
+
+This problem requires understanding how to detect cycles using DFS and understanding the implications of cycles on topological sorting. It is challenging enough to require careful consideration of graph traversal techniques but not so complex that it becomes overwhelming.
