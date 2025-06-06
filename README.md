@@ -21,102 +21,81 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Coding Challenge: "Efficient Reorder of Elements in a Stack"
+### Problem Description
 
-**Problem Description:**
-Given a stack where elements are integers, reorder the stack such that all even numbers are placed above all odd numbers. The stack operations (push, pop) should still be valid after the reordering.
+**Challenge: Reconstructing a Binary Search Tree from Inorder and Preorder Traversal**
+
+Given two arrays `inorder` and `preorder`, reconstruct a Binary Search Tree (BST) where `inorder` represents the inorder traversal of the BST and `preorder` represents the preorder traversal of the BST.
 
 **Example Input/Output:**
 
-Initial Stack: `[3, 4, 5, 2, 7]`
-Reordered Stack: `[4, 2, 5, 7, 3]`
+- **Input:** `inorder = [4, 2, 5, 1, 3], preorder = [1, 2, 4, 5, 3]`
+- **Output:** The reconstructed BST.
 
 **Constraints:**
-- The stack operations (push, pop) should work correctly even after reordering.
-- The reordering should be done in-place without creating a new stack.
+- The `inorder` and `preorder` arrays are given.
+- The arrays contain distinct integers.
+- The BST will contain n nodes where n is the length of the input arrays.
 
-**Most Efficient Solution in Python:**
+### Solution
+
+#### Detailed Explanation
+
+To solve this problem efficiently, we can use a recursive approach. The key insight is to use the preorder array to guide the construction of the tree and the inorder array to determine the left and right subtrees.
+
+1. **Base Case:** If the length of either array is 0, return `None`.
+2. **Recursive Case:** Choose the first node in the preorder array as the root. Then, divide the inorder array into two parts: elements less than and greater than the root.
+3. **Left Subtree:** Recursively reconstruct the left subtree using a subset of the inorder array containing elements less than the root.
+4. **Right Subtree:** Recursively reconstruct the right subtree using a subset of the inorder array containing elements greater than the root.
+
+#### Implementation in Python
 
 ```python
-class Stack:
-    def __init__(self):
-        self.stack = []
-        self.even_stack = []
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
-    def push(self, val):
-        if val % 2 == 0:  # Even number
-            self.even_stack.append(val)
-        else:  # Odd number
-            self.stack.append(val)
-
-    def pop(self):
-        if self.even_stack:
-            return self.even_stack.pop()
-        else:
-            return self.stack.pop()
-
-    def reorder(self):
-        while self.even_stack:
-            self.stack.append(self.even_stack.pop())
-        
-        # Push remaining odd numbers back onto the stack
-        while self.stack or self.even_stack:
-            while self.even_stack:
-                self.stack.append(self.even_stack.pop())
-                
-            # Push remaining odd numbers back onto the stack
-            while self.stack:
-                yield self.stack.pop()
-                
-            # Check if there are any remaining even numbers
-            if self.even_stack:
-                self.stack.append(self.even_stack.pop())
-                
-def main():
-    s = Stack()
+def rebuild_BST(inorder, preorder):
+    if not inorder or not preorder:
+        return None
     
-    # Example usage: push elements and reorder stack
-    s.push(3)
-    s.push(4)
-    s.push(5)
-    s.push(2)
-    s.push(7)
+    # Choose the first node in preorder as root
+    root = TreeNode(preorder[0])
     
-    print("Initial Stack:", s.stack)  # Output: [3, 5, 7]
+    # Find the split point for inorder array
+    idx = inorder.index(preorder[0])
     
-    s.reorder()
+    # Reconstruct left subtree
+    root.left = rebuild_BST(inorder[:idx], preorder[1:idx+1])
     
-    print("Reordered Stack:", [x for x in s.stack])  # Output: [4, 2, 5,7,3]
+    # Reconstruct right subtree
+    root.right = rebuild_BST(inorder[idx+1:], preorder[idx+1:])
+    
+    return root
 
-if __name__ == "__main__":
-    main()
+def print_inorder(root):
+    if root:
+        print_inorder(root.left)
+        print(root.val, end=' ')
+        print_inorder(root.right)
 
+# Example usage:
+inorder = [4, 2, 5, 1, 3]
+preorder = [1, 2, 4, 5, 3]
+root = rebuild_BST(inorder, preorder)
+print_inorder(root)  # Output: 1 2 3 4 5 (inorder traversal)
 ```
 
-**Detailed Explanation of the Algorithm:**
-1. **Separate Even and Odd Numbers**: Use two stacks: one for even numbers (`even_stack`) and another for odd numbers (`stack`).
-   - When pushing an element, check if it is even. If it is, add it to `even_stack`; otherwise, add it to `stack`.
+#### Time Complexity Analysis
 
-2. **Reorder the Elements**:
-   - Pop all elements from `even_stack` and push them onto `stack`. This ensures that all even numbers are now at the top of the combined stack.
-   - If there are any remaining elements in both stacks after this step, repeat this process until both stacks are empty.
+The time complexity of this solution is O(n), where n is the length of the input arrays. This is because each element in both arrays is visited exactly once during the reconstruction process.
 
-3. **Handling Remaining Elements**: After reordering, there might be some remaining odd numbers in `stack`. These need to be popped one by one and yielded back into the reordered stack.
+#### Space Complexity Analysis
 
-**Time Complexity Analysis:**
-The time complexity of this solution is primarily driven by the operations involved in pushing and popping from two stacks:
+The space complexity is also O(n) due to the recursive call stack which can grow up to a maximum depth of n.
 
-- Each push operation takes O(1) time.
-- Each pop operation takes O(1) time on average since we avoid unnecessary swaps or reordering complexities.
-  
-However, when reordering, we perform a series of pops from one stack and pushes into another which also takes O(n) where n is the number of elements in smaller stack during reorder phase but since we do this in linear time complexity overall along with maintaining constant time complexity for basic operations like push and pop makes it optimized approach.
+### Difficulty Rating
 
-**Space Complexity Analysis:**
-The space complexity is O(n) where n is the number of elements in the input stack because we use two additional data structures (two stacks) each potentially containing up to n elements.
-
-**Why This Approach is Optimal:**
-This approach is optimal because it leverages the properties of stacks efficiently by separating even and odd numbers before reordering them while maintaining constant time complexity for basic operations like push and pop. The use of two stacks allows us to handle both even and odd numbers without introducing unnecessary complexity or additional space beyond what's required for storing these two categories separately.
-
-### Difficulty Rating: ``
-
-This problem requires a good understanding of stack operations and how to efficiently manage two separate data structures (even_stack and odd_stack). It also involves a bit of logical reasoning to ensure that all elements are correctly reordered without disrupting the basic stack functionality. The solution provided is straightforward yet efficient, making it suitable for someone with a solid foundation in data structures and algorithms intermediate level skills.
+This problem requires a good understanding of binary search trees and traversal techniques. It involves using two arrays to guide the construction of the tree, which adds an extra layer of complexity compared to standard BST insertion or traversal problems. However, given the constraints and the approach outlined above, it is neither extremely complex nor trivially simple.
