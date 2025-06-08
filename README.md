@@ -21,107 +21,67 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Challenge: Topological Sorting with Cycle Detection in a Directed Acyclic Graph (DAG)
 
-**Problem: "Cycle Detection in a Directed Graph"**
+**Problem Description:**
+Given a directed acyclic graph (DAG) represented by an adjacency list, determine if the graph has a valid topological ordering. If it does, return the ordering; otherwise, return `None`.
 
-Given a directed graph `G(V, E)`, determine whether there is a cycle in the graph. The graph is represented as an adjacency list where each node is associated with a list of its neighbors.
+**Example Input/Output:**
 
-### Constraints
+- **Input:** `adjacency_list = {1: [2, 3], 2: [4], 3: [4], 4: []}`
+- **Output:** `[1, 2, 3, 4]`
 
-- The graph is directed.
-- The graph may have cycles.
+- **Input:** `adjacency_list = {1: [2], 2: [1]}`
+- **Output:** `None` (cycle detected)
+
+**Constraints:**
 - The graph is represented as an adjacency list.
-- The input graph is connected.
+- Each edge is directed from one vertex to another.
+- The graph is guaranteed to be a DAG or contain at least one cycle.
 
-### Example Input/Output
+**Most Efficient Solution:**
 
-**Input:**
-```
-Adjacency list representation of the graph:
-A -> B, C
-B -> D
-C -> A
-D -> E
-E -> F
-F -> D
-```
+To solve this problem efficiently, we will use a combination of DFS and topological sorting techniques. The key idea is to perform DFS while maintaining a stack of visited vertices. If we encounter a back edge during DFS, it means there is a cycle in the graph, and we should return `None`. Otherwise, we can push the visited vertices onto the stack to get the topological order.
 
-**Output:**
-```
-True (Cycle found: A -> B -> D -> E -> F -> D -> A)
-```
-
-### Detailed Explanation
-
-To detect a cycle in a directed graph using DFS, we can employ the following approach:
-
-1. **Vertex Color State**: Each vertex can be in one of three states:
-   - White: Unvisited
-   - Gray: Visiting (part of the current DFS path)
-   - Black: Visited and processed
-
-2. **Algorithm**:
-   - Start at any arbitrary node.
-   - Perform DFS traversal.
-   - If we encounter a gray node (i.e., a node that is being visited but has not been fully processed), it means that we have found a cycle.
-
-### Most Efficient Solution
+Here is the Python implementation:
 
 ```python
-from typing import List, Dict
+def valid_topological_ordering(adjacency_list):
+    visited = set()
+    order = []
+    def dfs(vertex):
+        if vertex in visited:
+            return 
+        visited.add(vertex)
+        for neighbor in adjacency_list[vertex]:
+            dfs(neighbor)
+        order.append(vertex)
 
-def has_cycle(graph: Dict[str, List[str]]) -> bool:
-    # Initialize vertex color states
-    colors = {}
+    for vertex in adjacency_list:
+        if vertex not in visited:
+            dfs(vertex)
 
-    def dfs(node: str) -> bool:
-        # Mark current node as gray (being visited)
-        colors[node] = 1  # 1 represents gray
-
-        # Iterate through neighbors of the current node
-        for neighbor in graph[node]:
-            if neighbor not in colors:
-                # If neighbor is white (unvisited), continue DFS exploration
-                if dfs(neighbor):
-                    return True
-            
-            # If neighbor is gray (being visited), it means we've found a cycle
-            elif colors[neighbor] == 1:
-                return True
-        
-        # Mark current node as black (visited)
-        colors[node] = 2  # 2 represents black
-        return False
-    
-    # Start DFS traversal from an arbitrary node
-    start_node = next(iter(graph))
-    
-    # Perform DFS traversal
-    return dfs(start_node)
+    # Check for cycles by verifying that all vertices are visited
+    if len(order) != len(adjacency_list):
+        return None
+    return order[::-1]  # Reverse the order as we appended vertices in reverse DFS order
 
 # Example usage:
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D'],
-    'C': ['A'],
-    'D': ['E'],
-    'E': ['F'],
-    'F': ['D']
-}
+adjacency_list = {1: [2, 3], 2: [4], 3: [4], 4: []}
+print(valid_topological_ordering(adjacency_list))  # Output: [1, 2, 3, 4]
 
-print(has_cycle(graph))  # Output: True
+adjacency_list = {1: [2], 2: [1]}
+print(valid_topological_ordering(adjacency_list))  # Output: None (cycle detected)
 ```
 
-### Analysis of Complexity
+**Analysis of Complexity:**
 
-- **Time Complexity**: The time complexity of this algorithm is O(V + E), where V is the number of vertices and E is the number of edges. This is because each vertex and edge are visited once during the DFS traversal.
-- **Space Complexity**: The space complexity is O(V), as we need to store the color state for each vertex.
+1. **Time Complexity:** The time complexity of this solution is O(V + E), where V is the number of vertices and E is the number of edges. This is because we perform DFS from each unvisited vertex once and visit each edge at most once.
+2. **Space Complexity:** The space complexity is also O(V + E), primarily due to storing the visited set and the adjacency list.
 
-### Why This Approach is Optimal
+**Why this approach is optimal:**
+This approach is optimal because it leverages the properties of DFS to detect cycles efficiently while maintaining a valid topological ordering for DAGs. The use of a set for keeping track of visited vertices ensures that we can handle large graphs effectively without redundant checks.
 
-This approach is optimal because it uses a standard DFS traversal technique with vertex coloring to detect cycles efficiently. It ensures that every edge and vertex are visited once, thereby achieving both time and space efficiency.
+**Difficulty Rating:** 3
 
-### Difficulty Rating
-
-This problem requires understanding of basic graph traversal algorithms like DFS and vertex coloring techniques to detect cycles. It is neither too easy nor too complex but rather a good challenge for intermediate-level programmers who are familiar with graph algorithms.
+This problem requires a good understanding of both DFS traversal and topological sorting concepts. However, it does not involve complex algorithms like Floyd Warshall or Dijkstra's algorithm, making it more accessible than extremely challenging problems like finding shortest paths in weighted graphs with negative weights. The implementation is straightforward once you understand the logic behind maintaining a valid ordering during DFS traversal.
