@@ -21,67 +21,118 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: Topological Sorting with Cycle Detection in a Directed Acyclic Graph (DAG)
+### Challenge: Reconstructing a Binary Search Tree from Inorder and Level Order Traversal
 
-**Problem Description:**
-Given a directed acyclic graph (DAG) represented by an adjacency list, determine if the graph has a valid topological ordering. If it does, return the ordering; otherwise, return `None`.
+#### Problem Description
 
-**Example Input/Output:**
+Given an inorder traversal and a level order traversal of a binary search tree, reconstruct the original binary search tree. The inorder traversal visits nodes in ascending order, while the level order traversal visits nodes level by level from left to right.
 
-- **Input:** `adjacency_list = {1: [2, 3], 2: [4], 3: [4], 4: []}`
-- **Output:** `[1, 2, 3, 4]`
+#### Example Input/Output
 
-- **Input:** `adjacency_list = {1: [2], 2: [1]}`
-- **Output:** `None` (cycle detected)
+Input:
+- Inorder Traversal: `[5, 3, 7, 2, 4, 6, 8]`
+- Level Order Traversal: `[[3], [2, 5], [4], , , ]`
 
-**Constraints:**
-- The graph is represented as an adjacency list.
-- Each edge is directed from one vertex to another.
-- The graph is guaranteed to be a DAG or contain at least one cycle.
-
-**Most Efficient Solution:**
-
-To solve this problem efficiently, we will use a combination of DFS and topological sorting techniques. The key idea is to perform DFS while maintaining a stack of visited vertices. If we encounter a back edge during DFS, it means there is a cycle in the graph, and we should return `None`. Otherwise, we can push the visited vertices onto the stack to get the topological order.
-
-Here is the Python implementation:
-
-```python
-def valid_topological_ordering(adjacency_list):
-    visited = set()
-    order = []
-    def dfs(vertex):
-        if vertex in visited:
-            return 
-        visited.add(vertex)
-        for neighbor in adjacency_list[vertex]:
-            dfs(neighbor)
-        order.append(vertex)
-
-    for vertex in adjacency_list:
-        if vertex not in visited:
-            dfs(vertex)
-
-    # Check for cycles by verifying that all vertices are visited
-    if len(order) != len(adjacency_list):
-        return None
-    return order[::-1]  # Reverse the order as we appended vertices in reverse DFS order
-
-# Example usage:
-adjacency_list = {1: [2, 3], 2: [4], 3: [4], 4: []}
-print(valid_topological_ordering(adjacency_list))  # Output: [1, 2, 3, 4]
-
-adjacency_list = {1: [2], 2: [1]}
-print(valid_topological_ordering(adjacency_list))  # Output: None (cycle detected)
+Output:
+```
+      5
+     / \
+    3   7
+   / \   \
+  2   4   8
+ / \
+3   6
 ```
 
-**Analysis of Complexity:**
+#### Constraints
 
-1. **Time Complexity:** The time complexity of this solution is O(V + E), where V is the number of vertices and E is the number of edges. This is because we perform DFS from each unvisited vertex once and visit each edge at most once.
-2. **Space Complexity:** The space complexity is also O(V + E), primarily due to storing the visited set and the adjacency list.
+- The binary search tree is non-empty.
+- The inorder traversal and level order traversal are given.
 
-**Why this approach is optimal:**
-This approach is optimal because it leverages the properties of DFS to detect cycles efficiently while maintaining a valid topological ordering for DAGs. The use of a set for keeping track of visited vertices ensures that we can handle large graphs effectively without redundant checks.
+#### Complexity Analysis
 
-**Difficulty Rating:** 3
+The problem involves reconstructing a binary search tree from two traversals. We can solve this problem by using a combination of inorder traversal and level order traversal.
 
-This problem requires a good understanding of both DFS traversal and topological sorting concepts. However, it does not involve complex algorithms like Floyd Warshall or Dijkstra's algorithm, making it more accessible than extremely challenging problems like finding shortest paths in weighted graphs with negative weights. The implementation is straightforward once you understand the logic behind maintaining a valid ordering during DFS traversal.
+1. **Inorder Traversal**: This gives us the order of nodes in ascending order when traversed left-root-right.
+2. **Level Order Traversal**: This gives us the nodes at each level from left to right.
+
+The optimal approach involves using these two pieces of information to construct the tree.
+
+#### Solution
+
+```python
+from collections import deque
+
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.left = None
+        self.right = None
+
+def reconstruct_bst(inorder, level_order):
+    if not inorder:
+        return None
+
+    # Find the root node using the first element of inorder traversal
+    root_val = inorder[0]
+    root = Node(root_val)
+
+    # Find the index of the root value in inorder traversal
+    idx = inorder.index(root_val)
+
+    # Process nodes before the root using level order traversal
+    left_inorder = inorder[:idx]
+    right_inorder = inorder[idx + 1:]
+
+    # Construct left subtree using level order traversal
+    queue = deque([node for node in level_order[0] if node.val < root_val])
+    
+    if queue:
+        left_subtree_root = reconstruct_bst(left_inorder, level_order[1:])
+        root.left = left_subtree_root
+    
+    # Construct right subtree using level order traversal
+    queue = deque([node for node in level_order[0] if node.val > root_val])
+    
+    if queue:
+        right_subtree_root = reconstruct_bst(right_inorder, level_order[1:])
+        root.right = right_subtree_root
+
+    return root
+
+# Example usage:
+inorder = [5, 3, 7, 2, 4, 6, 8]
+level_order = [[[3], [2, 5], [4], [7], [6], [8]]]
+root = reconstruct_bst(inorder, level_order)
+
+# Print reconstructed tree (optional)
+def print_tree(root):
+    if root:
+        print(root.val)
+        print_tree(root.left)
+        print_tree(root.right)
+
+print_tree(root)
+```
+
+#### Explanation
+
+1. **Initialization**: Find the root node using the first element of `inorder`.
+2. **Index Finding**: Determine the index of the root value in `inorder`.
+3. **Left Subtree Construction**: Use elements from `level_order` that are less than the root value to construct the left subtree recursively.
+4. **Right Subtree Construction**: Use elements from `level_order` that are greater than the root value to construct the right subtree recursively.
+
+#### Time Complexity
+
+- The function processes each node in the inorder traversal once.
+- For each node in level order traversal, we check if it is less than or greater than the current node and add it to either the left or right queue respectively.
+  
+Thus, the overall time complexity is O(n), where n is the total number of nodes in both traversals combined.
+
+#### Space Complexity
+
+- The space complexity is O(n) for storing nodes in queues and recursion stack.
+
+This approach ensures that we use both traversals efficiently and reconstructs the BST correctly.
+
+****
