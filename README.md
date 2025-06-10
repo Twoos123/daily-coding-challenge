@@ -21,118 +21,124 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: Reconstructing a Binary Search Tree from Inorder and Level Order Traversal
+### Matrix Operations Challenge: "Matrix Transformation Matrix"
 
-#### Problem Description
+**Problem Description:**
+Given two matrices `A` and `B`, both of which are `m x n`, perform the following operations:
+1. Rotate matrix `A` clockwise by 90 degrees.
+2. Transpose matrix `B`.
+3. Add the rotated matrix `A` to the transposed matrix `B`.
 
-Given an inorder traversal and a level order traversal of a binary search tree, reconstruct the original binary search tree. The inorder traversal visits nodes in ascending order, while the level order traversal visits nodes level by level from left to right.
+The resulting matrix should be an `m x n` matrix containing the sum of corresponding elements from the rotated `A` and transposed `B`.
 
-#### Example Input/Output
+**Example Input/Output:**
 
 Input:
-- Inorder Traversal: `[5, 3, 7, 2, 4, 6, 8]`
-- Level Order Traversal: `[[3], [2, 5], [4], , , ]`
+```python
+A = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+B = [
+    [10, 11, 12],
+    [13, 14, 15],
+    [16, 17, 18]
+]
+```
 
 Output:
-```
-      5
-     / \
-    3   7
-   / \   \
-  2   4   8
- / \
-3   6
+```python
+Resulting Matrix = [
+    [16 + 8, 17 + 7, 18 + 6],
+    [17 + 8, 18 + 7, 19 + 6],
+    [18 + 8, 19 + 7, 20 + 6]
+]
 ```
 
-#### Constraints
+### Constraints:
+- Both matrices `A` and `B` are 2D arrays with dimensions `m x n`.
+- All elements in both matrices are integers.
+- The operation should be performed in-place or using minimal additional space.
 
-- The binary search tree is non-empty.
-- The inorder traversal and level order traversal are given.
+### Most Efficient Solution:
 
-#### Complexity Analysis
-
-The problem involves reconstructing a binary search tree from two traversals. We can solve this problem by using a combination of inorder traversal and level order traversal.
-
-1. **Inorder Traversal**: This gives us the order of nodes in ascending order when traversed left-root-right.
-2. **Level Order Traversal**: This gives us the nodes at each level from left to right.
-
-The optimal approach involves using these two pieces of information to construct the tree.
-
-#### Solution
+#### Step-by-Step Solution:
+1. **Rotate Matrix `A` Clockwise by 90 Degrees:**
+    - Use a transpose followed by a reverse operation to achieve this efficiently.
+    - Transpose involves swapping rows with columns.
+    - Reverse each row to get the clockwise rotation.
 
 ```python
-from collections import deque
-
-class Node:
-    def __init__(self, val):
-        self.val = val
-        self.left = None
-        self.right = None
-
-def reconstruct_bst(inorder, level_order):
-    if not inorder:
-        return None
-
-    # Find the root node using the first element of inorder traversal
-    root_val = inorder[0]
-    root = Node(root_val)
-
-    # Find the index of the root value in inorder traversal
-    idx = inorder.index(root_val)
-
-    # Process nodes before the root using level order traversal
-    left_inorder = inorder[:idx]
-    right_inorder = inorder[idx + 1:]
-
-    # Construct left subtree using level order traversal
-    queue = deque([node for node in level_order[0] if node.val < root_val])
+def rotate_matrix(matrix):
+    # Transpose matrix
+    matrix_t = list(map(list, zip(*matrix)))
     
-    if queue:
-        left_subtree_root = reconstruct_bst(left_inorder, level_order[1:])
-        root.left = left_subtree_root
-    
-    # Construct right subtree using level order traversal
-    queue = deque([node for node in level_order[0] if node.val > root_val])
-    
-    if queue:
-        right_subtree_root = reconstruct_bst(right_inorder, level_order[1:])
-        root.right = right_subtree_root
-
-    return root
-
-# Example usage:
-inorder = [5, 3, 7, 2, 4, 6, 8]
-level_order = [[[3], [2, 5], [4], [7], [6], [8]]]
-root = reconstruct_bst(inorder, level_order)
-
-# Print reconstructed tree (optional)
-def print_tree(root):
-    if root:
-        print(root.val)
-        print_tree(root.left)
-        print_tree(root.right)
-
-print_tree(root)
+    # Reverse each row to get clockwise rotation
+    return [row[::-1] for row in matrix_t]
 ```
 
-#### Explanation
+2. **Transpose Matrix `B`:**
+    - Simply use Python's built-in `zip` function to transpose the matrix.
 
-1. **Initialization**: Find the root node using the first element of `inorder`.
-2. **Index Finding**: Determine the index of the root value in `inorder`.
-3. **Left Subtree Construction**: Use elements from `level_order` that are less than the root value to construct the left subtree recursively.
-4. **Right Subtree Construction**: Use elements from `level_order` that are greater than the root value to construct the right subtree recursively.
+```python
+def transpose_matrix(matrix):
+    return list(map(list, zip(*matrix)))
+```
 
-#### Time Complexity
+3. **Add Rotated Matrix `A` to Transposed Matrix `B`:**
+    - Perform element-wise addition of corresponding elements from both matrices.
 
-- The function processes each node in the inorder traversal once.
-- For each node in level order traversal, we check if it is less than or greater than the current node and add it to either the left or right queue respectively.
-  
-Thus, the overall time complexity is O(n), where n is the total number of nodes in both traversals combined.
+```python
+def add_matrices(rotated_A, transposed_B):
+    return [[a + b for a, b in zip(row_a, row_b)] for row_a, row_b in zip(rotated_A, transposed_B)]
+```
 
-#### Space Complexity
+#### Combined Function:
 
-- The space complexity is O(n) for storing nodes in queues and recursion stack.
+```python
+def transform_matrix():
+    A = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ]
 
-This approach ensures that we use both traversals efficiently and reconstructs the BST correctly.
+    B = [
+        [10, 11, 12],
+        [13, 14, 15],
+        [16, 17, 18]
+    ]
 
-****
+    # Rotate matrix A clockwise by 90 degrees
+    rotated_A = rotate_matrix(A)
+
+    # Transpose matrix B
+    transposed_B = transpose_matrix(B)
+
+    # Add rotated matrix A to transposed matrix B
+    resulting_matrix = add_matrices(rotated_A, transposed_B)
+    
+    return resulting_matrix
+
+resulting_matrix = transform_matrix()
+for row in resulting_matrix:
+    print(row)
+```
+
+### Analysis:
+- **Time Complexity:** 
+    - Rotating a matrix involves two operations (transpose and reverse), each taking O(m*n) time.
+    - Transposing a matrix takes O(m*n) time.
+    - Adding two matrices element-wise also takes O(m*n) time.
+    Therefore, the overall time complexity is O(3m*n) ≈ O(m*n).
+
+- **Space Complexity:** 
+    - The space complexity is dominated by storing the intermediate results:
+      - Transpose operation requires O(m*n) space.
+      - Adding two matrices requires O(m*n) space.
+      Therefore, the overall space complexity is O(2m*n) ≈ O(m*n).
+
+### Difficulty Rating:
+This problem requires efficient manipulation of matrices involving rotation and transposition operations which are fundamental concepts but require careful handling to achieve optimal performance. The solution provided minimizes additional space usage and ensures efficient execution time.
