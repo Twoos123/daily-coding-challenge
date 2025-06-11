@@ -21,124 +21,85 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Matrix Operations Challenge: "Matrix Transformation Matrix"
+**DIFFICULTY: 4**
 
-**Problem Description:**
-Given two matrices `A` and `B`, both of which are `m x n`, perform the following operations:
-1. Rotate matrix `A` clockwise by 90 degrees.
-2. Transpose matrix `B`.
-3. Add the rotated matrix `A` to the transposed matrix `B`.
+### Problem Description
 
-The resulting matrix should be an `m x n` matrix containing the sum of corresponding elements from the rotated `A` and transposed `B`.
+Given a string `s`, implement a function that returns the **longest substring without repeating characters**. The function should handle both uppercase and lowercase letters and should be case-insensitive.
 
-**Example Input/Output:**
+### Example Input/Output
 
-Input:
-```python
-A = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
+Input: `s = "abcabcbb"`
+Output: `3`
 
-B = [
-    [10, 11, 12],
-    [13, 14, 15],
-    [16, 17, 18]
-]
-```
+Input: `s = "abcabcbbab"`
 
-Output:
-```python
-Resulting Matrix = [
-    [16 + 8, 17 + 7, 18 + 6],
-    [17 + 8, 18 + 7, 19 + 6],
-    [18 + 8, 19 + 7, 20 + 6]
-]
-```
+Output: `4`
 
-### Constraints:
-- Both matrices `A` and `B` are 2D arrays with dimensions `m x n`.
-- All elements in both matrices are integers.
-- The operation should be performed in-place or using minimal additional space.
+### Constraints
 
-### Most Efficient Solution:
+- The input string `s` may contain any combination of uppercase and lowercase letters.
+- The function should be case-insensitive.
+- The substring with the longest length without repeating characters should be returned.
 
-#### Step-by-Step Solution:
-1. **Rotate Matrix `A` Clockwise by 90 Degrees:**
-    - Use a transpose followed by a reverse operation to achieve this efficiently.
-    - Transpose involves swapping rows with columns.
-    - Reverse each row to get the clockwise rotation.
+### Optimal Solution
+
+To solve this problem efficiently, we can use the sliding window technique combined with a set to keep track of unique characters encountered so far. Here's the most optimal solution in Python:
 
 ```python
-def rotate_matrix(matrix):
-    # Transpose matrix
-    matrix_t = list(map(list, zip(*matrix)))
+def longest_substring_without_repeats(s):
+    # Convert to lowercase for case-insensitivity
+    s = s.lower()
     
-    # Reverse each row to get clockwise rotation
-    return [row[::-1] for row in matrix_t]
-```
-
-2. **Transpose Matrix `B`:**
-    - Simply use Python's built-in `zip` function to transpose the matrix.
-
-```python
-def transpose_matrix(matrix):
-    return list(map(list, zip(*matrix)))
-```
-
-3. **Add Rotated Matrix `A` to Transposed Matrix `B`:**
-    - Perform element-wise addition of corresponding elements from both matrices.
-
-```python
-def add_matrices(rotated_A, transposed_B):
-    return [[a + b for a, b in zip(row_a, row_b)] for row_a, row_b in zip(rotated_A, transposed_B)]
-```
-
-#### Combined Function:
-
-```python
-def transform_matrix():
-    A = [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9]
-    ]
-
-    B = [
-        [10, 11, 12],
-        [13, 14, 15],
-        [16, 17, 18]
-    ]
-
-    # Rotate matrix A clockwise by 90 degrees
-    rotated_A = rotate_matrix(A)
-
-    # Transpose matrix B
-    transposed_B = transpose_matrix(B)
-
-    # Add rotated matrix A to transposed matrix B
-    resulting_matrix = add_matrices(rotated_A, transposed_B)
+    char_set = set()
+    max_length = 0
+    left = 0
     
-    return resulting_matrix
+    for right in range(len(s)):
+        while s[right] in char_set:
+            char_set.remove(s[left])
+            left += 1
+        
+        char_set.add(s[right])
+        max_length = max(max_length, right - left + 1)
+    
+    return max_length
 
-resulting_matrix = transform_matrix()
-for row in resulting_matrix:
-    print(row)
+# Example usage
+print(longest_substring_without_repeats("abcabcbb"))  # Output: 3
+print(longest_substring_without_repeats("abcabcbbab"))  # Output: 4
 ```
 
-### Analysis:
-- **Time Complexity:** 
-    - Rotating a matrix involves two operations (transpose and reverse), each taking O(m*n) time.
-    - Transposing a matrix takes O(m*n) time.
-    - Adding two matrices element-wise also takes O(m*n) time.
-    Therefore, the overall time complexity is O(3m*n) ≈ O(m*n).
+### Analysis of the Solution
 
-- **Space Complexity:** 
-    - The space complexity is dominated by storing the intermediate results:
-      - Transpose operation requires O(m*n) space.
-      - Adding two matrices requires O(m*n) space.
-      Therefore, the overall space complexity is O(2m*n) ≈ O(m*n).
+**Time Complexity**: 
+The time complexity of this solution is O(n), where n is the length of the string `s`. This is because we are scanning the string once and performing constant-time operations (adding and removing from the set).
 
-### Difficulty Rating:
-This problem requires efficient manipulation of matrices involving rotation and transposition operations which are fundamental concepts but require careful handling to achieve optimal performance. The solution provided minimizes additional space usage and ensures efficient execution time.
+**Space Complexity**:
+The space complexity is also O(n) in the worst case when all characters in the string are unique. However, this can be improved to O(min(n, m)) if we consider that m is the size of the character set (usually 26 for English alphabet), but in this specific problem context, we assume full alphabet usage.
+
+### Explanation
+
+1. **Initialization**:
+   - We convert the input string `s` to lowercase for case-insensitivity.
+   - Initialize an empty set `char_set` to keep track of unique characters.
+   - Initialize `max_length` to keep track of the maximum length without repeating characters.
+   - Initialize `left` pointer at position 0.
+
+2. **Scanning Through String**:
+   - Use a `right` pointer that scans through the string.
+   - For each character at position `right`, check if it exists in `char_set`. If it does:
+     - Remove characters from left until `s[right]` is not found in `char_set`.
+     - Then add `s[right]` to `char_set`.
+
+3. **Updating Maximum Length**:
+   - Update `max_length` whenever we find a longer substring without repeating characters.
+
+4. **Return Result**:
+   - Return `max_length` after scanning through all characters.
+
+This approach ensures we find the longest substring without repeating characters efficiently while handling both uppercase and lowercase letters in a case-insensitive manner.
+
+### Conclusion
+
+This problem requires implementing string manipulation techniques like sliding window and set operations. The provided solution is highly efficient with O(n) time complexity and O(n) space complexity under normal circumstances. However, if considering worst-case scenarios with full alphabet usage, it would be O(min(n, m)). Thus, it is rated as **Difficulty: 4** due to its moderate complexity level.
