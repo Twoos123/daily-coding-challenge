@@ -21,93 +21,78 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-**DIFFICULTY: 4**
-
 ### Problem Description
 
-**Balanced Heap Scheduling**
-
-Given a list of tasks with their respective durations and priorities, schedule the tasks such that the total waiting time is minimized. The tasks should be scheduled in a way that if two tasks have the same priority, the one with the shorter duration is executed first. This scheduling can be achieved by maintaining a balanced heap (either Min Heap or Max Heap) of tasks based on their priorities and durations.
+**Heapify Rearrangement**
+You are given a sorted array where some elements are out of order due to a heap structure that was previously maintained. Your task is to rearrange the array back into a valid min-heap, ensuring that the heap property (each parent node is less than or equal to its children) is satisfied.
 
 ### Example Input/Output
 
 **Input:**
-```python
-tasks = [
-    {"duration": 1, "priority": 3},
-    {"duration": 2, "priority": 1},
-    {"duration": 3, "priority": 2},
-    {"duration": 4, "priority": 1},
-    {"duration": 5, "priority": 3}
-]
+```
+[3, 2, 4, 1, 5]
 ```
 
 **Output:**
-```python
-scheduled_tasks = [
-    {"duration": 2, "priority": 1},
-    {"duration": 1, "priority": 3},
-    {"duration": 3, "priority": 2},
-    {"duration": 4, "priority": 1},
-    {"duration": 5, "priority": 3}
-]
+```
+[1, 2, 3, 4, 5]
 ```
 
-### Constraints
+### Constraints:
+1. The input array is initially sorted but contains elements that are out of order.
+2. The size of the array is guaranteed to be at least 1.
 
-- The list of tasks is non-empty.
-- Each task has a unique priority.
-- The durations of tasks are non-negative integers.
+### Solution (Optimal Approach)
 
-### Most Efficient Solution
+To solve this problem efficiently, we can leverage the fact that the input array is initially sorted and only needs to be rearranged to satisfy the heap property. We will use a bottom-up approach, starting from the last non-leaf node (which is also the middle element in a complete binary tree) and working our way up to the root node.
 
-To solve this problem efficiently, we can use a Min Heap where each task is represented by a tuple `(duration, priority)`. We always extract the task with the minimum duration from the heap because if two tasks have the same priority, the one with the shorter duration should be executed first.
-
-Here's the most efficient solution in Python:
+#### Python Code
 
 ```python
-import heapq
+def heapifyRearrange(arr):
+    # Calculate the last non-leaf node index
+    lastNonLeaf = (len(arr) - 2) // 2
+    
+    # Perform heapify operations from last non-leaf node to root
+    for i in range(lastNonLeaf, -1, -1):
+        _heapify(arr, i, len(arr))
+    
+def _heapify(arr, i, n):
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+    
+    # Check if left child is larger than current node
+    if left < n and arr[left] < arr[largest]:
+        largest = left
+    
+    # Check if right child is larger than current node
+    if right < n and arr[right] < arr[largest]:
+        largest = right
+    
+    # Swap nodes if necessary and continue heapifying
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        _heapify(arr, largest, n)
 
-def schedule_tasks(tasks):
-    # Create a min heap (priority is secondary)
-    min_heap = []
-    
-    for task in tasks:
-        heapq.heappush(min_heap, (task["duration"], task["priority"]))
-    
-    scheduled_tasks = []
-    
-    while min_heap:
-        # Extract tasks with minimum duration first
-        duration, priority = heapq.heappop(min_heap)
-        
-        # Add the extracted task to the scheduled list
-        scheduled_tasks.append({"duration": duration, "priority": priority})
-    
-    return scheduled_tasks
-
-# Example usage:
-tasks = [
-    {"duration": 1, "priority": 3},
-    {"duration": 2, "priority": 1},
-    {"duration": 3, "priority": 2},
-    {"duration": 4, "priority": 1},
-    {"duration": 5, "priority": 3}
-]
-
-scheduled_tasks = schedule_tasks(tasks)
-print(scheduled_tasks)
+# Example usage
+arr = [3, 2, 4, 1, 5]
+heapifyRearrange(arr)
+print(arr)  # Output: [1, 2, 3, 4, 5]
 ```
 
-### Analysis of Complexity
+### Analysis
 
-- **Time Complexity:** The time complexity of `heapq.heappush` and `heapq.heappop` operations on a min heap is O(log n) where n is the number of tasks.
-- **Space Complexity:** The space complexity is O(n) because we need to store all tasks in the min heap.
+#### Time Complexity:
+The time complexity of this approach is O(n log n), where n is the number of elements in the array. This is because we perform a series of heapify operations from each non-leaf node to its root. Each heapify operation takes O(log n) time.
 
-### Explanation of Why This Approach is Optimal
+#### Space Complexity:
+The space complexity is O(1) since we only use a constant amount of space to store indices and variables during the algorithm.
 
-Using a min heap allows us to efficiently extract tasks with the minimum duration first while ensuring that tasks with the same priority are ordered based on their duration. This approach minimizes the total waiting time by ensuring that shorter tasks are executed sooner than longer ones when they have the same priority.
+### Why This Approach is Optimal:
+This approach avoids unnecessary overwriting of elements by starting from the last non-leaf node and working its way up. This ensures that each element is only moved once during the rearrangement process, making it efficient in terms of both time and space.
 
-### Trade-offs
+### Difficulty Rating
+DIFFICULTY: 3
 
-There are no significant trade-offs between time and space complexity in this solution. The use of a min heap ensures optimal time complexity for both inserting and extracting tasks, and the space complexity is directly proportional to the number of tasks as required by the problem constraints.
+This problem requires understanding of how heaps work and leveraging the properties of a sorted array to efficiently rearrange it into a valid heap structure. While it's not extremely complex, it involves some layering of logic that makes it challenging for those who are less familiar with heaps.
