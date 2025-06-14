@@ -21,78 +21,124 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
+**DIFFICULTY: 4**
+
 ### Problem Description
 
-**Heapify Rearrangement**
-You are given a sorted array where some elements are out of order due to a heap structure that was previously maintained. Your task is to rearrange the array back into a valid min-heap, ensuring that the heap property (each parent node is less than or equal to its children) is satisfied.
+**Challenge: Remove Every k-th Node from a Linked List**
+
+Given a singly linked list, remove every k-th node from the list. The head of the linked list is given as `head`. You should not remove the first node, only nodes at positions that are multiples of `k`.
 
 ### Example Input/Output
 
 **Input:**
 ```
-[3, 2, 4, 1, 5]
+Head Node: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> ...
+k = 3
 ```
 
 **Output:**
 ```
-[1, 2, 3, 4, 5]
+Head Node: 1 -> 2 -> 4 -> 5 -> 7 -> ...
 ```
 
-### Constraints:
-1. The input array is initially sorted but contains elements that are out of order.
-2. The size of the array is guaranteed to be at least 1.
+### Constraints
 
-### Solution (Optimal Approach)
+- The linked list does not contain any duplicate values.
+- The value of `k` is greater than 1.
+- The linked list may contain `n` nodes, where `n` could be very large.
 
-To solve this problem efficiently, we can leverage the fact that the input array is initially sorted and only needs to be rearranged to satisfy the heap property. We will use a bottom-up approach, starting from the last non-leaf node (which is also the middle element in a complete binary tree) and working our way up to the root node.
+### Most Efficient Solution in Python
 
-#### Python Code
+#### Algorithm Explanation
+
+To achieve this efficiently, we will use a two-pointer approach. The first pointer (`curr`) will traverse the linked list, and the second pointer (`skip`) will help us skip every `k-th` node.
+
+1. **Initialize Pointers:**
+   - `curr` points to the head of the linked list.
+   - `skip` points to `head`.
+
+2. **Traversal:**
+   - Traverse the linked list with `curr`.
+   - If `skip` reaches `k`, move it to the next node.
+
+3. **Removal:**
+   - When `skip` reaches the node that should be removed, move `curr` to the next node.
+
+4. **New Head:**
+   - If `curr` becomes null, return null as there are no more nodes in the list.
+
+5. **Final List:**
+   - Update the head of the list with `curr`.
+
+#### Code Implementation
 
 ```python
-def heapifyRearrange(arr):
-    # Calculate the last non-leaf node index
-    lastNonLeaf = (len(arr) - 2) // 2
-    
-    # Perform heapify operations from last non-leaf node to root
-    for i in range(lastNonLeaf, -1, -1):
-        _heapify(arr, i, len(arr))
-    
-def _heapify(arr, i, n):
-    largest = i
-    left = 2 * i + 1
-    right = 2 * i + 2
-    
-    # Check if left child is larger than current node
-    if left < n and arr[left] < arr[largest]:
-        largest = left
-    
-    # Check if right child is larger than current node
-    if right < n and arr[right] < arr[largest]:
-        largest = right
-    
-    # Swap nodes if necessary and continue heapifying
-    if largest != i:
-        arr[i], arr[largest] = arr[largest], arr[i]
-        _heapify(arr, largest, n)
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
-# Example usage
-arr = [3, 2, 4, 1, 5]
-heapifyRearrange(arr)
-print(arr)  # Output: [1, 2, 3, 4, 5]
+def removeEveryKthNode(head, k):
+    if not head or k <= 1:
+        return head
+
+    prev = None
+    skip = head
+
+    while skip:
+        if k == 1:
+            # If k is 1, skip every node in the list
+            return None
+
+        for _ in range(k - 2): # Skip k-2 nodes before removing the k-th node
+            if not skip.next:
+                break # If there are not enough nodes left, stop skipping.
+            skip = skip.next
+        
+        # If we've reached the end of the list, stop here
+        if not skip.next:
+            break
+        
+        # Skip the k-th node and set prev to skip to keep track of previous node.
+        prev = skip if prev else head 
+        skip = skip.next.next
+        
+        # If prev is None, it means the head was removed so update the head.
+        if prev is None:
+            head = skip
+    
+    return head
+
+# Example usage:
+# Create a sample linked list (1 -> 2 -> 3 -> 4 -> 5 -> ...)
+head = ListNode(1)
+current = head
+for i in range(2, 6):
+    current.next = ListNode(i)
+    current = current.next
+
+# Remove every 3rd node
+new_head = removeEveryKthNode(head, 3)
+
+# Print the resulting list
+while new_head:
+    print(new_head.val, end=" ")
+    new_head = new_head.next
+
+# Output: 1 -> 2 -> 4 -> 5 
 ```
 
-### Analysis
+### Complexity Analysis
 
-#### Time Complexity:
-The time complexity of this approach is O(n log n), where n is the number of elements in the array. This is because we perform a series of heapify operations from each non-leaf node to its root. Each heapify operation takes O(log n) time.
+**Time Complexity:** O(n), where n is the number of nodes in the linked list. This is because we traverse the list once.
 
-#### Space Complexity:
-The space complexity is O(1) since we only use a constant amount of space to store indices and variables during the algorithm.
+**Space Complexity:** O(1), as we only use a constant amount of space to store pointers.
 
-### Why This Approach is Optimal:
-This approach avoids unnecessary overwriting of elements by starting from the last non-leaf node and working its way up. This ensures that each element is only moved once during the rearrangement process, making it efficient in terms of both time and space.
+### Why This Approach is Optimal
 
-### Difficulty Rating
-DIFFICULTY: 3
+This approach is optimal because it uses a two-pointer technique that avoids unnecessary iterations and ensures that we traverse the list only once. The space complexity is constant, making it efficient in terms of memory usage.
 
-This problem requires understanding of how heaps work and leveraging the properties of a sorted array to efficiently rearrange it into a valid heap structure. While it's not extremely complex, it involves some layering of logic that makes it challenging for those who are less familiar with heaps.
+The trade-off here is that we need to handle edge cases like when `k` is 1 or when there are not enough nodes left in the list, which adds some complexity but does not affect the overall time complexity.
+
+This problem sits at a moderate difficulty level (4 out of 5) because it requires careful handling of pointers and edge cases without using recursion, making it slightly more challenging than some basic linked list problems but less complex than extremely advanced problems involving circular linked lists or complex merges.
