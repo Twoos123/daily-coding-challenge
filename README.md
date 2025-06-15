@@ -21,124 +21,105 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-**DIFFICULTY: 4**
-
 ### Problem Description
 
-**Challenge: Remove Every k-th Node from a Linked List**
+**Trie-Based Prefix Queries**
 
-Given a singly linked list, remove every k-th node from the list. The head of the linked list is given as `head`. You should not remove the first node, only nodes at positions that are multiples of `k`.
+Given a set of strings and an array of query prefixes, implement a Trie data structure to efficiently handle prefix queries. The goal is to determine for each query prefix whether it is a full string or a prefix of a string in the given set.
 
 ### Example Input/Output
 
 **Input:**
-```
-Head Node: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> ...
-k = 3
-```
+- Strings: `["apple", "banana", "cherry"]`
+- Query Prefixes: `["app", "ban", "che"]`
 
 **Output:**
-```
-Head Node: 1 -> 2 -> 4 -> 5 -> 7 -> ...
-```
+- For each query prefix, determine if it is a full string or a prefix:
+  - `"app"`: Full string
+  - `"ban"`: Prefix of "banana"
+  - `"che"`: Full string
 
 ### Constraints
 
-- The linked list does not contain any duplicate values.
-- The value of `k` is greater than 1.
-- The linked list may contain `n` nodes, where `n` could be very large.
+- The strings in the input set are unique.
+- The query prefixes are also unique.
+- The length of each query prefix is at most 10 characters.
 
-### Most Efficient Solution in Python
-
-#### Algorithm Explanation
-
-To achieve this efficiently, we will use a two-pointer approach. The first pointer (`curr`) will traverse the linked list, and the second pointer (`skip`) will help us skip every `k-th` node.
-
-1. **Initialize Pointers:**
-   - `curr` points to the head of the linked list.
-   - `skip` points to `head`.
-
-2. **Traversal:**
-   - Traverse the linked list with `curr`.
-   - If `skip` reaches `k`, move it to the next node.
-
-3. **Removal:**
-   - When `skip` reaches the node that should be removed, move `curr` to the next node.
-
-4. **New Head:**
-   - If `curr` becomes null, return null as there are no more nodes in the list.
-
-5. **Final List:**
-   - Update the head of the list with `curr`.
-
-#### Code Implementation
+### Most Efficient Solution
 
 ```python
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
 
-def removeEveryKthNode(head, k):
-    if not head or k <= 1:
-        return head
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-    prev = None
-    skip = head
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end_of_word = True
 
-    while skip:
-        if k == 1:
-            # If k is 1, skip every node in the list
-            return None
-
-        for _ in range(k - 2): # Skip k-2 nodes before removing the k-th node
-            if not skip.next:
-                break # If there are not enough nodes left, stop skipping.
-            skip = skip.next
-        
-        # If we've reached the end of the list, stop here
-        if not skip.next:
-            break
-        
-        # Skip the k-th node and set prev to skip to keep track of previous node.
-        prev = skip if prev else head 
-        skip = skip.next.next
-        
-        # If prev is None, it means the head was removed so update the head.
-        if prev is None:
-            head = skip
-    
-    return head
+    def query(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return "Not Full String"
+            node = node.children[char]
+        if node.is_end_of_word:
+            return "Full String"
+        else:
+            return "Prefix of a String"
 
 # Example usage:
-# Create a sample linked list (1 -> 2 -> 3 -> 4 -> 5 -> ...)
-head = ListNode(1)
-current = head
-for i in range(2, 6):
-    current.next = ListNode(i)
-    current = current.next
+trie = Trie()
+strings = ["apple", "banana", "cherry"]
+for string in strings:
+    trie.insert(string)
 
-# Remove every 3rd node
-new_head = removeEveryKthNode(head, 3)
-
-# Print the resulting list
-while new_head:
-    print(new_head.val, end=" ")
-    new_head = new_head.next
-
-# Output: 1 -> 2 -> 4 -> 5 
+query_prefixes = ["app", "ban", "che"]
+for prefix in query_prefixes:
+    print(trie.query(prefix))
 ```
 
-### Complexity Analysis
+### Detailed Explanation of the Algorithm
 
-**Time Complexity:** O(n), where n is the number of nodes in the linked list. This is because we traverse the list once.
+1. **Trie Node Creation:**
+   - Each node in the Trie represents a character in the strings.
+   - The `children` dictionary stores child nodes based on characters.
+   - The `is_end_of_word` attribute indicates whether a node marks the end of a word.
 
-**Space Complexity:** O(1), as we only use a constant amount of space to store pointers.
+2. **Inserting Strings:**
+   - Iterate through each character of a string and insert it into the Trie.
+   - If a character is not present in the current node's children, create a new node for it.
+   - Move to the child node corresponding to the current character.
+   - Finally, mark the last node as an end-of-word.
 
-### Why This Approach is Optimal
+3. **Handling Queries:**
+   - For each query prefix, iterate through its characters.
+   - If any character is not found in the Trie, it's not a full string.
+   - If all characters are found and the last node marks an end-of-word, it's a full string.
+   - Otherwise, it's a prefix of a string.
 
-This approach is optimal because it uses a two-pointer technique that avoids unnecessary iterations and ensures that we traverse the list only once. The space complexity is constant, making it efficient in terms of memory usage.
+### Time and Space Complexity Analysis
 
-The trade-off here is that we need to handle edge cases like when `k` is 1 or when there are not enough nodes left in the list, which adds some complexity but does not affect the overall time complexity.
+- **Time Complexity:**
+  - Insertion: O(m), where m is the length of the string.
+  - Query: O(m), where m is the length of the query prefix.
+  
+- **Space Complexity:**
+  - The space required to store all nodes in the Trie is proportional to the total number of unique characters across all strings, which is O(N * M), where N is the number of strings and M is the average length of strings.
 
-This problem sits at a moderate difficulty level (4 out of 5) because it requires careful handling of pointers and edge cases without using recursion, making it slightly more challenging than some basic linked list problems but less complex than extremely advanced problems involving circular linked lists or complex merges.
+### Optimal Approach Explanation
+
+This approach is optimal because:
+
+- **Efficient String Insertion:** Using a Trie allows us to insert strings in amortized O(m) time complexity, where m is the length of the string.
+- **Efficient Prefix Queries:** For each query, we only traverse up to the length of the query prefix, ensuring an amortized O(m) time complexity for queries as well.
+
+This solution balances both time and space complexities effectively by leveraging the inherent properties of Trie data structures for prefix matching.
