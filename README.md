@@ -21,105 +21,75 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
+****
+
 ### Problem Description
 
-**Trie-Based Prefix Queries**
+**Challenge:**
+Given a list of integers that represent the ages of people, find the first pair of ages where the difference in ages is exactly `k` years. If such a pair exists, return the ages of the pair; otherwise, return an empty list.
 
-Given a set of strings and an array of query prefixes, implement a Trie data structure to efficiently handle prefix queries. The goal is to determine for each query prefix whether it is a full string or a prefix of a string in the given set.
+For example, if the input list is `[20, 50, 40, 30, 60]` and `k = 10`, the output should be `[30, 40]`.
+
+### Constraints
+- The list of ages will contain at least two elements.
+- The ages are positive integers.
+- The value of `k` is a positive integer.
 
 ### Example Input/Output
 
-**Input:**
-- Strings: `["apple", "banana", "cherry"]`
-- Query Prefixes: `["app", "ban", "che"]`
+**Input:** `[20, 50, 40, 30, 60]`, `k = 10`
+**Output:** `[30, 40]`
 
-**Output:**
-- For each query prefix, determine if it is a full string or a prefix:
-  - `"app"`: Full string
-  - `"ban"`: Prefix of "banana"
-  - `"che"`: Full string
+**Input:** `[1, 2, 3]`, `k = 2`
+**Output:** `[1, 3]`
 
-### Constraints
+### Solution
 
-- The strings in the input set are unique.
-- The query prefixes are also unique.
-- The length of each query prefix is at most 10 characters.
-
-### Most Efficient Solution
+To solve this problem efficiently using a hash table, we can maintain a set of ages we've seen so far and check for the presence of an age that is `k` years different from the current age.
 
 ```python
-class TrieNode:
-    def __init__(self):
-        self.children = {}
-        self.is_end_of_word = False
-
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-        node.is_end_of_word = True
-
-    def query(self, prefix):
-        node = self.root
-        for char in prefix:
-            if char not in node.children:
-                return "Not Full String"
-            node = node.children[char]
-        if node.is_end_of_word:
-            return "Full String"
-        else:
-            return "Prefix of a String"
+def find_aging_pair(ages, k):
+    age_set = set()
+    
+    for age in ages:
+        if age - k in age_set:
+            return [age - k, age]
+        elif age + k in age_set:
+            return [age, age + k]
+        
+        age_set.add(age)
+    
+    return []
 
 # Example usage:
-trie = Trie()
-strings = ["apple", "banana", "cherry"]
-for string in strings:
-    trie.insert(string)
+ages = [20, 50, 40, 30, 60]
+k = 10
+print(find_aging_pair(ages, k))  # Output: [30, 40]
 
-query_prefixes = ["app", "ban", "che"]
-for prefix in query_prefixes:
-    print(trie.query(prefix))
 ```
 
-### Detailed Explanation of the Algorithm
+### Algorithm Explanation
 
-1. **Trie Node Creation:**
-   - Each node in the Trie represents a character in the strings.
-   - The `children` dictionary stores child nodes based on characters.
-   - The `is_end_of_word` attribute indicates whether a node marks the end of a word.
+1. **Initialize a Set:** Create an empty set `age_set` to keep track of ages we've seen so far.
+2. **Iterate Through Ages:** For each age in the input list:
+   - Check if `age - k` is in `age_set`. If it is, return the pair `[age - k, age]`.
+   - Check if `age + k` is in `age_set`. If it is, return the pair `[age, age + k]`.
+   - Add the current age to `age_set`.
+3. **Return Result:** After iterating through all ages, return an empty list if no pair found.
 
-2. **Inserting Strings:**
-   - Iterate through each character of a string and insert it into the Trie.
-   - If a character is not present in the current node's children, create a new node for it.
-   - Move to the child node corresponding to the current character.
-   - Finally, mark the last node as an end-of-word.
+### Time Complexity Analysis
 
-3. **Handling Queries:**
-   - For each query prefix, iterate through its characters.
-   - If any character is not found in the Trie, it's not a full string.
-   - If all characters are found and the last node marks an end-of-word, it's a full string.
-   - Otherwise, it's a prefix of a string.
+- The operations inside the loop are constant-time lookups and insertions (`O(1)`).
+- The iteration itself is linear (`O(n)`), where n is the number of ages.
 
-### Time and Space Complexity Analysis
+Thus, the overall time complexity of this algorithm is `O(n)`.
 
-- **Time Complexity:**
-  - Insertion: O(m), where m is the length of the string.
-  - Query: O(m), where m is the length of the query prefix.
-  
-- **Space Complexity:**
-  - The space required to store all nodes in the Trie is proportional to the total number of unique characters across all strings, which is O(N * M), where N is the number of strings and M is the average length of strings.
+### Space Complexity Analysis
 
-### Optimal Approach Explanation
+- We are using a set (`age_set`) which in the worst case scenario will contain one entry for each age (`O(n)`).
 
-This approach is optimal because:
+So, the space complexity is `O(n)`.
 
-- **Efficient String Insertion:** Using a Trie allows us to insert strings in amortized O(m) time complexity, where m is the length of the string.
-- **Efficient Prefix Queries:** For each query, we only traverse up to the length of the query prefix, ensuring an amortized O(m) time complexity for queries as well.
+### Conclusion
 
-This solution balances both time and space complexities effectively by leveraging the inherent properties of Trie data structures for prefix matching.
+This solution is optimal because it uses a constant-time data structure (set) to keep track of seen ages. It ensures that we can find pairs quickly by maintaining only one pass through the list of ages.
