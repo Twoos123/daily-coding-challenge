@@ -21,75 +21,124 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-****
-
 ### Problem Description
+**Reverse and Merge Linked Lists**
 
-**Challenge:**
-Given a list of integers that represent the ages of people, find the first pair of ages where the difference in ages is exactly `k` years. If such a pair exists, return the ages of the pair; otherwise, return an empty list.
+Given two singly linked lists, one of which is reversed, merge them into a single sorted linked list. The reversed list is also sorted in ascending order but has been reversed. Your task is to create a function that merges these two lists into a single sorted order.
 
-For example, if the input list is `[20, 50, 40, 30, 60]` and `k = 10`, the output should be `[30, 40]`.
+#### Example Input/Output
+- **Input 1: Reversed List `R`:** `3 -> 2 -> 1`
+- **Input 2: Sorted List `S`:** `4 -> 10 -> 11`
+- **Output:** Merged List: `1 -> 2 -> 3 -> 4 -> 10 -> 11`
 
-### Constraints
-- The list of ages will contain at least two elements.
-- The ages are positive integers.
-- The value of `k` is a positive integer.
+#### Constraints
+- Both input lists are singly linked lists.
+- The reversed list is already sorted in ascending order.
+- The sorted list is also sorted in ascending order.
 
-### Example Input/Output
+### Difficulty Rating
+**DIFFICULTY: 4**
 
-**Input:** `[20, 50, 40, 30, 60]`, `k = 10`
-**Output:** `[30, 40]`
+### Solution in Python
 
-**Input:** `[1, 2, 3]`, `k = 2`
-**Output:** `[1, 3]`
+#### Reversing a Linked List Function
 
-### Solution
-
-To solve this problem efficiently using a hash table, we can maintain a set of ages we've seen so far and check for the presence of an age that is `k` years different from the current age.
+First, we need to reverse the linked list. This can be done using a simple iterative approach.
 
 ```python
-def find_aging_pair(ages, k):
-    age_set = set()
-    
-    for age in ages:
-        if age - k in age_set:
-            return [age - k, age]
-        elif age + k in age_set:
-            return [age, age + k]
-        
-        age_set.add(age)
-    
-    return []
+class Node:
+    def __init__(self, data=None):
+        self.data = data
+        self.next = None
 
-# Example usage:
-ages = [20, 50, 40, 30, 60]
-k = 10
-print(find_aging_pair(ages, k))  # Output: [30, 40]
-
+def reverse_list(head):
+    prev = None
+    while head:
+        next_node = head.next
+        head.next = prev
+        prev = head
+        head = next_node
+    return prev
 ```
 
-### Algorithm Explanation
+#### Merging Two Sorted Linked Lists Function
 
-1. **Initialize a Set:** Create an empty set `age_set` to keep track of ages we've seen so far.
-2. **Iterate Through Ages:** For each age in the input list:
-   - Check if `age - k` is in `age_set`. If it is, return the pair `[age - k, age]`.
-   - Check if `age + k` is in `age_set`. If it is, return the pair `[age, age + k]`.
-   - Add the current age to `age_set`.
-3. **Return Result:** After iterating through all ages, return an empty list if no pair found.
+Next, we need to merge these two lists. We can do this by comparing nodes from both lists and adding them in sorted order.
 
-### Time Complexity Analysis
+```python
+def merge_sorted_lists(reversed_head, sorted_head):
+    # Initialize dummy node for merged list
+    dummy = Node()
+    current = dummy
+    
+    # Pointers for both lists
+    reversed_current = reversed_head
+    sorted_current = sorted_head
+    
+    while reversed_current and sorted_current:
+        if reversed_current.data < sorted_current.data:
+            current.next = reversed_current
+            reversed_current = reversed_current.next
+        else:
+            current.next = sorted_current
+            sorted_current = sorted_current.next
+        
+        current = current.next
+    
+    # If there are remaining nodes in either list, append them to the merged list
+    if reversed_current:
+        current.next = reversed_current
+    elif sorted_current:
+        current.next = sorted_current
+    
+    return dummy.next
 
-- The operations inside the loop are constant-time lookups and insertions (`O(1)`).
-- The iteration itself is linear (`O(n)`), where n is the number of ages.
+# Example usage:
+def create_and_reverse_list(data):
+    head = None
+    for i in reversed(data):
+        head = Node(i, head)
+    return head
 
-Thus, the overall time complexity of this algorithm is `O(n)`.
+# Create example lists
+data1 = [3, 2, 1]
+data2 = [4, 10, 11]
 
-### Space Complexity Analysis
+# Reverse and merge lists
+reversed_head = create_and_reverse_list(data1)
+sorted_head = create_and_sorted_list(data2)  # Assuming this function exists
 
-- We are using a set (`age_set`) which in the worst case scenario will contain one entry for each age (`O(n)`).
+merged_head = merge_sorted_lists(reversed_head, sorted_head)
 
-So, the space complexity is `O(n)`.
+def print_list(head):
+    while head:
+        print(head.data, end=" ")
+        head = head.next
+    print()
 
-### Conclusion
+print("Merged List:")
+print_list(merged_head)
+```
 
-This solution is optimal because it uses a constant-time data structure (set) to keep track of seen ages. It ensures that we can find pairs quickly by maintaining only one pass through the list of ages.
+### Analysis of Time and Space Complexity
+
+- **Time Complexity:**
+  - Reversing a linked list takes O(n) time where n is the number of nodes in the list.
+  - Merging two sorted linked lists takes O(n+m) time where n and m are the numbers of nodes in each list.
+  - Therefore, the overall time complexity is O(n+m).
+
+- **Space Complexity:**
+  - The space complexity for reversing a linked list is O(1) since we only use a constant amount of space.
+  - The space complexity for merging two sorted linked lists is also O(1) since we only need additional pointers and a dummy node.
+
+### Optimal Approach Explanation
+
+The chosen solution is optimal because it:
+
+1. **Efficiently Reverses the Linked List:** Using an iterative approach ensures that we don't incur the overhead of recursive calls or additional data structures that might consume more space and time.
+
+2. **Efficiently Merges Sorted Lists:** By comparing nodes from both lists and adding them in sorted order, we ensure that the merged list remains sorted without requiring additional sorting operations.
+
+3. **Minimal Space Usage:** Both operations use minimal additional space, making them efficient in terms of space complexity.
+
+In summary, this problem requires implementing and manipulating linked lists in an interesting way, requiring efficient algorithms for both reversing and merging operations.
