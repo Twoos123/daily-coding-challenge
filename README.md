@@ -19,126 +19,103 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
 ### Problem Description
-**Reverse and Merge Linked Lists**
 
-Given two singly linked lists, one of which is reversed, merge them into a single sorted linked list. The reversed list is also sorted in ascending order but has been reversed. Your task is to create a function that merges these two lists into a single sorted order.
+**Challenge:**
+**Title:** `Netflix Recommendation System`
+**Objective:** 
+Design a hash table-based system to manage movie recommendations for a streaming service like Netflix. The system should efficiently store and retrieve movie recommendations based on user preferences.
 
-#### Example Input/Output
-- **Input 1: Reversed List `R`:** `3 -> 2 -> 1`
-- **Input 2: Sorted List `S`:** `4 -> 10 -> 11`
-- **Output:** Merged List: `1 -> 2 -> 3 -> 4 -> 10 -> 11`
+**Input:**
+- **Users:** A list of unique user IDs.
+- **Movies:** A list of unique movie titles.
+- **User Preferences:** A mapping of user IDs to their preferred movie genres (e.g., action, comedy, drama).
 
-#### Constraints
-- Both input lists are singly linked lists.
-- The reversed list is already sorted in ascending order.
-- The sorted list is also sorted in ascending order.
+**Output:**
+- **Recommended Movies for Each User:** A list of recommended movie titles for each user.
+
+### Constraints
+- Each user has a unique set of preferred genres.
+- Each movie belongs to one or more genres.
+- The system should handle a large number of users and movies efficiently.
+
+### Example Input/Output
+
+**Input:**
+```python
+users = ["user1", "user2", "user3"]
+movies = ["Movie A", "Movie B", "Movie C"]
+user_preferences = {
+    "user1": ["action", "comedy"],
+    "user2": ["drama", "thriller"],
+    "user3": ["action", "comedy"]
+}
+```
+
+**Output:**
+```python
+recommended_movies = {
+    "user1": ["Movie A", "Movie C"],  # Both movies are in 'action' or 'comedy'
+    "user2": ["Movie B"],           # Only one movie matches 'drama' or 'thriller'
+    "user3": ["Movie A", "Movie B"]  # Both movies are in 'action' or 'comedy'
+}
+```
+
+### Detailed Explanation
+
+To solve this problem efficiently, we will use a hash table to store the user preferences and movie genres. The key will be the user ID, and the value will be a set of preferred genres for that user. Similarly, we will store the movie genres in another hash table where the key is the movie title and the value is a set of genres associated with that movie.
+
+#### Step-by-Step Solution
+
+1. **Hash Table Initialization:**
+
+   ```python
+   user_preferences = {}  # Key: User ID, Value: Set of preferred genres
+   movie_genres = {}       # Key: Movie Title, Value: Set of genres
+   ```
+
+2. **Populating `user_preferences` and `movie_genres`:**
+
+   ```python
+   for user_id, genres in user_preferences.items():
+       user_preferences[user_id] = set(genres)
+   
+   for movie_title, genres in movie_genres.items():
+       movie_genres[movie_title] = set(genres)
+   ```
+
+3. **Finding Recommended Movies for Each User:**
+
+    For each user, iterate through their preferred genres and find movies that belong to those genres.
+
+    ```python
+    recommended_movies = {}
+    
+    for user_id in users:
+        recommended_movies[user_id] = []
+        
+        for movie_title in movies:
+            if (user_preferences.get(user_id) & movie_genres.get(movie_title)).issubset(user_preferences[user_id]):
+                recommended_movies[user_id].append(movie_title)
+                
+    return recommended_movies
+```
+
+#### Explanation
+
+- **Time Complexity:** The overall time complexity is O(n*m*avg_len), where n is the number of users or movies (whichever is larger), m is the average number of preferred genres per user or associated genres per movie (whichever is larger), and avg_len is the average length of sets involved in intersection operations.
+  
+  - Initializing hash tables (O(n + m))
+  - Populating hash tables (O(n*m))
+  - Finding recommended movies (O(n*m*avg_len))
+
+- **Space Complexity:** The space complexity is O(n + m), as we need to store information about each user's preferences and each movie's genres.
+
+### Optimal Solution
+
+This approach ensures that we can efficiently handle large datasets by using hash tables to store and retrieve data quickly. The use of sets for storing genres allows for efficient intersection operations when finding matching movies.
 
 ### Difficulty Rating
-**DIFFICULTY: 4**
-
-### Solution in Python
-
-#### Reversing a Linked List Function
-
-First, we need to reverse the linked list. This can be done using a simple iterative approach.
-
-```python
-class Node:
-    def __init__(self, data=None):
-        self.data = data
-        self.next = None
-
-def reverse_list(head):
-    prev = None
-    while head:
-        next_node = head.next
-        head.next = prev
-        prev = head
-        head = next_node
-    return prev
-```
-
-#### Merging Two Sorted Linked Lists Function
-
-Next, we need to merge these two lists. We can do this by comparing nodes from both lists and adding them in sorted order.
-
-```python
-def merge_sorted_lists(reversed_head, sorted_head):
-    # Initialize dummy node for merged list
-    dummy = Node()
-    current = dummy
-    
-    # Pointers for both lists
-    reversed_current = reversed_head
-    sorted_current = sorted_head
-    
-    while reversed_current and sorted_current:
-        if reversed_current.data < sorted_current.data:
-            current.next = reversed_current
-            reversed_current = reversed_current.next
-        else:
-            current.next = sorted_current
-            sorted_current = sorted_current.next
-        
-        current = current.next
-    
-    # If there are remaining nodes in either list, append them to the merged list
-    if reversed_current:
-        current.next = reversed_current
-    elif sorted_current:
-        current.next = sorted_current
-    
-    return dummy.next
-
-# Example usage:
-def create_and_reverse_list(data):
-    head = None
-    for i in reversed(data):
-        head = Node(i, head)
-    return head
-
-# Create example lists
-data1 = [3, 2, 1]
-data2 = [4, 10, 11]
-
-# Reverse and merge lists
-reversed_head = create_and_reverse_list(data1)
-sorted_head = create_and_sorted_list(data2)  # Assuming this function exists
-
-merged_head = merge_sorted_lists(reversed_head, sorted_head)
-
-def print_list(head):
-    while head:
-        print(head.data, end=" ")
-        head = head.next
-    print()
-
-print("Merged List:")
-print_list(merged_head)
-```
-
-### Analysis of Time and Space Complexity
-
-- **Time Complexity:**
-  - Reversing a linked list takes O(n) time where n is the number of nodes in the list.
-  - Merging two sorted linked lists takes O(n+m) time where n and m are the numbers of nodes in each list.
-  - Therefore, the overall time complexity is O(n+m).
-
-- **Space Complexity:**
-  - The space complexity for reversing a linked list is O(1) since we only use a constant amount of space.
-  - The space complexity for merging two sorted linked lists is also O(1) since we only need additional pointers and a dummy node.
-
-### Optimal Approach Explanation
-
-The chosen solution is optimal because it:
-
-1. **Efficiently Reverses the Linked List:** Using an iterative approach ensures that we don't incur the overhead of recursive calls or additional data structures that might consume more space and time.
-
-2. **Efficiently Merges Sorted Lists:** By comparing nodes from both lists and adding them in sorted order, we ensure that the merged list remains sorted without requiring additional sorting operations.
-
-3. **Minimal Space Usage:** Both operations use minimal additional space, making them efficient in terms of space complexity.
-
-In summary, this problem requires implementing and manipulating linked lists in an interesting way, requiring efficient algorithms for both reversing and merging operations.
+This problem requires understanding how to efficiently manage and manipulate data using hash tables while ensuring scalability for large datasets. The intersection operation adds a layer of complexity but is still within the realm of manageable algorithms for experienced developers.
