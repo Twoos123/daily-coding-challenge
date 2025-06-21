@@ -21,100 +21,103 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### Problem Description
+### Challenge: "Detecting Cycles in a Directed Graph"
 
-**Unique Root is Unique Tree**
+**Problem Description:**
+Given a directed graph, implement a function to detect whether the graph contains any cycles. The input is represented as an adjacency list where each key represents a node and its corresponding value is a list of nodes that it directly points to.
 
-Given an unrooted tree represented as a set of nodes and their connections, determine if the tree can be uniquely rooted such that the resulting rooted tree is a Binary Search Tree (BST). If it can be uniquely rooted, return True; otherwise, return False.
-
-### Example Input/Output
-
-**Input:**
-```python
-connections = [
-    {'node1': 'A', 'node2': 'B'},
-    {'node1': 'A', 'node2': 'C'},
-    {'node1': 'B', 'node2': 'D'}
-]
+**Example Input/Output:**
 ```
+Input:
+{
+    'A': ['B'],
+    'B': ['C'],
+    'C': ['A']
+}
 
-**Output:**
-```python
+Output:
 True
+
+Input:
+{
+    'A': ['B'],
+    'B': ['C'],
+    'C': ['D']
+}
+
+Output:
+False
 ```
 
-### Constraints
+**Constraints:**
+- The graph may contain multiple edges between any two nodes.
+- The graph may contain self-loops (i.e., a node pointing to itself).
+- The number of nodes and edges in the graph is finite and can be reasonably large for practical purposes.
 
-- The input connections represent an unrooted tree.
-- Each connection is between two distinct nodes.
-- The resulting rooted tree must be a BST.
+### Most Efficient Solution in Python
 
-### The Most Efficient Solution in Python
+#### Using Depth-First Search (DFS)
 
-The problem involves determining whether the given unrooted tree can be uniquely rooted to form a BST. We will use a depth-first search (DFS) approach to traverse the tree and check if it satisfies the BST property.
+We will use the DFS approach with a set to keep track of visited nodes and another set to keep track of nodes currently being visited (`stack`). If we encounter a node that is already in the `stack`, it means we have detected a cycle.
 
 ```python
-def is_unique_root_bst(connections):
-    # Function to perform DFS and check if a subtree is BST
-    def is_bst(node, min_val=float('-inf'), max_val=float('inf')):
-        if not node:
-            return True
+from collections import defaultdict
+
+def has_cycle(graph):
+    visited = set()
+    stack = set()
+
+    def dfs(node):
+        visited.add(node)
+        stack.add(node)
         
-        if node not in connections:
-            return False
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                if dfs(neighbor):
+                    return True
+            elif neighbor in stack:
+                return True
         
-        for neighbor in connections[node]:
-            if neighbor != node:
-                # Recursively check left and right subtrees
-                left = is_bst(neighbor, min_val, node)
-                right = is_bst(neighbor, node, max_val)
-                
-                # If any subtree is not a BST, return False
-                if not left or not right:
-                    return False
-                
-                # Update the node value based on the smallest and largest values in its subtree
-                if connections[node][neighbor] < node:
-                    min_val = min(min_val, connections[node][neighbor])
-                if connections[node][neighbor] > node:
-                    max_val = max(max_val, connections[node][neighbor])
-        
-        return True
-    
-    # Check if any node can be the root of the tree
-    for node in connections:
-        if is_bst(node):
-            return True
+        stack.remove(node)
+        return False
+
+    for node in graph:
+        if node not in visited:
+            if dfs(node):
+                return True
     
     return False
 
 # Example usage:
-connections = {
-    'A': {'B', 'C'},
-    'B': {'D'},
-    'C': set(),
-    'D': set()
+graph = {
+    'A': ['B'],
+    'B': ['C'],
+    'C': ['A']
 }
 
-print(is_unique_root_bst(connections))  # Output: True
+print(has_cycle(graph))  # Output: True
+
+graph = {
+    'A': ['B'],
+    'B': ['C'],
+    'C': ['D']
+}
+
+print(has_cycle(graph))  # Output: False
 ```
 
-### Analysis
+#### Detailed Explanation of the Algorithm:
+1. **Initialization**: We initialize two sets, `visited` and `stack`, to keep track of visited nodes and nodes currently being visited respectively.
+2. **DFS Function**: The `dfs` function takes a node as input and performs a depth-first traversal starting from that node.
+   - It marks the current node as visited and adds it to the stack.
+   - It iterates over all neighbors of the current node.
+   - If a neighbor has not been visited before, it recursively calls the `dfs` function for that neighbor.
+   - If a neighbor is already in the stack, it means we have detected a cycle and returns `True`.
+   - After visiting all unvisited neighbors, it removes the current node from the stack.
+3. **Main Function**: The main function iterates over all nodes in the graph and calls the `dfs` function for each unvisited node. If any call to `dfs` returns `True`, it means the graph contains a cycle and returns `True`.
 
-**Time Complexity:**
-The time complexity of this solution is O(V + E), where V is the number of nodes and E is the number of edges, because we perform a DFS traversal of the tree once.
+#### Time and Space Complexity:
+- **Time Complexity**: The time complexity is O(V + E), where V is the number of vertices (nodes) and E is the number of edges. This is because each node and each edge is visited exactly once.
+- **Space Complexity**: The space complexity is O(V) due to the use of sets (`visited` and `stack`) which can store up to V elements in the worst case.
 
-**Space Complexity:**
-The space complexity is O(V), as we use a recursive call stack that can go up to V levels deep in the worst case.
-
-### Explanation
-
-1. **DFS Traversal:** We perform a DFS traversal on each node to determine if it can be the root of a BST.
-2. **BST Check:** For each potential root node, we recursively check if its subtrees satisfy the BST property.
-3. **Node Value Update:** We update the smallest and largest values seen in each subtree to ensure that they comply with BST ordering.
-4. **Uniqueness Check:** If any node can be rooted as a valid BST, we return True; otherwise, we continue checking other potential roots.
-
-This approach ensures that we efficiently check all possible rootings of the given unrooted tree and verify if they form a unique BST.
-
-### Difficulty Rating
-This problem requires a good understanding of tree traversals and the properties of Binary Search Trees. It involves implementing a DFS traversal to check multiple subtrees efficiently, making it moderately challenging but not extremely complex like a hard LeetCode problem.
+This approach is optimal because it only requires a single pass through the graph and uses constant space for each recursive call, making it efficient both in terms of time and space usage.
