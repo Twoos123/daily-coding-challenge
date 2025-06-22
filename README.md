@@ -19,105 +19,59 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Challenge: "Detecting Cycles in a Directed Graph"
+### Problem Description
+**Task:**
+Implement a function `anagramGroups` that takes a list of strings as input and returns a list of lists where each sublist contains all the anagrams from the input list. For example, if the input is `["eat", "tea", "tan", "ate", "nat", "bat"]`, the output should be `[["eat", "tea", "ate"], ["tan", "nat"], ["bat"]]`.
 
-**Problem Description:**
-Given a directed graph, implement a function to detect whether the graph contains any cycles. The input is represented as an adjacency list where each key represents a node and its corresponding value is a list of nodes that it directly points to.
+### Example Input/Output
+Input: `["eat", "tea", "tan", "ate", "nat", "bat"]`
+Output: `[["eat", "tea", "ate"], ["tan", "nat"], ["bat"]]`
 
-**Example Input/Output:**
-```
-Input:
-{
-    'A': ['B'],
-    'B': ['C'],
-    'C': ['A']
-}
+### Constraints
+- The length of each string in the input list is between 1 and 10 characters.
+- All strings in the input list can be anagrams of each other.
 
-Output:
-True
+### Difficulty Rating: **4**
 
-Input:
-{
-    'A': ['B'],
-    'B': ['C'],
-    'C': ['D']
-}
-
-Output:
-False
-```
-
-**Constraints:**
-- The graph may contain multiple edges between any two nodes.
-- The graph may contain self-loops (i.e., a node pointing to itself).
-- The number of nodes and edges in the graph is finite and can be reasonably large for practical purposes.
-
-### Most Efficient Solution in Python
-
-#### Using Depth-First Search (DFS)
-
-We will use the DFS approach with a set to keep track of visited nodes and another set to keep track of nodes currently being visited (`stack`). If we encounter a node that is already in the `stack`, it means we have detected a cycle.
+### Implementation in Python
 
 ```python
-from collections import defaultdict
-
-def has_cycle(graph):
-    visited = set()
-    stack = set()
-
-    def dfs(node):
-        visited.add(node)
-        stack.add(node)
-        
-        for neighbor in graph[node]:
-            if neighbor not in visited:
-                if dfs(neighbor):
-                    return True
-            elif neighbor in stack:
-                return True
-        
-        stack.remove(node)
-        return False
-
-    for node in graph:
-        if node not in visited:
-            if dfs(node):
-                return True
+def anagramGroups(strings):
+    # Create a hashmap where each key is a sorted string and value is a list of strings
+    anagram_map = {}
     
-    return False
+    for string in strings:
+        sorted_string = ''.join(sorted(string))
+        if sorted_string not in anagram_map:
+            anagram_map[sorted_string] = [string]
+        else:
+            anagram_map[sorted_string].append(string)
+    
+    # Convert the hashmap values to a list of lists and return
+    return list(anagram_map.values())
 
 # Example usage:
-graph = {
-    'A': ['B'],
-    'B': ['C'],
-    'C': ['A']
-}
-
-print(has_cycle(graph))  # Output: True
-
-graph = {
-    'A': ['B'],
-    'B': ['C'],
-    'C': ['D']
-}
-
-print(has_cycle(graph))  # Output: False
+strings = ["eat", "tea", "tan", "ate", "nat", "bat"]
+print(anagramGroups(strings)) # Output: [["eat", "tea", "ate"], ["tan", "nat"], ["bat"]]
 ```
 
-#### Detailed Explanation of the Algorithm:
-1. **Initialization**: We initialize two sets, `visited` and `stack`, to keep track of visited nodes and nodes currently being visited respectively.
-2. **DFS Function**: The `dfs` function takes a node as input and performs a depth-first traversal starting from that node.
-   - It marks the current node as visited and adds it to the stack.
-   - It iterates over all neighbors of the current node.
-   - If a neighbor has not been visited before, it recursively calls the `dfs` function for that neighbor.
-   - If a neighbor is already in the stack, it means we have detected a cycle and returns `True`.
-   - After visiting all unvisited neighbors, it removes the current node from the stack.
-3. **Main Function**: The main function iterates over all nodes in the graph and calls the `dfs` function for each unvisited node. If any call to `dfs` returns `True`, it means the graph contains a cycle and returns `True`.
+### Detailed Explanation:
+1. **Algorithm Overview**: The approach here is to use a hash map where each key is a sorted version of a string from the input list, and each value is a list of strings that are anagrams of that key.
 
-#### Time and Space Complexity:
-- **Time Complexity**: The time complexity is O(V + E), where V is the number of vertices (nodes) and E is the number of edges. This is because each node and each edge is visited exactly once.
-- **Space Complexity**: The space complexity is O(V) due to the use of sets (`visited` and `stack`) which can store up to V elements in the worst case.
+2. **Time Complexity**:
+   - **Hashing and Insertion**: For each string in the input list, we perform O(n log n) sorting (since we sort each string) and then hash it. If it's not already in our hashmap, we add it with O(1) complexity. If it's already present, we append it to the corresponding list with O(1) complexity.
+   - **Total Time Complexity**: Since we iterate through all strings exactly once (O(n)) and perform O(n log n) sorting for each string, the overall time complexity is O(n * n log n).
 
-This approach is optimal because it only requires a single pass through the graph and uses constant space for each recursive call, making it efficient both in terms of time and space usage.
+3. **Space Complexity**:
+   - **Hash Map**: The space complexity is O(n), where n is the number of unique sorted strings. Since we only store unique sorted strings once and reference them multiple times, this space usage is efficient.
+
+4. **Optimality**:
+   - The approach is optimal because it ensures that all anagrams are grouped together efficiently without having to compare all pairs of strings directly.
+
+5. **Trade-offs**:
+   - The use of sorting introduces a time penalty but ensures that anagrams are correctly grouped.
+   - The space usage is efficient as we only store unique sorted strings and their corresponding groups.
+
+This solution should be able to handle large inputs efficiently by leveraging the properties of hash tables effectively.
