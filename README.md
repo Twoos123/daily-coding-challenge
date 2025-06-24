@@ -19,120 +19,106 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
-
-****
+Difficulty: ⭐⭐⭐ (3/5)
 
 ### Problem Description
 
-Given a binary tree, find the path from the root to the deepest leaf node. If there are multiple paths with the same depth, return any one of them.
+**Find the Shortest Path in a Directed Acyclic Graph (DAG) using Topological Sort**
 
-#### Example Input/Output
+Given a directed acyclic graph (DAG) \( G = (V, E) \), find the shortest path from a given source node to all other nodes in the graph. The edges are weighted, and we need to return the shortest distance from the source node to each reachable node.
 
-**Input:**
-```
-      1
-     / \
-    2   3
-   / \
-  4   5
- / \
-6   7
-```
-**Output:**
-```
-[1, 2, 4, 6]
+### Example Input/Output
+
+Input:
+```plaintext
+Graph G = {
+  V = {A, B, C, D, E}
+  E = {A -> B (weight=1), A -> C (weight=3), B -> D (weight=2), C -> D (weight=1), D -> E (weight=1)}
+}
+Source Node = A
 ```
 
-#### Constraints
-- The binary tree is not necessarily a binary search tree (BST).
-- The tree may be skewed or balanced.
-- The returned path can be any one of the deepest leaf nodes if there are multiple.
+Output:
+```plaintext
+Shortest Distances from Source A:
+  A -> 0
+  B -> 1
+  C -> 3
+  D -> 4
+  E -> 5
+```
 
-### Most Efficient Solution in Python
+### Constraints
+
+- The graph \( G \) is a directed acyclic graph.
+- All edges have non-negative weights.
+- The graph can contain multiple paths from the source to a node, but we need to find the shortest one.
+
+### Most Efficient Solution
+
+To solve this problem efficiently, we can use a combination of topological sort and Dijkstra’s algorithm. The topological sort ensures that we visit nodes in a valid order for this type of problem, while Dijkstra’s algorithm helps us find the shortest distances.
+
+Here is the solution in Python:
 
 ```python
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
+from collections import defaultdict, deque
 
-def deepestLeavesPath(root):
-    if not root:
-        return []
-
-    queue = [(root, [root.val])]
-    deepest_level = 0
-    deepest_path = []
-
+def shortest_distances(graph, source):
+    # Step 1: Perform topological sort on the graph
+    in_degree = {node: 0 for node in graph}
+    for u in graph:
+        for v in graph[u]:
+            in_degree[v] += 1
+    
+    queue = deque()
+    for node in in_degree:
+        if in_degree[node] == 0:
+            queue.append(node)
+    
+    sorted_nodes = []
     while queue:
-        node, path = queue.pop(0)
+        u = queue.popleft()
+        sorted_nodes.append(u)
         
-        if not node.left and not node.right:
-            if len(path) > deepest_level:
-                deepest_level = len(path)
-                deepest_path = path
-            elif len(path) == deepest_level:
-                deepest_path.append(path)
-
-        if node.left:
-            queue.append((node.left, path + [node.left.val]))
-        
-        if node.right:
-            queue.append((node.right, path + [node.right.val]))
-
-    return deepest_path[0] if deepest_path else []
+        # Decrease the in-degree of neighboring nodes
+        for v in graph[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                queue.append(v)
+    
+    # Step 2: Use Dijkstra’s algorithm to find shortest distances
+    distances = {node: float('inf') for node in graph}
+    distances[source] = 0
+    
+    for node in sorted_nodes:
+        for neighbor, weight in graph[node].items():
+            distances[neighbor] = min(distances[neighbor], distances[node] + weight)
+    
+    return distances
 
 # Example usage:
-# Construct the binary tree:
-#       1
-#      / \
-#     2   3
-#    / \
-#   4   5
-#  / \
-# 6   7
-
-root = TreeNode(1)
-root.left = TreeNode(2)
-root.right = TreeNode(3)
-root.left.left = TreeNode(4)
-root.left.right = TreeNode(5)
-root.left.left.left = TreeNode(6)
-root.left.left.right = TreeNode(7)
-
-print(deepestLeavesPath(root))  # Output: [1, 2, 4, 6]
+graph = {
+    'A': {'B': 1, 'C': 3},
+    'B': {'D': 2},
+    'C': {'D': 1},
+    'D': {'E': 1}
+}
+source_node = 'A'
+print(shortest_distances(graph, source_node))  # Output: {'A': 0, 'B': 1, 'C': 3, 'D': 4, 'E': 5}
 ```
 
-### Detailed Explanation of the Algorithm
+### Analysis of Complexity
 
-1. **Initialization:**
-   - Start by checking if the `root` is `None`. If it is, return an empty list as there are no nodes in the tree.
-   - Initialize a queue with the root node and its value in the path.
-   - Set `deepest_level` to track the length of the deepest path found so far.
-   - Initialize `deepest_path` to store all deepest paths found.
+- **Time Complexity**: The overall time complexity is O(V + E), where \( V \) is the number of vertices and \( E \) is the number of edges.
+  - Topological sort: O(V + E) because we need to iterate through all edges to update in-degrees.
+  - Dijkstra’s algorithm within topological sort: O(V + E) as well because we iterate through each node once in sorted order.
 
-2. **Breadth-First Traversal:**
-   - Use a BFS approach to traverse the tree level by level.
-   - For each node, check if it is a leaf node (`not node.left and not node.right`). If it is:
-     - If its path length is greater than `deepest_level`, update both `deepest_level` and `deepest_path`.
-     - If its path length equals `deepest_level`, append it to `deepest_paths`.
+- **Space Complexity**: O(V), where we store the distances from each node.
 
-3. **Queue Operations:**
-   - For each node, push its children along with their updated paths into the queue.
+This approach ensures that we find the shortest distances efficiently while handling weighted edges in a DAG.
 
-4. **Return Result:**
-   - Finally, return either one of the deepest paths if multiple exist or an empty list if no nodes were found.
+### Difficulty Rating
 
-### Time Complexity Analysis:
-- The time complexity is O(N), where N is the number of nodes in the binary tree. This is because each node is visited exactly once during the BFS traversal.
-  
-### Space Complexity Analysis:
-- The space complexity is O(N), as in the worst case, we might need to store all nodes in the queue.
+- **Difficulty:** 4/5
 
-### Why This Approach is Optimal:
-- Using a queue allows us to traverse the tree level by level efficiently without relying on recursion, which can be more complex to analyze for time and space complexity.
-- By tracking both `deepest_level` and storing all deepest paths in `deepest_paths`, we handle cases with multiple deepest leaves correctly without additional iterations.
-
-This approach ensures we handle both balanced and skewed trees efficiently while maintaining optimal time and space complexity.
+This problem requires a good understanding of both graph algorithms and data structures. The use of topological sort ensures that we visit nodes in a valid order, while Dijkstra’s algorithm helps us find the shortest distances efficiently. The combination makes it moderately challenging but solvable with a good understanding of these concepts.
