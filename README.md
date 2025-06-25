@@ -21,104 +21,118 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
+****
+
 ### Problem Description
 
-**Find the Shortest Path in a Directed Acyclic Graph (DAG) using Topological Sort**
+**Prefix Matching with Trie**
 
-Given a directed acyclic graph (DAG) \( G = (V, E) \), find the shortest path from a given source node to all other nodes in the graph. The edges are weighted, and we need to return the shortest distance from the source node to each reachable node.
+Given a Trie data structure, implement a function that returns all words in the Trie that are prefixes of a given query string. The function should handle multiple query strings and return all matching words.
 
 ### Example Input/Output
 
-Input:
-```plaintext
-Graph G = {
-  V = {A, B, C, D, E}
-  E = {A -> B (weight=1), A -> C (weight=3), B -> D (weight=2), C -> D (weight=1), D -> E (weight=1)}
-}
-Source Node = A
-```
+**Input:**
+- Trie: `["apple", "banana", "app", "ape", "bat"]`
+- Queries:
+  - `"ap"`
+  - `"ban"`
+  - `"at"`
 
-Output:
-```plaintext
-Shortest Distances from Source A:
-  A -> 0
-  B -> 1
-  C -> 3
-  D -> 4
-  E -> 5
-```
+**Output:**
+- For `"ap"`: `["apple", "app", "ape"]`
+- For `"ban"`: `["banana"]`
+- For `"at"`: `[]` (no matching words)
 
 ### Constraints
 
-- The graph \( G \) is a directed acyclic graph.
-- All edges have non-negative weights.
-- The graph can contain multiple paths from the source to a node, but we need to find the shortest one.
+- The input Trie contains only lowercase letters.
+- The query strings are also lowercase.
+- The function should be efficient in terms of time complexity.
 
-### Most Efficient Solution
-
-To solve this problem efficiently, we can use a combination of topological sort and Dijkstra’s algorithm. The topological sort ensures that we visit nodes in a valid order for this type of problem, while Dijkstra’s algorithm helps us find the shortest distances.
-
-Here is the solution in Python:
+### Solution
 
 ```python
-from collections import defaultdict, deque
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
 
-def shortest_distances(graph, source):
-    # Step 1: Perform topological sort on the graph
-    in_degree = {node: 0 for node in graph}
-    for u in graph:
-        for v in graph[u]:
-            in_degree[v] += 1
-    
-    queue = deque()
-    for node in in_degree:
-        if in_degree[node] == 0:
-            queue.append(node)
-    
-    sorted_nodes = []
-    while queue:
-        u = queue.popleft()
-        sorted_nodes.append(u)
-        
-        # Decrease the in-degree of neighboring nodes
-        for v in graph[u]:
-            in_degree[v] -= 1
-            if in_degree[v] == 0:
-                queue.append(v)
-    
-    # Step 2: Use Dijkstra’s algorithm to find shortest distances
-    distances = {node: float('inf') for node in graph}
-    distances[source] = 0
-    
-    for node in sorted_nodes:
-        for neighbor, weight in graph[node].items():
-            distances[neighbor] = min(distances[neighbor], distances[node] + weight)
-    
-    return distances
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-# Example usage:
-graph = {
-    'A': {'B': 1, 'C': 3},
-    'B': {'D': 2},
-    'C': {'D': 1},
-    'D': {'E': 1}
-}
-source_node = 'A'
-print(shortest_distances(graph, source_node))  # Output: {'A': 0, 'B': 1, 'C': 3, 'D': 4, 'E': 5}
+    def insert(self, word):
+        current = self.root
+        for char in word:
+            if char not in current.children:
+                current.children[char] = TrieNode()
+            current = current.children[char]
+        current.is_end_of_word = True
+
+    def prefix_match(self, query):
+        current = self.root
+        result = []
+        for char in query:
+            if char not in current.children:
+                break
+            current = current.children[char]
+            if current.is_end_of_word:
+                result.append(self._collect_words_from_node(current))
+        return result
+
+    def _collect_words_from_node(self, node):
+        words = []
+        if node.is_end_of_word:
+            words.append(self._get_word_from_node(node))
+        for char, child in sorted(node.children.items()):
+            words.extend(self._collect_words_from_node(child))
+        return words
+
+    def _get_word_from_node(self, node):
+        word = ''
+        while node:
+            word = node.is_end_of_word and word or chr(97 + ord(word[-1])) + word
+            node = node.parent if hasattr(node, 'parent') else None
+        return word
 ```
 
-### Analysis of Complexity
+### Explanation of the Algorithm
 
-- **Time Complexity**: The overall time complexity is O(V + E), where \( V \) is the number of vertices and \( E \) is the number of edges.
-  - Topological sort: O(V + E) because we need to iterate through all edges to update in-degrees.
-  - Dijkstra’s algorithm within topological sort: O(V + E) as well because we iterate through each node once in sorted order.
+1. **Inserting Words**:
+   - The `insert` method adds a word to the Trie by iterating through each character and creating new nodes as needed.
+   - Time complexity: O(L), where L is the length of the word.
+   - Space complexity: O(L), as in the worst case, we need to add L new nodes.
 
-- **Space Complexity**: O(V), where we store the distances from each node.
+2. **Prefix Matching**:
+   - The `prefix_match` method iterates through each character of the query string and checks if it exists in the Trie.
+   - For each character that exists, it moves down to the corresponding child node and checks if this node marks an end of a word.
+   - If so, it collects all words rooted at this node using `_collect_words_from_node`.
 
-This approach ensures that we find the shortest distances efficiently while handling weighted edges in a DAG.
+3. **Collecting Words**:
+   - The `_collect_words_from_node` method performs a depth-first search to collect all words rooted at a given node.
+   - It keeps track of whether a node marks an end of a word and adds it to the result list accordingly.
+   - It also recursively explores all child nodes and collects words from them.
 
-### Difficulty Rating
+4. **Getting Word from Node**:
+   - The `_get_word_from_node` method reconstructs a word from a given node by traversing up to the root while storing characters along the way.
 
-- **Difficulty:** 4/5
+### Time and Space Complexity Analysis
 
-This problem requires a good understanding of both graph algorithms and data structures. The use of topological sort ensures that we visit nodes in a valid order, while Dijkstra’s algorithm helps us find the shortest distances efficiently. The combination makes it moderately challenging but solvable with a good understanding of these concepts.
+- **Time Complexity**:
+  - The `insert` method runs in O(L), where L is the length of the word.
+  - The `prefix_match` method also runs in O(L), as it needs to traverse each character of the query string.
+  - The `_collect_words_from_node` and `_get_word_from_node` methods also have a time complexity of O(L) due to their recursive nature.
+
+- **Space Complexity**:
+  - Both methods use O(L) space complexity because in the worst-case scenario, they need to store L characters during traversal.
+
+This approach ensures that both insertion and prefix matching operations are efficient in terms of time complexity while maintaining reasonable space complexity. The trade-off lies in the recursive calls which might increase stack size but are necessary for building and traversing the Trie structure effectively.
+
+### Why this Approach is Optimal
+
+The approach is optimal because it leverages the inherent properties of a Trie:
+- It efficiently stores and retrieves strings by utilizing shared prefixes.
+- It allows quick identification of word prefixes through direct traversal.
+- It handles multiple queries efficiently by reusing paths already traversed during construction.
+
+This makes it suitable for real-time applications where prefix matching is common, such as auto-completion in search engines
