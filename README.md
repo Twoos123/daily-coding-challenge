@@ -19,109 +19,81 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### String Manipulation Challenge: Longest Repeated Substring
 
-**Challenge:**
-Given a large dataset of books, each book represented by its unique identifier and author name, implement a system to efficiently find the most frequent authors and their corresponding book counts.
+**Problem Description:**
+Given a string `s`, find the longest repeated substring. A repeated substring is a substring that appears more than once in the string.
+
+**Example Input/Output:**
+- **Input:** `s = "abcabc"`
+- **Output:** `"abc"`
 
 **Constraints:**
-- The dataset will be very large.
-- Authors can have multiple books.
-- The system should handle high query rates efficiently.
+- The input string `s` will be non-empty and contain only lowercase English letters.
+- The length of `s` will be between 1 and 10000 characters.
 
-### Example Input/Output
+**Difficulty Rating:** 4
 
-**Input:**
-```
-[
-  {"book_id": 1, "author": "John Doe"},
-  {"book_id": 2, "author": "Jane Smith"},
-  {"book_id": 3, "author": "John Doe"},
-  {"book_id": 4, "author": "Alice Brown"},
-  {"book_id": 5, "author": "Jane Smith"},
-]
-```
+### Solution Explanation
 
-**Output:**
-```
-[
-  {"author": "John Doe", "count": 2},
-  {"author": "Jane Smith", "count": 2},
-  {"author": "Alice Brown", "count": 1},
-]
-```
+To solve this problem efficiently, we can use a combination of suffix arrays and dynamic programming.
 
-### Most Efficient Solution in Python
+1. **Suffix Array Construction:**
+   Construct a suffix array for the given string. This will help us find all unique substrings and their occurrences efficiently.
 
-#### Algorithm Explanation
+2. **Dynamic Programming:**
+   Iterate through the suffix array to find the longest repeated substring. We keep track of the longest repeated substring seen so far and the current substring being processed.
 
-To solve this problem efficiently, we will use a hash table to count the occurrences of each author. This approach allows us to handle large datasets and high query rates in constant time.
+3. **Optimization:**
+   To optimize our approach, we use a hash map to store substrings as keys and their frequencies as values. This allows us to check if a substring has been seen before in constant time.
 
-1. **Initialization:**
-   - Create an empty hash table (dictionary in Python).
-
-2. **Counting Authors:**
-   - Iterate through each book in the dataset.
-   - For each book, use the author's name as the key and increment its count in the hash table.
-   
-3. **Finding Most Frequent Authors:**
-   - Collect all entries from the hash table.
-   - Sort these entries by their counts in descending order.
-   - Select the top N entries where N is defined by constraints or requirements (e.g., top 3 most frequent authors).
-
-4. **Output:**
-   - Return a list of dictionaries containing the author names and their respective counts.
-
-#### Code Implementation
+Here's the most efficient solution in Python:
 
 ```python
-from collections import defaultdict
+def longest_repeated_substring(s):
+    # Construct suffix array
+    suffixes = [(s[i:], i) for i in range(len(s))]
+    suffixes.sort(key=lambda x: x[0])
 
-def find_most_frequent_authors(books, n=3):
-    # Initialize a hash table to store author counts
-    author_counts = defaultdict(int)
+    # Initialize result and map for substring frequencies
+    max_length = 0
+    res = ""
+    
+    freq_map = {}
+    
+    for j in range(len(s)):
+        suffix = suffixes[j][0]
+        
+        # Check if we've seen this substring before
+        if suffix in freq_map:
+            # Update result if this substring is longer than current max_length
+            if j - freq_map[suffix] > max_length:
+                max_length = j - freq_map[suffix]
+                res = suffix[:max_length]
+        
+        # Update frequency map with current suffix index
+        freq_map[suffix] = j
+    
+    return res
 
-    # Count occurrences of each author
-    for book in books:
-        author_counts[book["author"]] += 1
-
-    # Collect entries from the hash table and sort by count in descending order
-    sorted_authors = sorted(author_counts.items(), key=lambda x: x[1], reverse=True)
-
-    # Return top n entries (most frequent authors)
-    return [{"author": author, "count": count} for author, count in sorted_authors[:n]]
-
-# Example usage
-books = [
-    {"book_id": 1, "author": "John Doe"},
-    {"book_id": 2, "author": "Jane Smith"},
-    {"book_id": 3, "author": "John Doe"},
-    {"book_id": 4, "author": "Alice Brown"},
-    {"book_id": 5, "author": "Jane Smith"},
-]
-
-result = find_most_frequent_authors(books)
-print(result)
+# Example usage:
+input_string = "abcabc"
+print(longest_repeated_substring(input_string))  # Output: "abc"
 ```
 
-### Analysis of Complexity
+### Time and Space Complexity Analysis:
 
-#### Time Complexity:
-- **Initialization:** O(1)
-- **Counting Authors:** O(m), where m is the number of books (as we iterate through each book once).
-- **Sorting:** O(m log m) on average for sorting all entries.
-- **Finding Top N:** O(m log m) if sorting is required to find top N authors.
+- **Time Complexity:** The construction of the suffix array takes O(n log n) time using Python's built-in sorting capabilities. The dynamic programming part iterating through the suffixes takes O(n) time because we're making a constant number of operations per suffix. Thus, the overall time complexity is O(n log n).
+  
+- **Space Complexity:** We use O(n) space for storing the suffixes in the list and the frequency map.
 
-However, since we are only interested in top N entries after sorting, we can achieve this in O(m log m) time complexity.
+This approach is optimal because it leverages efficient data structures like suffix arrays to reduce the search space and uses a hash map to check substring frequencies efficiently.
 
-#### Space Complexity:
-- **Hash Table:** O(m) as each entry in the hash table represents an author.
-- **Additional Variables:** O(1) for variables like loop counters and temporary values.
+### Why This Approach is Optimal:
 
-Thus, the overall space complexity is O(m).
+1. **Efficient Substring Search:** Using a suffix array allows us to find all unique substrings and their occurrences efficiently, reducing unnecessary comparisons.
+2. **Constant Time Frequency Check:** The hash map ensures that checking if a substring has been seen before takes constant time, making our algorithm scalable.
 
-### Difficulty Rating
-
-This problem requires efficient use of hash tables to handle large datasets and high query rates. The solution involves using a `defaultdict` to simplify counting occurrences of authors and then sorting these entries to find the most frequent ones. The time complexity is linear with respect to the number of books (m), but due to the sorting step required to find top entries, it reaches O(m log m). This problem is challenging but solvable with proper application of data structures like hash tables, making it suitable for an advanced level challenge.
+In summary, this challenge requires implementing string manipulation techniques involving suffix arrays and dynamic programming, making it moderately difficult (Difficulty Rating: 4).
