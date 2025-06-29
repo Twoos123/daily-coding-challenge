@@ -19,81 +19,114 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐ (3/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
-### String Manipulation Challenge: Longest Repeated Substring
+### Challenge: Matrix Rotation and Sum Calculation
 
-**Problem Description:**
-Given a string `s`, find the longest repeated substring. A repeated substring is a substring that appears more than once in the string.
+#### Problem Description
 
-**Example Input/Output:**
-- **Input:** `s = "abcabc"`
-- **Output:** `"abc"`
+Given a square matrix, implement two operations:
+1. **Rotate Matrix**: Rotate the matrix 90 degrees clockwise.
+2. **Sum of Diagonals**: Calculate the sum of the diagonals (both primary and secondary) of the original and rotated matrices.
 
-**Constraints:**
-- The input string `s` will be non-empty and contain only lowercase English letters.
-- The length of `s` will be between 1 and 10000 characters.
+#### Example Input/Output
 
-**Difficulty Rating:** 4
-
-### Solution Explanation
-
-To solve this problem efficiently, we can use a combination of suffix arrays and dynamic programming.
-
-1. **Suffix Array Construction:**
-   Construct a suffix array for the given string. This will help us find all unique substrings and their occurrences efficiently.
-
-2. **Dynamic Programming:**
-   Iterate through the suffix array to find the longest repeated substring. We keep track of the longest repeated substring seen so far and the current substring being processed.
-
-3. **Optimization:**
-   To optimize our approach, we use a hash map to store substrings as keys and their frequencies as values. This allows us to check if a substring has been seen before in constant time.
-
-Here's the most efficient solution in Python:
-
-```python
-def longest_repeated_substring(s):
-    # Construct suffix array
-    suffixes = [(s[i:], i) for i in range(len(s))]
-    suffixes.sort(key=lambda x: x[0])
-
-    # Initialize result and map for substring frequencies
-    max_length = 0
-    res = ""
-    
-    freq_map = {}
-    
-    for j in range(len(s)):
-        suffix = suffixes[j][0]
-        
-        # Check if we've seen this substring before
-        if suffix in freq_map:
-            # Update result if this substring is longer than current max_length
-            if j - freq_map[suffix] > max_length:
-                max_length = j - freq_map[suffix]
-                res = suffix[:max_length]
-        
-        # Update frequency map with current suffix index
-        freq_map[suffix] = j
-    
-    return res
-
-# Example usage:
-input_string = "abcabc"
-print(longest_repeated_substring(input_string))  # Output: "abc"
+**Input:**
+```
+[
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9]
+]
 ```
 
-### Time and Space Complexity Analysis:
+**Output:**
+- **Original Matrix Diagonals Sum**: 
+  - Primary Diagonal: Sum = 1 + 5 + 9 = 15
+  - Secondary Diagonal: Sum = 3 + 5 + 7 = 15
 
-- **Time Complexity:** The construction of the suffix array takes O(n log n) time using Python's built-in sorting capabilities. The dynamic programming part iterating through the suffixes takes O(n) time because we're making a constant number of operations per suffix. Thus, the overall time complexity is O(n log n).
+- **Rotated Matrix Diagonals Sum**:
+  - Primary Diagonal: Sum = 7 + 5 + 3 = 15
+  - Secondary Diagonal: Sum = 9 + 5 + 1 = 15
+
+#### Constraints
+- The input matrix is guaranteed to be a square matrix.
+- The matrix will contain only integers.
+
+#### Most Efficient Solution in Python
+
+```python
+def rotate_and_sum(matrix):
+    def transpose(matrix):
+        return list(map(list, zip(*matrix)))
+    
+    def reverse_each_row(matrix):
+        return [row[::-1] for row in matrix]
+    
+    def sum_of_diagonals(matrix):
+        n = len(matrix)
+        primary_diagonal_sum = sum(matrix[i][i] for i in range(n))
+        secondary_diagonal_sum = sum(matrix[i][n-i-1] for i in range(n))
+        return primary_diagonal_sum + secondary_diagonal_sum
+    
+    # Original Matrix Diagonals Sum
+    original_sum = sum_of_diagonals(matrix)
+    
+    # Rotate Matrix 90 degrees clockwise
+    rotated_matrix = reverse_each_row(transpose(matrix))
+    
+    # Rotated Matrix Diagonals Sum
+    rotated_sum = sum_of_diagonals(rotated_matrix)
+    
+    return original_sum, rotated_sum
+
+# Example usage:
+matrix = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9]
+]
+
+original_sum, rotated_sum = rotate_and_sum(matrix)
+print(f"Original Matrix Diagonals Sum: {original_sum}")
+print(f"Rotated Matrix Diagonals Sum: {rotated_sum}")
+```
+
+### Detailed Explanation of the Algorithm
+
+1. **Transpose Matrix**: The `transpose` function uses Python's built-in `zip` function to transpose the matrix.
+   - This operation changes rows into columns and vice versa.
+   - Time Complexity: O(n^2), where n is the number of rows (or columns).
+   - Space Complexity: O(n^2) for storing the transposed matrix.
+
+2. **Reverse Each Row**: The `reverse_each_row` function uses list slicing (`[::-1]`) to reverse each row of the matrix.
+   - This operation reverses the order of elements in each row.
+   - Time Complexity: O(n^2), where n is the number of rows.
+   - Space Complexity: O(n^2) for storing the reversed rows.
+
+3. **Sum of Diagonals**: The `sum_of_diagonals` function calculates the sum of both primary and secondary diagonals.
+   - Primary Diagonal: Elements from top-left to bottom-right.
+   - Secondary Diagonal: Elements from top-right to bottom-left.
+   - Time Complexity: O(n), where n is the number of rows (or columns).
+   - Space Complexity: O(1) since it only uses a constant amount of space to store sums.
+
+### Complexity Analysis
+
+- The overall time complexity of the solution involves transposing and reversing operations, which are both linear operations on square matrices.
+  - Thus, the total time complexity is O(n^2) for transposing and O(n^2) for reversing, resulting in a total time complexity of O(n^2).
   
-- **Space Complexity:** We use O(n) space for storing the suffixes in the list and the frequency map.
+- The space complexity involves storing intermediate matrices during transpose and reverse operations.
+  - Therefore, the total space complexity remains O(n^2).
 
-This approach is optimal because it leverages efficient data structures like suffix arrays to reduce the search space and uses a hash map to check substring frequencies efficiently.
+### Why This Approach is Optimal
 
-### Why This Approach is Optimal:
+This approach is optimal because it directly addresses both challenges (rotating and summing diagonals) with minimal additional overhead.
 
-1. **Efficient Substring Search:** Using a suffix array allows us to find all unique substrings and their occurrences efficiently, reducing unnecessary comparisons.
-2. **Constant Time Frequency Check:** The hash map ensures that checking if a substring has been seen before takes constant time, making our algorithm scalable.
+1. **Rotating Matrix**: Transposing and then reversing each row achieves a 90-degree clockwise rotation efficiently.
+2. **Sum of Diagonals**: Calculating sums directly using diagonal indices avoids unnecessary computations.
 
-In summary, this challenge requires implementing string manipulation techniques involving suffix arrays and dynamic programming, making it moderately difficult (Difficulty Rating: 4).
+Additionally, using built-in operations like slicing (`[::-1]`) and transposing with `zip` ensures that the implementation is both concise and efficient.
+
+### Difficulty Rating
+
+This problem requires understanding matrix operations, specifically transposing and reversing rows. While it's not extremely
