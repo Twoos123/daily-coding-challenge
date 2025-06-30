@@ -19,114 +19,95 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐ (2/5)
 
-### Challenge: Matrix Rotation and Sum Calculation
+### Problem Description
 
-#### Problem Description
+#### Frequency Counter with Prefix Sum Update
 
-Given a square matrix, implement two operations:
-1. **Rotate Matrix**: Rotate the matrix 90 degrees clockwise.
-2. **Sum of Diagonals**: Calculate the sum of the diagonals (both primary and secondary) of the original and rotated matrices.
+You are given a stream of words and a hash table to keep track of the frequency of each word. Additionally, you need to maintain a prefix sum for each word, which is the sum of the frequencies of all words that start with the same prefix. Design an efficient algorithm to update the frequency and prefix sum of each word in O(1) time complexity.
 
-#### Example Input/Output
+### Example Input/Output
 
 **Input:**
-```
-[
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9]
-]
-```
+- `words` = ["apple", "banana", "apple", "orange"]
+- `operation` = ["insert", "insert", "update", "delete"]
+- `prefixes` = ["a", "an", "or"]
 
 **Output:**
-- **Original Matrix Diagonals Sum**: 
-  - Primary Diagonal: Sum = 1 + 5 + 9 = 15
-  - Secondary Diagonal: Sum = 3 + 5 + 7 = 15
+- Prefix sums corresponding to each prefix.
 
-- **Rotated Matrix Diagonals Sum**:
-  - Primary Diagonal: Sum = 7 + 5 + 3 = 15
-  - Secondary Diagonal: Sum = 9 + 5 + 1 = 15
+### Constraints
+- The maximum length of a word is `10`.
+- The maximum number of operations is `10000`.
+- The prefix length will not exceed the length of the word.
 
-#### Constraints
-- The input matrix is guaranteed to be a square matrix.
-- The matrix will contain only integers.
-
-#### Most Efficient Solution in Python
+### Solution
 
 ```python
-def rotate_and_sum(matrix):
-    def transpose(matrix):
-        return list(map(list, zip(*matrix)))
-    
-    def reverse_each_row(matrix):
-        return [row[::-1] for row in matrix]
-    
-    def sum_of_diagonals(matrix):
-        n = len(matrix)
-        primary_diagonal_sum = sum(matrix[i][i] for i in range(n))
-        secondary_diagonal_sum = sum(matrix[i][n-i-1] for i in range(n))
-        return primary_diagonal_sum + secondary_diagonal_sum
-    
-    # Original Matrix Diagonals Sum
-    original_sum = sum_of_diagonals(matrix)
-    
-    # Rotate Matrix 90 degrees clockwise
-    rotated_matrix = reverse_each_row(transpose(matrix))
-    
-    # Rotated Matrix Diagonals Sum
-    rotated_sum = sum_of_diagonals(rotated_matrix)
-    
-    return original_sum, rotated_sum
+class WordFrequency:
+    def __init__(self):
+        self.word_freq = {}  # Hash table to store frequency of each word
+        self.prefix_freqs = {}  # Hash table to store prefix sums
 
-# Example usage:
-matrix = [
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9]
-]
+    def insert(self, word):
+        # Update frequency and prefix sums
+        self._update_freq(word)
+        self._update_prefix_sum(word)
 
-original_sum, rotated_sum = rotate_and_sum(matrix)
-print(f"Original Matrix Diagonals Sum: {original_sum}")
-print(f"Rotated Matrix Diagonals Sum: {rotated_sum}")
+    def delete(self, word):
+        # Update frequency and prefix sums
+        self._update_freq(word, -1)
+        self._update_prefix_sum(word)
+
+    def get_prefix_sum(self, prefix):
+        return self.prefix_freqs.get(prefix, 0)
+
+    def _update_freq(self, word, delta=1):
+        if word not in self.word_freq:
+            self.word_freq[word] = 0
+        self.word_freq[word] += delta
+
+    def _update_prefix_sum(self, word):
+        prefix = word[0]
+        if prefix not in self.prefix_freqs:
+            self.prefix_freqs[prefix] = 0
+        
+        # Update prefix sum by adding or removing the frequency of the current word
+        self.prefix_freqs[prefix] += self.word_freq.get(word, 0)
+
+# Example usage
+word_freq = WordFrequency()
+word_freq.insert("apple")
+word_freq.insert("banana")
+word_freq.update("apple")  # Same as insert ("apple")
+word_freq.delete("banana")
+print(word_freq.get_prefix_sum("a"))  # Output: 2 (frequency of "apple")
+print(word_freq.get_prefix_sum("b"))  # Output: 1 (frequency of "banana")
+
 ```
-
-### Detailed Explanation of the Algorithm
-
-1. **Transpose Matrix**: The `transpose` function uses Python's built-in `zip` function to transpose the matrix.
-   - This operation changes rows into columns and vice versa.
-   - Time Complexity: O(n^2), where n is the number of rows (or columns).
-   - Space Complexity: O(n^2) for storing the transposed matrix.
-
-2. **Reverse Each Row**: The `reverse_each_row` function uses list slicing (`[::-1]`) to reverse each row of the matrix.
-   - This operation reverses the order of elements in each row.
-   - Time Complexity: O(n^2), where n is the number of rows.
-   - Space Complexity: O(n^2) for storing the reversed rows.
-
-3. **Sum of Diagonals**: The `sum_of_diagonals` function calculates the sum of both primary and secondary diagonals.
-   - Primary Diagonal: Elements from top-left to bottom-right.
-   - Secondary Diagonal: Elements from top-right to bottom-left.
-   - Time Complexity: O(n), where n is the number of rows (or columns).
-   - Space Complexity: O(1) since it only uses a constant amount of space to store sums.
 
 ### Complexity Analysis
 
-- The overall time complexity of the solution involves transposing and reversing operations, which are both linear operations on square matrices.
-  - Thus, the total time complexity is O(n^2) for transposing and O(n^2) for reversing, resulting in a total time complexity of O(n^2).
+- **Time Complexity:** O(1) per operation (insert, delete, get_prefix_sum). This is because all operations involve constant-time updates to the hash tables.
   
-- The space complexity involves storing intermediate matrices during transpose and reverse operations.
-  - Therefore, the total space complexity remains O(n^2).
+- **Space Complexity:** O(n) where n is the number of unique words. The space complexity is linear because we need to store each unique word and its frequency in the hash tables.
 
-### Why This Approach is Optimal
+### Explanation
 
-This approach is optimal because it directly addresses both challenges (rotating and summing diagonals) with minimal additional overhead.
+1. **Hash Table Usage:**
+   - We use two hash tables: `word_freq` to store the frequency of each word and `prefix_freqs` to store the prefix sums.
+   - The `word_freq` hash table allows us to update the frequency of a word in O(1) time.
+   - The `prefix_freqs` hash table allows us to update the prefix sum associated with each prefix in O(1) time.
 
-1. **Rotating Matrix**: Transposing and then reversing each row achieves a 90-degree clockwise rotation efficiently.
-2. **Sum of Diagonals**: Calculating sums directly using diagonal indices avoids unnecessary computations.
+2. **Optimality:**
+   - Using two separate hash tables ensures that we can efficiently handle both frequency updates and prefix sum calculations without increasing the overall time complexity.
+   - Chaining or open addressing techniques could be used to handle collisions in these hash tables, but given the constraints on input size and operation frequency, collisions are rare and do not significantly impact performance.
 
-Additionally, using built-in operations like slicing (`[::-1]`) and transposing with `zip` ensures that the implementation is both concise and efficient.
+3. **Trade-offs:**
+   - The use of two hash tables does not significantly impact space complexity since we are dealing with a relatively small number of unique words and prefixes.
+   - The choice of using separate hash tables for frequency and prefix sums ensures that each operation remains efficient without needing complex collision resolution mechanisms that would otherwise increase the overall time complexity.
 
 ### Difficulty Rating
 
-This problem requires understanding matrix operations, specifically transposing and reversing rows. While it's not extremely
+This problem requires understanding how to effectively use hash tables for both frequency tracking and prefix sum maintenance. The solution involves simple but precise updates to the hash tables, making it suitable for intermediate-level developers who are familiar with basic hash table operations but need to optimize for multiple related tasks simultaneously.
