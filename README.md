@@ -19,95 +19,150 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐ (2/5)
+Difficulty: ⭐⭐⭐⭐ (4/5)
 
 ### Problem Description
 
-#### Frequency Counter with Prefix Sum Update
+**Challenge: Detecting Cycles in a LinkedList**
 
-You are given a stream of words and a hash table to keep track of the frequency of each word. Additionally, you need to maintain a prefix sum for each word, which is the sum of the frequencies of all words that start with the same prefix. Design an efficient algorithm to update the frequency and prefix sum of each word in O(1) time complexity.
+Given a singly or doubly linked list, write an algorithm to detect whether the linked list contains a cycle. A cycle is defined as any node that points back to a previous node in the list, either directly or indirectly.
 
 ### Example Input/Output
 
-**Input:**
-- `words` = ["apple", "banana", "apple", "orange"]
-- `operation` = ["insert", "insert", "update", "delete"]
-- `prefixes` = ["a", "an", "or"]
-
-**Output:**
-- Prefix sums corresponding to each prefix.
+**Input:** A singly or doubly linked list with nodes containing values and references to other nodes.
+**Output:** True if the linked list contains a cycle; False otherwise.
 
 ### Constraints
-- The maximum length of a word is `10`.
-- The maximum number of operations is `10000`.
-- The prefix length will not exceed the length of the word.
 
-### Solution
+- The linked list can be either singly or doubly linked.
+- Each node in the linked list should have a reference to its next node(s).
+- The list can contain any number of nodes including zero.
+
+### Most Efficient Solution in Python
+
+To detect a cycle in a singly linked list, we can use Floyd's Tortoise and Hare algorithm. For doubly linked lists, the approach remains similar but we need to traverse both forward and backward directions.
+
+#### Singly Linked List (Floyd's Cycle Detection Algorithm)
 
 ```python
-class WordFrequency:
-    def __init__(self):
-        self.word_freq = {}  # Hash table to store frequency of each word
-        self.prefix_freqs = {}  # Hash table to store prefix sums
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
-    def insert(self, word):
-        # Update frequency and prefix sums
-        self._update_freq(word)
-        self._update_prefix_sum(word)
-
-    def delete(self, word):
-        # Update frequency and prefix sums
-        self._update_freq(word, -1)
-        self._update_prefix_sum(word)
-
-    def get_prefix_sum(self, prefix):
-        return self.prefix_freqs.get(prefix, 0)
-
-    def _update_freq(self, word, delta=1):
-        if word not in self.word_freq:
-            self.word_freq[word] = 0
-        self.word_freq[word] += delta
-
-    def _update_prefix_sum(self, word):
-        prefix = word[0]
-        if prefix not in self.prefix_freqs:
-            self.prefix_freqs[prefix] = 0
+def hasCycle(head):
+    if not head or not head.next:
+        return False
+    
+    slow = head
+    fast = head
+    
+    while fast and fast.next:
+        slow = slow.next  # Move one step at a time
+        fast = fast.next.next  # Move two steps at a time
         
-        # Update prefix sum by adding or removing the frequency of the current word
-        self.prefix_freqs[prefix] += self.word_freq.get(word, 0)
+        if slow == fast:
+            return True
+    
+    return False
 
-# Example usage
-word_freq = WordFrequency()
-word_freq.insert("apple")
-word_freq.insert("banana")
-word_freq.update("apple")  # Same as insert ("apple")
-word_freq.delete("banana")
-print(word_freq.get_prefix_sum("a"))  # Output: 2 (frequency of "apple")
-print(word_freq.get_prefix_sum("b"))  # Output: 1 (frequency of "banana")
+# Example usage:
+node1 = ListNode(1)
+node2 = ListNode(2)
+node3 = ListNode(3)
+
+node1.next = node2
+node2.next = node3
+node3.next = node1  # Creating a cycle
+
+print(hasCycle(node1))  # Output: True
+
+# Example without cycle:
+node1.next = node2
+node2.next = node3
+node3.next = None
+
+print(hasCycle(node1))  # Output: False
+```
+
+#### Doubly Linked List
+
+For doubly linked lists, we need to traverse both forward and backward directions to detect cycles efficiently.
+
+```python
+class DoublyListNode:
+    def __init__(self, val=0, prev=None, next=None):
+        self.val = val
+        self.prev = prev
+        self.next = next
+
+def hasCycle(doubly_head):
+    if not doubly_head or not doubly_head.next:
+        return False
+    
+    slow = doubly_head
+    fast = doubly_head
+    
+    while fast and fast.next:
+        slow = slow.next  # Move one step forward
+        fast = fast.next.next  # Move two steps forward
+        
+        if slow == fast:
+            return True
+        
+        # If we are at an even length, move one step backward for each forward step taken by slow
+        if slow == doubly_head or slow.prev == doubly_head:
+            slow = slow.prev
+        
+        if fast == doubly_head or fast.prev == doubly_head:
+            fast = fast.prev
+    
+    return False
+
+# Example usage:
+node1 = DoublyListNode(1)
+node2 = DoublyListNode(2)
+node3 = DoublyListNode(3)
+
+node1.prev = None
+node2.prev = node1 
+node3.prev = node2 
+
+node1.next = node2 
+node2.next = node3 
+node3.next = node1 # Creating a cycle
+
+print(hasCycle(node1))  # Output: True
+
+# Example without cycle:
+node4 = DoublyListNode(4)
+node5 = DoublyListNode(5)
+node6= DoublyListNode(6)
+
+node1.prev=None  
+node4.prev=None  
+node5.prev=None  
+node6.prev=None  
+
+node1.next=node4   
+node4.next=node5    
+node5.next=node6    
+
+print(hasCycle(node1)) # Output :False 
 
 ```
 
-### Complexity Analysis
+### Analysis of Complexity
 
-- **Time Complexity:** O(1) per operation (insert, delete, get_prefix_sum). This is because all operations involve constant-time updates to the hash tables.
-  
-- **Space Complexity:** O(n) where n is the number of unique words. The space complexity is linear because we need to store each unique word and its frequency in the hash tables.
+- **Time Complexity:** The algorithm has a linear time complexity of O(n), where n is the number of nodes in the linked list. This is because in the worst case, we need to visit each node once.
+- **Space Complexity:** The space complexity is O(1), as we only use a constant amount of space to keep track of the slow and fast pointers.
 
-### Explanation
+### Explanation of Optimal Approach
 
-1. **Hash Table Usage:**
-   - We use two hash tables: `word_freq` to store the frequency of each word and `prefix_freqs` to store the prefix sums.
-   - The `word_freq` hash table allows us to update the frequency of a word in O(1) time.
-   - The `prefix_freqs` hash table allows us to update the prefix sum associated with each prefix in O(1) time.
+The Floyd's Tortoise and Hare algorithm is optimal for detecting cycles in singly or doubly linked lists because it converges to a meeting point if a cycle exists and continues traversing otherwise. This approach is efficient due to its simplicity and linear time complexity.
 
-2. **Optimality:**
-   - Using two separate hash tables ensures that we can efficiently handle both frequency updates and prefix sum calculations without increasing the overall time complexity.
-   - Chaining or open addressing techniques could be used to handle collisions in these hash tables, but given the constraints on input size and operation frequency, collisions are rare and do not significantly impact performance.
+For doubly linked lists, moving one step forward and one step backward (if necessary) ensures that we cover all possible paths in a cycle detection scenario.
 
-3. **Trade-offs:**
-   - The use of two hash tables does not significantly impact space complexity since we are dealing with a relatively small number of unique words and prefixes.
-   - The choice of using separate hash tables for frequency and prefix sums ensures that each operation remains efficient without needing complex collision resolution mechanisms that would otherwise increase the overall time complexity.
+### Trade-offs
 
-### Difficulty Rating
-
-This problem requires understanding how to effectively use hash tables for both frequency tracking and prefix sum maintenance. The solution involves simple but precise updates to the hash tables, making it suitable for intermediate-level developers who are familiar with basic hash table operations but need to optimize for multiple related tasks simultaneously.
+There are no significant trade-offs between time and space complexity in this approach. The algorithm is optimal in both aspects.
