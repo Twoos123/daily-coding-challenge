@@ -19,150 +19,81 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 ## Today's Challenge
 
-Difficulty: ⭐⭐⭐⭐ (4/5)
+Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description
+### Problem Description: "Rotate the Stack and Queue Elements"
 
-**Challenge: Detecting Cycles in a LinkedList**
+**Problem Statement:**
+Given a stack and a queue, you need to rotate the elements in both data structures such that the top element of the stack becomes the front element of the queue, and vice versa. The operation should be performed in a way that minimizes the number of operations required.
 
-Given a singly or doubly linked list, write an algorithm to detect whether the linked list contains a cycle. A cycle is defined as any node that points back to a previous node in the list, either directly or indirectly.
+### Example Input/Output:
 
-### Example Input/Output
+**Input:**
+- Stack: `[A, B, C]`
+- Queue: `[X, Y, Z]`
 
-**Input:** A singly or doubly linked list with nodes containing values and references to other nodes.
-**Output:** True if the linked list contains a cycle; False otherwise.
+**Output:**
+- Stack: `[X, Y, Z]`
+- Queue: `[C, B, A]`
 
-### Constraints
+### Constraints:
+- The stack and queue can have any number of elements (`n`).
+- The rotation operation should be performed in-place.
+- The solution should minimize the number of operations required.
 
-- The linked list can be either singly or doubly linked.
-- Each node in the linked list should have a reference to its next node(s).
-- The list can contain any number of nodes including zero.
+### Most Efficient Solution in Python:
 
-### Most Efficient Solution in Python
+To solve this problem efficiently, we need to use the properties of stacks and queues. Since we need to rotate the elements such that the top element of the stack becomes the front element of the queue, and vice versa, we can achieve this by first converting the queue to a list (which stores elements in order), then reversing the list, and finally converting it back to a queue. This approach ensures that we only need to perform operations on a single data structure, minimizing the number of operations.
 
-To detect a cycle in a singly linked list, we can use Floyd's Tortoise and Hare algorithm. For doubly linked lists, the approach remains similar but we need to traverse both forward and backward directions.
-
-#### Singly Linked List (Floyd's Cycle Detection Algorithm)
-
-```python
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
-
-def hasCycle(head):
-    if not head or not head.next:
-        return False
-    
-    slow = head
-    fast = head
-    
-    while fast and fast.next:
-        slow = slow.next  # Move one step at a time
-        fast = fast.next.next  # Move two steps at a time
-        
-        if slow == fast:
-            return True
-    
-    return False
-
-# Example usage:
-node1 = ListNode(1)
-node2 = ListNode(2)
-node3 = ListNode(3)
-
-node1.next = node2
-node2.next = node3
-node3.next = node1  # Creating a cycle
-
-print(hasCycle(node1))  # Output: True
-
-# Example without cycle:
-node1.next = node2
-node2.next = node3
-node3.next = None
-
-print(hasCycle(node1))  # Output: False
-```
-
-#### Doubly Linked List
-
-For doubly linked lists, we need to traverse both forward and backward directions to detect cycles efficiently.
+Here is the most efficient solution in Python:
 
 ```python
-class DoublyListNode:
-    def __init__(self, val=0, prev=None, next=None):
-        self.val = val
-        self.prev = prev
-        self.next = next
+from collections import deque
 
-def hasCycle(doubly_head):
-    if not doubly_head or not doubly_head.next:
-        return False
+def rotate_stack_and_queue(stack, queue):
+    # Convert queue to list for easier manipulation
+    queue_list = list(queue)
     
-    slow = doubly_head
-    fast = doubly_head
+    # Reverse the list
+    queue_list.reverse()
     
-    while fast and fast.next:
-        slow = slow.next  # Move one step forward
-        fast = fast.next.next  # Move two steps forward
-        
-        if slow == fast:
-            return True
-        
-        # If we are at an even length, move one step backward for each forward step taken by slow
-        if slow == doubly_head or slow.prev == doubly_head:
-            slow = slow.prev
-        
-        if fast == doubly_head or fast.prev == doubly_head:
-            fast = fast.prev
+    # Clear the original queue
+    queue.clear()
     
-    return False
+    # Add elements from reversed list back into queue
+    for elem in reversed(queue_list):
+        queue.appendleft(elem)
+        
+    return queue
 
-# Example usage:
-node1 = DoublyListNode(1)
-node2 = DoublyListNode(2)
-node3 = DoublyListNode(3)
+# Example usage
+stack = deque(['A', 'B', 'C'])
+queue = deque(['X', 'Y', 'Z'])
 
-node1.prev = None
-node2.prev = node1 
-node3.prev = node2 
+print("Original Stack:", list(stack))
+print("Original Queue:", list(queue))
 
-node1.next = node2 
-node2.next = node3 
-node3.next = node1 # Creating a cycle
+rotated_queue = rotate_stack_and_queue(stack, queue)
 
-print(hasCycle(node1))  # Output: True
-
-# Example without cycle:
-node4 = DoublyListNode(4)
-node5 = DoublyListNode(5)
-node6= DoublyListNode(6)
-
-node1.prev=None  
-node4.prev=None  
-node5.prev=None  
-node6.prev=None  
-
-node1.next=node4   
-node4.next=node5    
-node5.next=node6    
-
-print(hasCycle(node1)) # Output :False 
-
+print("Rotated Stack:", list(rotated_queue))  # Should be ['X', 'Y', 'Z']
+print("Rotated Queue:", list(stack))         # Should be ['C', 'B', 'A']
 ```
 
-### Analysis of Complexity
+### Detailed Explanation of the Algorithm:
+1. **Convert Queue to List**: We convert the queue to a list because lists are more flexible for manipulation.
+2. **Reverse List**: We reverse the list of elements.
+3. **Clear Original Queue**: We clear the original queue to ensure it is empty before adding elements back.
+4. **Add Elements Back**: We add elements from the reversed list back into the queue but this time using `appendleft` method which adds elements at the beginning of the queue.
 
-- **Time Complexity:** The algorithm has a linear time complexity of O(n), where n is the number of nodes in the linked list. This is because in the worst case, we need to visit each node once.
-- **Space Complexity:** The space complexity is O(1), as we only use a constant amount of space to keep track of the slow and fast pointers.
+### Analysis of Time and Space Complexity:
+- **Time Complexity**: The time complexity is O(n), where n is the number of elements in both data structures. This is because we perform operations on each element once.
+- **Space Complexity**: The space complexity is O(n) because we temporarily store all elements in a list before converting them back into a queue.
 
-### Explanation of Optimal Approach
+### Optimality Explanation:
+This approach is optimal because it minimizes the number of operations by ensuring that we only need to manipulate elements once and do not require multiple passes over either data structure.
 
-The Floyd's Tortoise and Hare algorithm is optimal for detecting cycles in singly or doubly linked lists because it converges to a meeting point if a cycle exists and continues traversing otherwise. This approach is efficient due to its simplicity and linear time complexity.
+### Trade-offs:
+There are no significant trade-offs between time and space complexity in this solution as both complexities are linear with respect to the number of elements involved.
 
-For doubly linked lists, moving one step forward and one step backward (if necessary) ensures that we cover all possible paths in a cycle detection scenario.
-
-### Trade-offs
-
-There are no significant trade-offs between time and space complexity in this approach. The algorithm is optimal in both aspects.
+### Difficulty Rating:
+This problem requires an understanding of how stacks and queues work and how to manipulate them efficiently, which makes it challenging but not extremely difficult like some advanced LeetCode problems.
