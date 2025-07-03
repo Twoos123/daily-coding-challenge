@@ -21,79 +21,72 @@ An AI-powered platform that generates unique coding challenges daily, helping de
 
 Difficulty: ⭐⭐⭐ (3/5)
 
-### Problem Description: "Rotate the Stack and Queue Elements"
+### Problem Description
 
-**Problem Statement:**
-Given a stack and a queue, you need to rotate the elements in both data structures such that the top element of the stack becomes the front element of the queue, and vice versa. The operation should be performed in a way that minimizes the number of operations required.
+**Linked List Cycle Detection**
 
-### Example Input/Output:
+Given a singly linked list, determine if the list contains a cycle (i.e., if any node points back to a previous node). Implement a method to detect such a cycle and return `True` if one exists, otherwise return `False`.
 
-**Input:**
-- Stack: `[A, B, C]`
-- Queue: `[X, Y, Z]`
+### Example Input/Output
 
-**Output:**
-- Stack: `[X, Y, Z]`
-- Queue: `[C, B, A]`
+**Input:** A singly linked list with nodes `[1, 2, 3, 4]` where node `3` points back to node `1`.
+**Output:** `True`
 
-### Constraints:
-- The stack and queue can have any number of elements (`n`).
-- The rotation operation should be performed in-place.
-- The solution should minimize the number of operations required.
+**Input:** A singly linked list with nodes `[1, 2, 3, 4]` where no nodes point back.
+**Output:** `False`
 
-### Most Efficient Solution in Python:
+### Constraints
 
-To solve this problem efficiently, we need to use the properties of stacks and queues. Since we need to rotate the elements such that the top element of the stack becomes the front element of the queue, and vice versa, we can achieve this by first converting the queue to a list (which stores elements in order), then reversing the list, and finally converting it back to a queue. This approach ensures that we only need to perform operations on a single data structure, minimizing the number of operations.
+- The list may or may not contain a cycle.
+- Nodes in the list contain only integer data.
 
-Here is the most efficient solution in Python:
+### Solution
 
 ```python
-from collections import deque
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
 
-def rotate_stack_and_queue(stack, queue):
-    # Convert queue to list for easier manipulation
-    queue_list = list(queue)
+def hasCycle(head):
+    if head is None:
+        return False
     
-    # Reverse the list
-    queue_list.reverse()
+    slow = head
+    fast = head
     
-    # Clear the original queue
-    queue.clear()
-    
-    # Add elements from reversed list back into queue
-    for elem in reversed(queue_list):
-        queue.appendleft(elem)
+    while fast is not None and fast.next is not None:
+        slow = slow.next  # Move one step at a time
+        fast = fast.next.next  # Move two steps at a time
         
-    return queue
-
-# Example usage
-stack = deque(['A', 'B', 'C'])
-queue = deque(['X', 'Y', 'Z'])
-
-print("Original Stack:", list(stack))
-print("Original Queue:", list(queue))
-
-rotated_queue = rotate_stack_and_queue(stack, queue)
-
-print("Rotated Stack:", list(rotated_queue))  # Should be ['X', 'Y', 'Z']
-print("Rotated Queue:", list(stack))         # Should be ['C', 'B', 'A']
+        if slow == fast:
+            return True
+    
+    return False
 ```
 
-### Detailed Explanation of the Algorithm:
-1. **Convert Queue to List**: We convert the queue to a list because lists are more flexible for manipulation.
-2. **Reverse List**: We reverse the list of elements.
-3. **Clear Original Queue**: We clear the original queue to ensure it is empty before adding elements back.
-4. **Add Elements Back**: We add elements from the reversed list back into the queue but this time using `appendleft` method which adds elements at the beginning of the queue.
+### Detailed Explanation
 
-### Analysis of Time and Space Complexity:
-- **Time Complexity**: The time complexity is O(n), where n is the number of elements in both data structures. This is because we perform operations on each element once.
-- **Space Complexity**: The space complexity is O(n) because we temporarily store all elements in a list before converting them back into a queue.
+The solution uses Floyd's Tortoise and Hare algorithm to detect the cycle in the linked list. This algorithm leverages two pointers, `slow` and `fast`, which move at different speeds through the linked list.
 
-### Optimality Explanation:
-This approach is optimal because it minimizes the number of operations by ensuring that we only need to manipulate elements once and do not require multiple passes over either data structure.
+1. **Initialization**:
+   - If the head is `None`, it means there are no nodes, so we return `False`.
 
-### Trade-offs:
-There are no significant trade-offs between time and space complexity in this solution as both complexities are linear with respect to the number of elements involved.
+2. **Main Loop**:
+   - Set both pointers (`slow` and `fast`) to the head of the linked list.
+   - While `fast` and its next node are not `None`, move `slow` one step at a time and `fast` two steps at a time.
+   - If `slow` and `fast` ever meet, it indicates that there is a cycle in the linked list, so we return `True`.
 
-### Difficulty Rating:
-This problem requires an understanding of how stacks and queues work and how to manipulate them efficiently, which makes it challenging but not extremely difficult like some advanced LeetCode problems.
+3. **Termination**:
+   - If `fast` becomes `None` or its next node becomes `None`, it means there are no more nodes or no more adjacent nodes left, so we return `False`.
+
+This algorithm has a time complexity of O(n), where n is the number of nodes in the linked list because each node is visited at most twice (once by `slow` and once by `fast`). The space complexity is O(1) since only a constant amount of space is used.
+
+### Complexity Analysis
+
+- **Time Complexity:** O(n)
+- **Space Complexity:** O(1)
+
+### Why This Approach is Optimal
+
+Floyd's Tortoise and Hare algorithm is optimal for detecting cycles in linked lists because it takes advantage of the fact that if there is a cycle, eventually the faster pointer will caught up with the slower one. This approach ensures that every node is visited at most twice, making it highly efficient.
